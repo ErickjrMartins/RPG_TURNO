@@ -1,0 +1,11 @@
+node_modules/
+dist/
+coverage/
+attachments/
+work/
+scratch/
+generated_images/
+sites/reinos-da-aurora/
+.env
+.env.*
+!.env.example
