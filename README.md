@@ -34,11 +34,12 @@ Abra `http://localhost:4173` para verificar a build. Em outro terminal, execute 
 ```sh
 npx playwright install chromium
 npm run test:browser
+npm run test:offline
 ```
 
 Se o Chromium já estiver instalado, indique seu executável com `AURORA_CHROMIUM_PATH`. Para testar outro endereço, use `AURORA_URL`. A suíte verifica as três classes, Abismos em formação completa, a cidade, expedições, Relicário, eventos e retomada. A jornada do Atirador usa toque em uma viewport de 390 px, offline após o cache inicial.
 
-A build em `dist/` pode ser servida por um host estático em HTTPS. Para jogar offline, abra a build uma vez online e aguarde o cache local. O modo offline requer HTTPS ou localhost. O progresso é independente por origem, portanto as portas 5173 e 4173 terão saves diferentes. O save registra pontos de controle. Ao retomar uma batalha interrompida, ela recomeça com a mesma formação e semente.
+A build em `dist/` pode ser servida por um host estático em HTTPS. A abertura consulta o servidor e usa a cópia local quando a conexão falha. Para jogar offline, abra a build uma vez online e aguarde o cache local. O modo offline requer HTTPS ou localhost. `test:offline` verifica redirecionamento, atualização, tela de login e retomada offline no Chromium. O progresso é independente por origem, portanto as portas 5173 e 4173 terão saves diferentes. O save registra pontos de controle. Ao retomar uma batalha interrompida, ela recomeça com a mesma formação e semente.
 
 ## Organização
 

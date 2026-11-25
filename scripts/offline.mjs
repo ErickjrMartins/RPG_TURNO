@@ -8,6 +8,7 @@ const files = (await readdir(root, { recursive: true, withFileTypes: true }))
   .map((entry) => relative(root, join(entry.parentPath, entry.name)).split(sep).join('/'))
   .sort()
 const hash = createHash('sha256')
+hash.update(await readFile(new URL(import.meta.url)))
 for (const file of files) {
   hash.update(file)
   hash.update(await readFile(join(root, file)))
@@ -16,12 +17,15 @@ const revision = hash.digest('hex').slice(0, 16)
 const source = `const scope = new URL(self.registration.scope)
 const prefix = 'reinos-da-aurora:' + scope.href + ':'
 const cacheName = prefix + ${JSON.stringify(revision)}
-const paths = ${JSON.stringify(files)}
+const paths = ${JSON.stringify(files.filter((file) => file !== 'index.html'))}
 const assets = new Set(paths.map((path) => new URL(path, scope).href))
-const home = new URL('index.html', scope).href
+const home = scope.href
+const homeAlias = new URL('index.html', scope).pathname
 
 self.addEventListener('install', (event) => {
-  event.waitUntil(caches.open(cacheName).then((cache) => cache.addAll(paths)))
+  // Sites redirects /index.html. Cache the canonical document without a redirect.
+  const document = new Request(home, { cache: 'reload', redirect: 'error' })
+  event.waitUntil(caches.open(cacheName).then((cache) => cache.addAll([document, ...paths])))
 })
 
 self.addEventListener('activate', (event) => {
@@ -31,13 +35,27 @@ self.addEventListener('activate', (event) => {
   }))
 })
 
+async function navigate(request) {
+  try {
+    return await fetch(request)
+  } catch (error) {
+    const cached = await caches.match(home, { cacheName })
+    if (cached) return cached
+    throw error
+  }
+}
+
 self.addEventListener('fetch', (event) => {
   const { request } = event
   if (request.method !== 'GET') return
-  const isHome = request.mode === 'navigate' && [scope.pathname, new URL(home).pathname].includes(new URL(request.url).pathname)
-  const asset = isHome ? home : request.url
-  if (!assets.has(asset)) return
-  event.respondWith(caches.open(cacheName).then(async (cache) => (await cache.match(asset)) ?? fetch(request)))
+  const url = new URL(request.url)
+  if (request.mode === 'navigate' && url.origin === scope.origin && [scope.pathname, homeAlias].includes(url.pathname)) {
+    event.respondWith(navigate(request))
+    return
+  }
+  if (assets.has(request.url)) {
+    event.respondWith(caches.match(request, { cacheName }).catch(() => undefined).then((cached) => cached ?? fetch(request)))
+  }
 })
 `
 await writeFile(join(root, 'service-worker.js'), source)
