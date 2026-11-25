@@ -35,6 +35,7 @@ Abra `http://localhost:4173` para verificar a build. Em outro terminal, execute 
 npx playwright install chromium
 npm run test:browser
 npm run test:archer
+npm run test:motion
 npm run test:offline
 ```
 

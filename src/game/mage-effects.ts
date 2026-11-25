@@ -45,14 +45,14 @@ export function animateMageSpell(scene: Phaser.Scene, spell: string, origin: Uni
         const tailX = source.x + (x - source.x) * trail
         const tailY = source.y - 62 + (hit - source.y + 62) * trail - Math.sin(trail * Math.PI) * 20
         if (t < 0.57) {
-          ink.lineStyle(14, 0x775ae8, 0.25)
+          ink.lineStyle(14, 0x3279ff, 0.28)
           ink.lineBetween(tailX, tailY, travelX, travelY)
-          ink.lineStyle(4, 0xd6a5ff, 0.95)
+          ink.lineStyle(4, 0x88daff, 0.95)
           ink.lineBetween(tailX, tailY, travelX, travelY)
-          ink.fillStyle(0xfdf1ff, 0.95)
+          ink.fillStyle(0xe4fbff, 0.95)
           ink.fillCircle(travelX, travelY, 6)
         }
-        if (t > 0.43) particles(ink, x, hit, 46, (t - 0.43) / 0.57, 13, 0xc582ff)
+        if (t > 0.43) particles(ink, x, hit, 33, (t - 0.43) / 0.57, 8, 0x88daff)
       } else if (spell === 'rain') {
         rune(ink, x, ground, 32 + t * 21, 1 - t, 0xc59bff)
         for (let i = 0; i < 5; i++) {

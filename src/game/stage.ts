@@ -5,8 +5,11 @@ import { classIds, heroArt, type Presentation } from '../content/classes'
 import { monsterIds } from '../content/monsters'
 import type { BattleEvent, Unit } from '../domain/battle'
 import type { Hero } from '../domain/profile'
-import { animateArcherShot, shotCellSize, shotTexture } from './archer-shot'
+import { animateArcherShot, shotTexture } from './archer-shot'
+import { attackCellSize, type AttackPlayback } from './attack-playback'
+import { idleFrames, prepareIdleTexture } from './idle-motion'
 import { animateMageSpell } from './mage-effects'
+import { animateMageSpark, sparkTexture } from './mage-spark'
 import { arenaCamera, arenaHeight, arenaWidth, pointFor } from './layout'
 
 const opponentTextures = ['crawler', 'wisp', 'warden', 'sentry', ...monsterIds] as const
@@ -26,8 +29,9 @@ export class BootScene extends Phaser.Scene {
       this.load.image(key, assetUrl(`${key}.webp`))
     }
     for (const form of ['masculine', 'feminine'] as const) {
-      const key = shotTexture(form)
-      this.load.spritesheet(key, assetUrl(`${key}.webp`), { frameWidth: shotCellSize, frameHeight: shotCellSize })
+      for (const key of [shotTexture(form), sparkTexture(form)]) {
+        this.load.spritesheet(key, assetUrl(`${key}.webp`), { frameWidth: attackCellSize, frameHeight: attackCellSize })
+      }
     }
   }
 
@@ -40,13 +44,25 @@ interface Actor {
   sprite: Phaser.GameObjects.Image
   shadow: Phaser.GameObjects.Ellipse
   clothes?: Phaser.GameObjects.Graphics
+  art: string
+  scale: number
+  width: number
+  height: number
+  phase: number
+  alive: boolean
+  busyUntil: number
+  idle?: string | null
 }
+
+export type AnimatedAttack = 'shot' | 'spark'
 
 export class ArenaScene extends Phaser.Scene {
   private readonly actors = new Map<string, Actor>()
   private run: number | undefined
   private previousUnits: readonly Unit[] = []
-  private archerShot: ReturnType<typeof animateArcherShot> | undefined
+  private attack: { spell: AnimatedAttack; playback: AttackPlayback } | undefined
+  private motionTime = 0
+  private idleEnabled = false
 
   constructor() {
     super('arena')
@@ -57,35 +73,60 @@ export class ArenaScene extends Phaser.Scene {
   }
 
   clear(): void {
-    this.stopArcherShot()
+    this.stopHeroAttack()
     this.tweens.killAll()
     this.children.removeAll(true)
     this.actors.clear()
     this.run = undefined
     this.previousUnits = []
+    this.motionTime = 0
+    this.idleEnabled = false
   }
 
-  playArcherShot(form: Presentation, target: Unit, speed: number, impact: () => void): boolean {
+  playHeroAttack(spell: AnimatedAttack, form: Presentation, target: Unit, speed: number, impact: () => void): boolean {
     const hero = this.actors.get('hero')
-    if (!hero || !this.textures.exists(shotTexture(form))) return false
-    this.stopArcherShot()
-    this.archerShot = animateArcherShot(this, hero.sprite, form, target, speed, impact, () => { this.archerShot = undefined })
+    const texture = spell === 'shot' ? shotTexture(form) : sparkTexture(form)
+    if (!hero || !this.textures.exists(texture)) return false
+    this.stopHeroAttack()
+    this.restoreIdleBase(hero)
+    const play = spell === 'shot' ? animateArcherShot : animateMageSpark
+    this.attack = { spell, playback: play(this, hero.sprite, form, target, speed, impact, () => { this.attack = undefined }) }
     return true
   }
 
-  adjustArcherShot(speed: number, paused: boolean): void {
-    this.archerShot?.adjust(speed, paused)
+  stopHeroAttack(): void {
+    this.attack?.playback.cancel()
   }
 
-  stopArcherShot(): void {
-    this.archerShot?.cancel()
+  private restoreIdleBase(actor: Actor): void {
+    if (actor.sprite.texture.key !== actor.art) actor.sprite.setTexture(actor.art)
+    actor.sprite.setScale(actor.scale)
   }
 
-  show(run: number, hero: Hero, looks: Partial<Record<StyleSlot, AppearanceId>>, units: readonly Unit[], events: readonly BattleEvent[], animate: boolean, speed: number): void {
+  update(_time: number, delta: number): void {
+    if (!this.idleEnabled) return
+    this.motionTime += Math.min(delta, 50)
+    for (const [id, actor] of this.actors) {
+      if (!actor.alive || actor.busyUntil > this.motionTime || (id === 'hero' && this.attack)) continue
+      if (actor.idle === undefined) actor.idle = prepareIdleTexture(this, actor.art) ?? null
+      const cycle = this.motionTime / 3000 + actor.phase
+      const breath = Math.sin(cycle * Math.PI * 2)
+      if (actor.idle) {
+        const frame = Math.floor(((cycle * 0.84 + 0.16) % 1) * idleFrames)
+        if (actor.sprite.texture.key !== actor.idle) actor.sprite.setTexture(actor.idle, frame)
+        else if (Number(actor.sprite.frame.name) !== frame) actor.sprite.setFrame(frame)
+      }
+      actor.sprite.setDisplaySize(actor.width * (1 + breath * 0.008), actor.height * (1 + breath * 0.015))
+    }
+  }
+
+  show(run: number, hero: Hero, looks: Partial<Record<StyleSlot, AppearanceId>>, units: readonly Unit[], events: readonly BattleEvent[], animate: boolean, speed: number, paused: boolean): void {
     if (run !== this.run) {
       this.clear()
       this.run = run
     }
+    this.idleEnabled = animate && !paused
+    this.attack?.playback.adjust(speed, paused)
     for (const [id, entry] of this.actors) {
       if (units.some((unit) => unit.id === id)) continue
       entry.sprite.destroy()
@@ -106,9 +147,12 @@ export class ArenaScene extends Phaser.Scene {
         sprite.setScale(scale)
         if (unit.art === 'sentry') sprite.setTint(0xe4e8e1)
         const clothes = unit.id === 'hero' ? this.heroLook(point.x, point.y, looks) : undefined
-        entry = { sprite, shadow, clothes }
+        entry = { sprite, shadow, clothes, art: texture, scale, width: sprite.displayWidth, height: sprite.displayHeight,
+          phase: ((unit.slot * 3 + (unit.team === 'allies' ? 0 : 7)) % 19) / 19, alive: unit.hp > 0, busyUntil: 0 }
         this.actors.set(unit.id, entry)
       }
+      entry.alive = unit.hp > 0
+      if ((!animate || !entry.alive) && !(unit.id === 'hero' && this.attack)) this.restoreIdleBase(entry)
       entry.sprite.setAlpha(unit.hp > 0 ? 1 : 0.24)
       entry.shadow.setAlpha(unit.hp > 0 ? 1 : 0.32)
       entry.clothes?.setAlpha(unit.hp > 0 ? 1 : 0.25)
@@ -118,7 +162,15 @@ export class ArenaScene extends Phaser.Scene {
     if (!animate) return
     for (const event of events) {
       const target = effectUnits.find((unit) => unit.id === event.target)
-      if (event.visual && !(this.archerShot && event.actor === 'hero' && event.spell === 'shot')) this.skillEffect(hero, effectUnits, event, speed)
+      const customAttack = this.attack && event.actor === 'hero' && event.spell === this.attack.spell
+      if (event.kind === 'action' && event.actor && !customAttack) {
+        const entry = this.actors.get(event.actor)
+        if (entry) {
+          entry.busyUntil = this.motionTime + 330 / speed
+          this.restoreIdleBase(entry)
+        }
+      }
+      if (event.visual && !customAttack) this.skillEffect(hero, effectUnits, event, speed)
       if (event.kind === 'action' && event.visual === 'slash' && target && event.actor !== target.id) {
         const actor = units.find((unit) => unit.id === event.actor)
         const entry = actor && this.actors.get(actor.id)

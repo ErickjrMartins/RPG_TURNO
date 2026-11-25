@@ -1,13 +1,11 @@
 import type Phaser from 'phaser'
 import type { Presentation } from '../content/classes'
 import type { Unit } from '../domain/battle'
+import { playAttack, poseScale, type AttackPlayback } from './attack-playback'
 import { pointFor } from './layout'
 
-export const shotCellSize = 384
 export const shotTexture = (form: Presentation) => `archer-shot-${form}`
 
-// The sheets align a 320 px copy of the idle sprite at the center and bottom of each cell.
-const poseScale = 320 / 512
 const releaseAt = 355
 const impactAt = 525
 const endAt = 660
@@ -16,39 +14,17 @@ const poseTimes: Record<Presentation, readonly number[]> = {
   feminine: [0, 55, 152, 260, releaseAt, 555],
 }
 
-interface ShotPlayback {
-  adjust(speed: number, paused: boolean): void
-  cancel(): void
-}
-
 export function animateArcherShot(
   scene: Phaser.Scene, sprite: Phaser.GameObjects.Image, form: Presentation, target: Unit,
   speed: number, onImpact: () => void, onFinish: () => void,
-): ShotPlayback {
-  const idle = sprite.texture.key
+): AttackPlayback {
   const { scaleX, scaleY } = sprite
-  const poses = poseTimes[form]
   const destination = pointFor(target)
   const fromX = sprite.x + 73 * scaleX / poseScale
   const fromY = sprite.y - (form === 'masculine' ? 260 : 237) * scaleY / poseScale
   const toX = destination.x
   const toY = destination.y - 77
-  const ink = scene.add.graphics().setDepth(865)
-  let frame = 0
-  let arrived = false
-
-  sprite.setTexture(shotTexture(form), 0).setScale(scaleX / poseScale, scaleY / poseScale)
-  const dispose = () => {
-    ink.destroy()
-    sprite.setTexture(idle).setScale(scaleX, scaleY)
-    onFinish()
-  }
-  const paint = (time: number) => {
-    while (frame + 1 < poses.length && time >= poses[frame + 1]!) {
-      frame++
-      sprite.setFrame(frame)
-    }
-    ink.clear()
+  const paint = (ink: Phaser.GameObjects.Graphics, time: number) => {
     if (time < releaseAt) return
     if (time < impactAt) {
       const progress = (time - releaseAt) / (impactAt - releaseAt)
@@ -73,30 +49,7 @@ export function animateArcherShot(
       ink.fillStyle(0xffc565, 1 - fade)
       ink.fillCircle(toX + Math.cos(angle) * 26 * fade, toY + Math.sin(angle) * 26 * fade, 2)
     }
-    if (!arrived) {
-      arrived = true
-      onImpact()
-    }
   }
-
-  const tween = scene.tweens.addCounter({
-    from: 0, to: endAt, duration: endAt,
-    onUpdate: (tween) => paint(tween.getValue() ?? endAt),
-    onComplete: () => {
-      if (!arrived) onImpact()
-      dispose()
-    },
-  })
-  tween.setTimeScale(speed)
-  return {
-    adjust(nextSpeed, paused) {
-      tween.setTimeScale(nextSpeed)
-      if (paused) tween.pause()
-      else tween.resume()
-    },
-    cancel() {
-      tween.stop()
-      dispose()
-    },
-  }
+  const poses = poseTimes[form].map((time, frame) => [time, frame] as const)
+  return playAttack(scene, sprite, shotTexture(form), { duration: endAt, impactAt, poses }, speed, paint, onImpact, onFinish)
 }

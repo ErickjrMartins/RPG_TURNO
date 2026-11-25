@@ -43,7 +43,7 @@ root.innerHTML = `
     </header>
     <main id="view" aria-busy="true"><p class="loading">Carregando Reinos da Aurora…</p></main>
     <div class="stage-storage" aria-hidden="true"><div id="phaser-stage"></div></div>
-    <footer class="game-footer"><div class="view-width footer-inner"><span>VERSÃO 0.4.3</span><span>SALVAMENTO NESTE NAVEGADOR</span></div></footer>
+    <footer class="game-footer"><div class="view-width footer-inner"><span>VERSÃO 0.4.4</span><span>SALVAMENTO NESTE NAVEGADOR</span></div></footer>
   </div>`
 
 const view = root.querySelector<HTMLElement>('#view')!
@@ -68,7 +68,7 @@ let history: string[] = []
 let speed = 1
 let skip = reducedMotion.matches
 let paused = false
-let shotImpact: (() => void) | undefined
+let attackImpact: (() => void) | undefined
 let timer: number | undefined
 let building: BuildingId = 'barracks'
 let earnedGold = 0
@@ -95,8 +95,7 @@ function renderAudio(): void {
 function paintBattle(events: readonly BattleEvent[] = []): void {
   if (screen !== 'battle' || !battle || !profile || !arena) return
   if (arena.scene.isPaused()) arena.scene.resume()
-  arena.show(battle.attempt.id, profile.hero, profile.wardrobe.looks, battle.units, events, !skip && !reducedMotion.matches, speed)
-  arena.adjustArcherShot(speed, paused)
+  arena.show(battle.attempt.id, profile.hero, profile.wardrobe.looks, battle.units, events, !skip && !reducedMotion.matches, speed, paused)
 }
 
 function render(focusHeading = false, events: readonly BattleEvent[] = []): void {
@@ -133,8 +132,8 @@ function render(focusHeading = false, events: readonly BattleEvent[] = []): void
     view.innerHTML = titleView(profile, error)
   }
   if (screen !== 'battle') {
-    shotImpact = undefined
-    arena?.stopArcherShot()
+    attackImpact = undefined
+    arena?.stopHeroAttack()
     if (arena?.scene.isActive()) arena.scene.pause()
   }
   if (focusHeading) {
@@ -193,7 +192,7 @@ function stopTimer(): void {
 function enterBattle(): void {
   if (!profile) return
   stopTimer()
-  shotImpact = undefined
+  attackImpact = undefined
   arena?.clear()
   battle = startBattle(profile)
   selected = battle.skills[0]!.id
@@ -275,7 +274,7 @@ function saveResult(): void {
 
 function schedule(): void {
   stopTimer()
-  if (paused || shotImpact || screen !== 'battle' || !battle || battle.phase === 'player') return
+  if (paused || attackImpact || screen !== 'battle' || !battle || battle.phase === 'player') return
   timer = window.setTimeout(() => {
     if (!battle || paused || screen !== 'battle') return
     if (battle.phase === 'victory' || battle.phase === 'defeat') {
@@ -306,14 +305,14 @@ function act(targetId: string): void {
   if (!battle || busy || paused || battle.phase !== 'player') return
   try {
     const next = playerAction(battle, selected, targetId, overcharge)
-    if (selected === 'shot' && profile && arena && !skip && !reducedMotion.matches) {
+    if ((selected === 'shot' || selected === 'spark') && profile && arena && !skip && !reducedMotion.matches) {
       const target = battle.units.find((unit) => unit.id === targetId)!
       const impact = () => {
-        shotImpact = undefined
+        attackImpact = undefined
         presentTurn(next)
       }
-      if (arena.playArcherShot(profile.hero.presentation, target, speed, impact)) {
-        shotImpact = impact
+      if (arena.playHeroAttack(selected, profile.hero.presentation, target, speed, impact)) {
+        attackImpact = impact
         battle = { ...battle, phase: 'resolution' }
         render()
         return
@@ -449,8 +448,8 @@ root.addEventListener('click', (event) => {
     case 'leave-drill': {
       const attempt = battle?.attempt
       if (attempt?.encounter !== 'drill') return
-      arena?.stopArcherShot()
-      shotImpact?.()
+      arena?.stopHeroAttack()
+      attackImpact?.()
       stopTimer()
       void campaign((current) => settleAttempt(current, attempt, 'defeat'), () => { screen = 'camp' })
       return
@@ -522,8 +521,8 @@ root.addEventListener('click', (event) => {
     case 'skip':
       skip = !skip
       if (skip) {
-        arena?.stopArcherShot()
-        if (shotImpact) { shotImpact(); return }
+        arena?.stopHeroAttack()
+        if (attackImpact) { attackImpact(); return }
       }
       schedule()
       break
