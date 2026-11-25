@@ -4,7 +4,7 @@ RPG estratégico de fantasia para navegador. A jornada começa com a criação d
 
 ## Prévia hospedada
 
-O Sites reúne as versões publicadas. A build local em desenvolvimento pode ter alterações posteriores à versão hospedada. [Abrir Reinos da Aurora](https://reinos-da-aurora.erickmartins1.chatgpt.site)
+Use a prévia privada no Sites para testar as atualizações pelo navegador. Entre com a conta do ChatGPT que recebeu acesso e use o mesmo navegador e perfil para retomar seu save. [Abrir a prévia de Reinos da Aurora](https://reinos-da-aurora-previa.erickmartins1.chatgpt.site)
 
 ## Executar
 

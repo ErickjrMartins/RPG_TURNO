@@ -54,3 +54,4 @@ Atue como Lead Game Developer e Technical Director. Conduza decisões de engine,
 - Antes de editar, confira o estado do checkout e as mudanças remotas. Preserve alterações de terceiros e mantenha credenciais, saves pessoais e arquivos gerados fora dos commits.
 - Ao concluir e validar cada atualização solicitada, crie um commit com as mudanças relacionadas e envie-o ao `origin`. Use a branch principal quando houver acesso e o envio for fast-forward. Se a branch exigir revisão, envie a atualização em uma branch própria e abra um pull request.
 - Confirme que o commit chegou ao GitHub e informe o link na entrega. Se o envio falhar, preserve o commit local e informe o impedimento.
+- Após validar e enviar uma atualização jogável, atualize também a prévia privada de Reinos da Aurora no Sites. Reutilize o mesmo projeto e endereço de teste, preserve as permissões de quem já tem acesso e confirme a versão publicada. Informe o link de jogo na entrega.
