@@ -1,10 +1,11 @@
 import Phaser from 'phaser'
 import { assetUrl } from '../assets'
 import { appearance, type AppearanceId, type StyleSlot } from '../content/wardrobe'
-import { classIds, heroArt } from '../content/classes'
+import { classIds, heroArt, type Presentation } from '../content/classes'
 import { monsterIds } from '../content/monsters'
 import type { BattleEvent, Unit } from '../domain/battle'
 import type { Hero } from '../domain/profile'
+import { animateArcherShot, shotCellSize, shotTexture } from './archer-shot'
 import { animateMageSpell } from './mage-effects'
 import { arenaCamera, arenaHeight, arenaWidth, pointFor } from './layout'
 
@@ -24,6 +25,10 @@ export class BootScene extends Phaser.Scene {
     for (const key of opponentTextures) {
       this.load.image(key, assetUrl(`${key}.webp`))
     }
+    for (const form of ['masculine', 'feminine'] as const) {
+      const key = shotTexture(form)
+      this.load.spritesheet(key, assetUrl(`${key}.webp`), { frameWidth: shotCellSize, frameHeight: shotCellSize })
+    }
   }
 
   create(): void {
@@ -41,6 +46,7 @@ export class ArenaScene extends Phaser.Scene {
   private readonly actors = new Map<string, Actor>()
   private run: number | undefined
   private previousUnits: readonly Unit[] = []
+  private archerShot: ReturnType<typeof animateArcherShot> | undefined
 
   constructor() {
     super('arena')
@@ -51,11 +57,28 @@ export class ArenaScene extends Phaser.Scene {
   }
 
   clear(): void {
+    this.stopArcherShot()
     this.tweens.killAll()
     this.children.removeAll(true)
     this.actors.clear()
     this.run = undefined
     this.previousUnits = []
+  }
+
+  playArcherShot(form: Presentation, target: Unit, speed: number, impact: () => void): boolean {
+    const hero = this.actors.get('hero')
+    if (!hero || !this.textures.exists(shotTexture(form))) return false
+    this.stopArcherShot()
+    this.archerShot = animateArcherShot(this, hero.sprite, form, target, speed, impact, () => { this.archerShot = undefined })
+    return true
+  }
+
+  adjustArcherShot(speed: number, paused: boolean): void {
+    this.archerShot?.adjust(speed, paused)
+  }
+
+  stopArcherShot(): void {
+    this.archerShot?.cancel()
   }
 
   show(run: number, hero: Hero, looks: Partial<Record<StyleSlot, AppearanceId>>, units: readonly Unit[], events: readonly BattleEvent[], animate: boolean, speed: number): void {
@@ -95,7 +118,7 @@ export class ArenaScene extends Phaser.Scene {
     if (!animate) return
     for (const event of events) {
       const target = effectUnits.find((unit) => unit.id === event.target)
-      if (event.visual) this.skillEffect(hero, effectUnits, event, speed)
+      if (event.visual && !(this.archerShot && event.actor === 'hero' && event.spell === 'shot')) this.skillEffect(hero, effectUnits, event, speed)
       if (event.kind === 'action' && event.visual === 'slash' && target && event.actor !== target.id) {
         const actor = units.find((unit) => unit.id === event.actor)
         const entry = actor && this.actors.get(actor.id)

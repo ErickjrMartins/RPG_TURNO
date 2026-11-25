@@ -35,6 +35,8 @@ Criar herói → preparar cidade e formação → escolher uma missão no mapa �
 
 O combate passa por preparação, início de rodada, entrada do jogador, resolução de ações, atualização de efeitos e fim de rodada. Ao fim, inicia outra rodada ou chega à vitória ou à derrota. Durante a resolução, a interface bloqueia novos comandos de ação. A lógica de batalha aplica dano, gasto de energia e recompensas uma única vez por evento válido. As animações exibem o resultado desses eventos.
 
+O Disparo básico do Atirador e da Atiradora mostra a preparação, a puxada do arco dourado, a soltura e a volta à guarda. A Vida do alvo muda quando a flecha chega. A animação acompanha a pausa e a velocidade de combate. Com **Pular efeitos** ou movimento reduzido, a ação resolve diretamente.
+
 As referências de balanceamento propostas são 20 pontos de recurso inicial, 12 gerados no ataque básico, recuperação de 5 por turno e custos de 20 e 35 para as duas habilidades. A duração desejada é de 3–6 rodadas para uma batalha comum e 5–9 para um miniboss. Os valores serão calibrados em testes.
 
 ### Juras Profanas e Abismos Pessoais

@@ -1,6 +1,6 @@
 {
   "name": "reinos-da-aurora",
-  "version": "0.4.2",
+  "version": "0.4.3",
   "private": true,
   "type": "module",
   "scripts": {
@@ -12,6 +12,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:browser": "node tests/browser.mjs",
+    "test:archer": "node tests/archer-browser.mjs",
     "test:offline": "node tests/offline-browser.mjs",
     "build:portable": "tsc --noEmit && vite build --mode portable && node scripts/portable.mjs",
     "start": "node server/start.mjs",
