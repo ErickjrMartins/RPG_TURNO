@@ -22,6 +22,8 @@ Criar herói → preparar cidade e formação → escolher uma missão no mapa �
 4. Visitar o quartel, recrutar uma tropa e melhorar o Salão do Conselho, com custo, duração e efeito visíveis.
 5. Abrir o mapa e enfrentar um miniboss, com possibilidade de derrota e nova tentativa. Aprender a equipar um item e ter o progresso salvo automaticamente.
 
+Na criação, cada retrato sobe e desce levemente em um ciclo de respiração. Apenas pontas de cabelo e tecido se deslocam dentro da imagem. O rosto, o tronco e o equipamento conservam as proporções, e a preferência de movimento reduzido exibe o retrato estático.
+
 ## Mecânicas
 
 ### Combate em formação

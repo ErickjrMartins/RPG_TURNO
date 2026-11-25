@@ -27,6 +27,7 @@ import { campView, updateCityView } from './ui/city'
 import { filters, relicaryView, type RelicFilter } from './ui/relicary'
 import { createView, titleView } from './ui/foundation'
 import { message, sigil } from './ui/html'
+import { mountPortraitMotion } from './ui/portrait-motion'
 
 const root = document.querySelector<HTMLDivElement>('#app')
 if (!root) throw new Error('A interface do jogo está indisponível.')
@@ -43,7 +44,7 @@ root.innerHTML = `
     </header>
     <main id="view" aria-busy="true"><p class="loading">Carregando Reinos da Aurora…</p></main>
     <div class="stage-storage" aria-hidden="true"><div id="phaser-stage"></div></div>
-    <footer class="game-footer"><div class="view-width footer-inner"><span>VERSÃO 0.4.4</span><span>SALVAMENTO NESTE NAVEGADOR</span></div></footer>
+    <footer class="game-footer"><div class="view-width footer-inner"><span>VERSÃO 0.4.5</span><span>SALVAMENTO NESTE NAVEGADOR</span></div></footer>
   </div>`
 
 const view = root.querySelector<HTMLElement>('#view')!
@@ -59,6 +60,7 @@ let profile: Profile | null = null
 let repository: SaveRepository | undefined
 let arena: ArenaScene | undefined
 let stageLoading = false
+let stopPortrait: (() => void) | undefined
 let error = ''
 let busy = false
 let battle: Battle | undefined
@@ -100,11 +102,15 @@ function paintBattle(events: readonly BattleEvent[] = []): void {
 
 function render(focusHeading = false, events: readonly BattleEvent[] = []): void {
   if (screen !== 'plaza') plaza.leave()
+  stopPortrait?.()
+  stopPortrait = undefined
   const active = document.activeElement instanceof HTMLElement && view.contains(document.activeElement) ? document.activeElement : null
   stageStorage.append(stageHost)
   view.setAttribute('aria-busy', String(busy))
   if (screen === 'create') {
     view.innerHTML = createView(draft, error, busy)
+    const portrait = view.querySelector<HTMLElement>('.character-portrait')
+    if (portrait) stopPortrait = mountPortraitMotion(portrait, draft.classId, draft.presentation, reducedMotion)
   } else if (screen === 'battle' && profile && battle) {
     const skill = battle.skills.find((entry) => entry.id === selected) ?? battle.skills[0]!
     view.innerHTML = battleView({ battle, profile, selected: skill, history, error, speed, skip, paused, saving: busy, overcharge, opening: events.some((event) => event.kind === 'abyss-start') })

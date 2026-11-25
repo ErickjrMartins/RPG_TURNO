@@ -1,6 +1,6 @@
 {
   "name": "reinos-da-aurora",
-  "version": "0.4.4",
+  "version": "0.4.5",
   "private": true,
   "type": "module",
   "scripts": {
@@ -14,6 +14,7 @@
     "test:browser": "node tests/browser.mjs",
     "test:archer": "node tests/archer-browser.mjs",
     "test:motion": "node tests/motion-browser.mjs",
+    "test:portrait": "node tests/portrait-browser.mjs",
     "test:offline": "node tests/offline-browser.mjs",
     "build:portable": "tsc --noEmit && vite build --mode portable && node scripts/portable.mjs",
     "start": "node server/start.mjs",

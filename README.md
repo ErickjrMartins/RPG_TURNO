@@ -36,6 +36,7 @@ npx playwright install chromium
 npm run test:browser
 npm run test:archer
 npm run test:motion
+npm run test:portrait
 npm run test:offline
 ```
 

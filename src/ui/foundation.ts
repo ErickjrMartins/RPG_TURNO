@@ -69,7 +69,10 @@ export function createView(draft: Draft, error: string, busy: boolean): string {
       </div>
       <div class="character-stage" style="--choice:${heroClass.color}">
         <div class="character-circle" aria-hidden="true">${sigil}</div>
-        <img class="character-art" src="${heroArt(draft.classId, draft.presentation)}" alt="" />
+        <div class="character-portrait">
+          <img class="character-art" src="${heroArt(draft.classId, draft.presentation)}" alt="" />
+          <canvas class="character-motion" aria-hidden="true" hidden></canvas>
+        </div>
         <div class="character-description">
           <span class="eyebrow">${heroClass.role}</span>
           <h2>${className(draft.classId, draft.presentation)}</h2>

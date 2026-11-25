@@ -1,6 +1,5 @@
 import type Phaser from 'phaser'
-
-type Flex = readonly [x: number, y: number, radiusX: number, radiusY: number, pixels: number]
+import { fabricFrames, type Flex } from './fabric-motion'
 
 // Regions are normalized in the original images. Feet and the stiff parts of armor stay anchored.
 const flexible: Record<string, readonly Flex[]> = {
@@ -31,62 +30,13 @@ export function prepareIdleTexture(scene: Phaser.Scene, art: string): string | u
   if (scene.textures.exists(key)) return key
   const source = scene.textures.get(art).getSourceImage()
   if (!(source instanceof HTMLImageElement || source instanceof HTMLCanvasElement)) return undefined
-  const height = idleHeight
-  const width = Math.round(height * source.width / source.height)
-  const sampling = document.createElement('canvas')
-  sampling.width = width
-  sampling.height = height
-  const brush = sampling.getContext('2d', { willReadFrequently: true })
-  if (!brush) return undefined
-  brush.drawImage(source, 0, 0, width, height)
-  const original = brush.getImageData(0, 0, width, height).data
-  const sheet = scene.textures.createCanvas(key, width * columns, height * Math.ceil(idleFrames / columns))
-  if (!sheet) return undefined
-
-  // Store only pixels affected by loose fabric or hair. Each atlas is shared by actors of the same art.
-  const motion: { x: number; offset: number; sine: number; cosine: number }[] = []
-  for (let y = 0; y < height; y++) {
-    const v = y / (height - 1)
-    for (let x = 0; x < width; x++) {
-      const u = x / (width - 1)
-      let sine = 0
-      let cosine = 0
-      for (let region = 0; region < regions.length; region++) {
-        const [cx, cy, rx, ry, amount] = regions[region]!
-        const weight = Math.max(0, 1 - ((u - cx) / rx) ** 2 - ((v - cy) / ry) ** 2)
-        const phase = v * 3.7 + region * 1.8
-        sine += amount * weight ** 2 * Math.cos(phase)
-        cosine += amount * weight ** 2 * Math.sin(phase)
-      }
-      if (Math.hypot(sine, cosine) > 0.035) motion.push({ x, offset: (y * width + x) * 4, sine, cosine })
-    }
-  }
-  const frame = sheet.context.createImageData(width, height)
+  const atlas = fabricFrames(source, regions, { height: idleHeight, frames: idleFrames, columns, rowPhase: 3.7 })
+  if (!atlas) return undefined
+  const { sheet, width, height } = atlas
+  const texture = scene.textures.addCanvas(key, sheet)
+  if (!texture) return undefined
   for (let index = 0; index < idleFrames; index++) {
-    frame.data.set(original)
-    const radians = index * Math.PI * 2 / idleFrames
-    const sine = Math.sin(radians)
-    const cosine = Math.cos(radians)
-    for (const pixel of motion) {
-      const sourceX = Math.min(width - 1, Math.max(0, pixel.x - pixel.sine * sine - pixel.cosine * cosine))
-      const left = Math.floor(sourceX)
-      const first = pixel.offset + (left - pixel.x) * 4
-      const second = left < width - 1 ? first + 4 : first
-      const fraction = sourceX - left
-      const a = original[first + 3]! * (1 - fraction)
-      const b = original[second + 3]! * fraction
-      const alpha = a + b
-      frame.data[pixel.offset + 3] = alpha
-      if (!alpha) continue
-      for (let channel = 0; channel < 3; channel++) {
-        frame.data[pixel.offset + channel] = (original[first + channel]! * a + original[second + channel]! * b) / alpha
-      }
-    }
-    const x = index % columns * width
-    const y = Math.floor(index / columns) * height
-    sheet.context.putImageData(frame, x, y)
-    sheet.add(index, 0, x, y, width, height)
+    texture.add(index, 0, index % columns * width, Math.floor(index / columns) * height, width, height)
   }
-  sheet.refresh()
   return key
 }
