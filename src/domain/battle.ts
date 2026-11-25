@@ -1,8 +1,8 @@
-import { abyssSpecs, skillsByClass, troops, type EffectKind, type Skill, type Visual } from '../content/adventure'
+import { abyssSpecs, effectNames, skillsByClass, troops, type EffectKind, type Skill, type Visual } from '../content/adventure'
 import { zone } from '../content/campaign'
 import { monsters, type MonsterId } from '../content/monsters'
 import type { Attributes, ClassId } from '../content/classes'
-import { mageBonuses } from './mage'
+import { configuredMageSpell, isMageSpell, mageBonuses } from './mage'
 import { isZone } from './campaign'
 import { styleBonuses } from './wardrobe'
 import { glyphFamily, type Mastery } from './relicary'
@@ -60,6 +60,7 @@ export interface Battle {
   mastery: Record<string, Mastery>
   nucleus: boolean
   magePulse: number
+  mageHealing: number
   sealed: boolean
 }
 
@@ -131,7 +132,7 @@ export function startBattle(profile: Profile): Battle {
   const jurasUnlocked = attempt.encounter !== 'ruins'
   const abyssRank = levelFor(profile.hero.xp) >= 2 && (profile.city.buildings.council.level >= 2 || profile.completed.includes('gate')) ? 2 : 1
   const glyph = glyphFamily(profile.relicary)
-  const arcana = mageBonuses(profile.mageRanks)
+  const arcana = mageBonuses(profile.mageRanks, profile.mageLoadout)
   const baseSkills = skillsByClass[classId].map((skill): Skill => {
     if (classId !== 'mage') return skill
     if (skill.id === 'spark' && arcana.spark) return { ...skill, damage: (skill.damage ?? 0) * (1 + arcana.spark), description: `${skill.description} Árvore: +${Math.round(arcana.spark * 100)}% de potência.` }
@@ -139,6 +140,9 @@ export function startBattle(profile: Profile): Battle {
     const extraHeal = skill.id === 'renew' ? arcana.renew : skill.id === 'chorus' ? arcana.chorus : 0
     return extraHeal && skill.heal ? { ...skill, heal: skill.heal + extraHeal, description: `${skill.description} Árvore: +${extraHeal} cura.` } : skill
   })
+  const loadout = profile.mageLoadout
+  const readySkills = loadout ? loadout.active.flatMap((id) => isMageSpell(id)
+    ? [configuredMageSpell(id, profile.mageRanks)] : baseSkills.filter((skill) => skill.id === id)) : baseSkills
   const abyss = { ...abyssSpecs[classId], cost: abyssSpecs[classId].cost - arcana.abyssDiscount }
   return {
     attempt,
@@ -147,7 +151,7 @@ export function startBattle(profile: Profile): Battle {
     units,
     energy: (glyph === 'pest' ? 30 : 20) + styleBonuses(profile.wardrobe).energy + arcana.focus,
     cooldowns: {},
-    skills: jurasUnlocked ? [...baseSkills, abyss] : baseSkills.filter((skill) => skill.id !== 'chorus'),
+    skills: jurasUnlocked ? [...readySkills, abyss] : baseSkills.filter((skill) => skill.id !== 'chorus'),
     seed: attempt.seed,
     queue: [],
     reinforced: false,
@@ -162,6 +166,7 @@ export function startBattle(profile: Profile): Battle {
     mastery: profile.relicary.mastery,
     nucleus: false,
     magePulse: arcana.pulse,
+    mageHealing: 1 + arcana.healing,
     sealed: false,
   }
 }
@@ -198,18 +203,26 @@ export function availableTargets(state: Battle, skill: Skill): Unit[] {
   if (skill.target === 'self') return living.filter((entry) => entry.id === 'hero')
   if (skill.target === 'allies') return living.filter((entry) => entry.id === 'hero')
   if (skill.target === 'ally') return living.filter((entry) => entry.team === 'allies')
+  if (skill.target === 'lowest-ally') {
+    return living.filter((entry) => entry.team === 'allies')
+      .sort((first, second) => first.hp * second.maxHp - second.hp * first.maxHp || first.slot - second.slot).slice(0, 1)
+  }
   const enemies = living.filter((entry) => entry.team === 'enemies')
   const front = enemies.filter((entry) => entry.slot < 3)
   return skill.target === 'front' && front.length ? front : enemies
 }
 
+export function skillUsesMacula(skill: Skill): boolean {
+  return Boolean(skill.abyss || skill.resource === 'macula')
+}
+
 export function skillBlocked(state: Battle, skill: Skill): string | null {
   if (state.phase !== 'player') return 'Aguarde a resolução'
   if (skill.abyss && state.abyss) return 'Abismo já ativo'
-  if (skill.abyss && state.macula < skill.cost) return 'Mácula insuficiente'
   const cooldown = state.cooldowns[skill.id] ?? 0
   if (cooldown > 0) return `${cooldown} ${cooldown === 1 ? 'rodada' : 'rodadas'} de recarga`
-  if (!skill.abyss && state.energy < skill.cost) return 'Recurso insuficiente'
+  if (skillUsesMacula(skill)) return state.macula < skill.cost ? 'Mácula insuficiente' : null
+  if (state.energy < skill.cost) return 'Recurso insuficiente'
   return null
 }
 
@@ -238,9 +251,17 @@ function damage(state: Battle, target: Unit, amount: number, source: string, eve
   events.push({ kind: 'damage', actor: source, target: target.id, amount: hit, text: `${target.name} sofreu ${hit} de dano${blocked}${fallen}.` })
 }
 
+function heal(target: Unit, potency: number, actor: string, events: BattleEvent[]): void {
+  if (target.hp <= 0) return
+  const amount = Math.min(Math.round(potency), target.maxHp - target.hp)
+  target.hp += amount
+  events.push({ kind: 'heal', actor, target: target.id, amount, text: `${target.name} recuperou ${amount} de vida.` })
+}
+
 function applySkill(state: Battle, actor: Unit, targets: Unit[], skill: Skill, events: BattleEvent[], powerUp = 1): void {
   const visual = skill.visual ?? (skill.heal ? 'heal' : actor.art === 'bowman' ? 'arrow' : 'slash')
   events.push({ kind: 'action', actor: actor.id, target: targets[0]?.id, targets: targets.map((entry) => entry.id), visual, spell: skill.id, text: `${actor.name} usou ${skill.name}.` })
+  const healingPower = powerUp * (actor.id === 'hero' ? state.mageHealing : 1)
   for (const target of targets) {
     if (skill.damage) {
       const hunter = state.abyss?.classId === 'archer' && state.abyss.target === target.id && actor.team === 'allies'
@@ -249,21 +270,21 @@ function applySkill(state: Battle, actor: Unit, targets: Unit[], skill: Skill, e
       const roll = random(state)
       const critical = roll < Math.min(0.35, 0.1 + actor.precision / 500)
       const power = actor.power * skill.damage * powerUp * (state.attempt.challenge && actor.team === 'enemies' ? 1.35 : 1) * (1 - weak) * (critical ? 1.45 : 0.91 + roll * 0.18)
-      const amount = Math.max(1, Math.round((power - target.defense * 0.55) * (1 + mark)))
+      const inCircle = actor.id === 'hero' && state.abyss?.classId === 'mage' && (target.slot >= 3) === state.abyss.rear
+      const amount = Math.max(1, Math.round((power - target.defense * 0.55) * (1 + mark) * (inCircle ? 1.2 : 1)))
       damage(state, target, amount, actor.id, events)
       if (critical) events.push({ kind: 'effect', target: target.id, text: 'Acerto crítico!' })
     }
-    if (skill.heal) {
-      const amount = Math.min(Math.round(skill.heal * powerUp), target.maxHp - target.hp)
-      target.hp += amount
-      events.push({ kind: 'heal', actor: actor.id, target: target.id, amount, text: `${target.name} recuperou ${amount} de vida.` })
-    }
+    if (skill.heal || skill.healPercent) heal(target, ((skill.heal ?? 0) + (skill.healPercent ?? 0) * target.maxHp) * healingPower, actor.id, events)
     if (skill.effect && target.hp > 0) {
       const effect = skill.effect
-      const names = { shield: 'Escudo', marked: 'Marca', weakened: 'Fraqueza', burning: 'Queimadura' }
-      target.effects = [...target.effects.filter((entry) => entry.kind !== effect.kind), { ...effect, strength: effect.kind === 'shield' || effect.kind === 'burning' ? Math.round(effect.strength * powerUp) : effect.strength * powerUp, rounds: effect.kind === 'shield' ? effect.rounds
-        : Math.max(1, effect.rounds - Math.floor(target.resistance / 10)) + (state.glyph === 'void' && actor.id === 'hero' ? 1 : 0) }]
-      events.push({ kind: 'effect', target: target.id, text: `${target.name} recebeu ${names[effect.kind]}.` })
+      const friendly = effect.kind === 'shield' || effect.kind === 'mending'
+      const scaled = effect.strength * (effect.kind === 'mending' ? healingPower : powerUp)
+      const strength = effect.kind === 'shield' || effect.kind === 'burning' ? Math.round(scaled) : scaled
+      const rounds = friendly ? effect.rounds : Math.max(1, effect.rounds - Math.floor(target.resistance / 10))
+        + (state.glyph === 'void' && actor.id === 'hero' ? 1 : 0)
+      target.effects = [...target.effects.filter((entry) => entry.kind !== effect.kind), { kind: effect.kind, strength, rounds }]
+      events.push({ kind: 'effect', target: target.id, text: `${target.name} recebeu ${effectNames[effect.kind]}.` })
     }
   }
 }
@@ -313,9 +334,13 @@ export function juraCost(state: Battle, skillId: string): number {
   return Math.max(1, Math.ceil(hero.maxHp * 0.1) - state.affinity - branch * 2)
 }
 
+export function abyssRounds(state: Battle): number {
+  return state.classId === 'mage' ? 3 : state.abyssRank + 1
+}
+
 function openAbyss(state: Battle, actor: Unit, target: Unit, targets: Unit[], skill: Skill, events: BattleEvent[]): void {
   const { classId, abyssRank: rank } = state
-  const rounds = rank === 2 ? 3 : 2
+  const rounds = abyssRounds(state)
   state.abyss = { classId, rounds, rank, target: target.id, rear: target.slot >= 3 }
   state.macula -= skill.cost
   if (state.sealed) {
@@ -346,7 +371,7 @@ export function playerAction(previous: Battle, skillId: string, targetId: string
   const events: BattleEvent[] = []
   if (overcharge) {
     const cost = juraCost(state, skillId)
-    if (!state.jurasUnlocked || skill.abyss || !skill.cost || actor.hp <= cost || state.corrosion >= 3) throw new Error('Jura Profana indisponível.')
+    if (!state.jurasUnlocked || skillUsesMacula(skill) || !skill.cost || actor.hp <= cost || state.corrosion >= 3) throw new Error('Jura Profana indisponível.')
     actor.hp -= cost
     state.corrosion++
     events.push({ kind: 'jura', actor: actor.id, target: actor.id, text: `Jura Profana: −${cost} Vida, Corrosão Interna ${state.corrosion}/3.` })
@@ -356,8 +381,11 @@ export function playerAction(previous: Battle, skillId: string, targetId: string
   if (skill.abyss) {
     openAbyss(state, actor, target, targets, skill, events)
   } else {
-    state.energy = Math.min(100, state.energy - skill.cost + (skill.energy ?? 0))
-    if (state.jurasUnlocked) state.macula = Math.min(100, state.macula + (overcharge ? 38 : 24))
+    if (skillUsesMacula(skill)) state.macula -= skill.cost
+    else {
+      state.energy = Math.min(100, state.energy - skill.cost + (skill.energy ?? 0))
+      if (state.jurasUnlocked) state.macula = Math.min(100, state.macula + (overcharge ? 38 : 24))
+    }
     const mastery = state.mastery[skillId]
     const chosenPath = overcharge ? 'oath' : 'safe'
     const branch = Number(mastery?.[5] === chosenPath) + Number(mastery?.[10] === chosenPath)
@@ -417,6 +445,7 @@ export function advanceBattle(previous: Battle): Transition {
     if (entry.hp <= 0) continue
     for (const effect of entry.effects) {
       if (effect.kind === 'burning') damage(state, entry, effect.strength, entry.id, events)
+      if (effect.kind === 'mending') heal(entry, entry.maxHp * effect.strength, 'hero', events)
       effect.rounds--
     }
     entry.effects = entry.effects.filter((effect) => effect.rounds > 0)

@@ -111,8 +111,8 @@ describe('motor tático', () => {
   it('migra a fundação v1 com a aparência e o progresso originais', () => {
     const old = { schemaVersion: 1, revision: '01', hero: { name: 'Liora', classId: 'archer', presentation: 'feminine', xp: 10 }, gold: 3, supplies: 0 }
     const migrated = decodeProfile(old)
-    expect(migrated).toMatchObject({ schemaVersion: 7, revision: '01', hero: old.hero, gold: 3, relicary: { relics: [] }, pending: null })
+    expect(migrated).toMatchObject({ schemaVersion: 8, revision: '01', hero: old.hero, gold: 3, relicary: { relics: [] }, pending: null })
     expect(isProfile(migrated)).toBe(true)
-    expect(decodeProfile({ ...old, schemaVersion: 8 })).toBeNull()
+    expect(decodeProfile({ ...old, schemaVersion: 9 })).toBeNull()
   })
 })

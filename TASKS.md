@@ -1,6 +1,6 @@
 # TASKS — Reinos da Aurora
 
-> Versão 0.3.0. Marque [x] após implementar e verificar no repositório.
+> Versão 0.4.0. Marque [x] após implementar e verificar no repositório.
 
 ## M0 — Fundação
 - [x] Inspecionar estrutura de arquivos e inicializar package.json/scripts.
@@ -62,6 +62,19 @@ A versão 0.2.0 passou no lint, na checagem de tipos, em 30 testes unitários e 
 - [x] Praça de Alvor com presença e movimento compartilhados no servidor Node.
 
 A versão 0.3.0 passou no lint, na checagem de tipos, em 34 testes automatizados e na build de produção. No Chromium, a validação incluiu as três classes, o salvamento da árvore do Mago, a Chuva Astral na Cordilheira Cinzenta e a presença e o movimento compartilhados entre duas sessões, uma delas em viewport móvel.
+
+## Expansão ritual 0.4.0
+
+- [x] Detalhar no GDD a expansão ritual, os conflitos de balanceamento e a ordem de integração.
+- [x] Expandir a árvore do Canalizador para 15 nós e persistir a preparação no save v8.
+- [x] Implementar Fio de Âmbar, Orvalho de Sal, Alvorada de Marfim, Prisma de Selos, Rasgo de Nanquim, Trama Restauradora e sinergia por fileira do Círculo do Vazio.
+- [ ] Expandir Vanguarda e Atirador para 15 nós cada.
+- [ ] Rotina diária configurável, rotação semanal, fragmentos, presets e títulos.
+- [ ] XP, Índice de Calamidade e garantia visível nas rotas de saque.
+- [ ] Enclave, captura e evolução de Abominações e Bestas de Selamento.
+- [ ] Cooperativo autoritativo, Clã, Relicário do Tempo, Mercado e Selo de Patrocínio.
+
+A build, o lint e 39 testes automatizados passaram. O roteiro de navegador cobre as três classes, toque em 390 px, retomada da preparação, expedições e presença compartilhada na Praça de Alvor.
 
 ## M4 — Qualidade
 - [ ] Responsividade desktop/mobile e área segura.

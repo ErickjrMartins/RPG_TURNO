@@ -636,7 +636,7 @@ img { max-width: 100%; }
 [data-discipline="Vazio"] { --node-color: #f69ab5; }
 .arcana-node {
   position: absolute; left: var(--x); top: var(--y); transform: translate(-50%, -50%);
-  width: clamp(67px, 13cqw, 120px); padding: 4px; min-height: 66px; color: #f3e4ef; background: #20232ddd;
+  width: clamp(67px, 16cqw, 120px); padding: 4px; min-height: 66px; color: #f3e4ef; background: #20232ddd;
   border: 1px solid #74657e; border-radius: 4px; font-size: clamp(9px, 1.55cqw, 13px); display: grid; justify-items: center; gap: 2px;
 }
 .arcana-node img { width: 42px; aspect-ratio: 1; object-fit: cover; border: 1px solid #aa8fba55; border-radius: 3px; }
@@ -646,8 +646,12 @@ img { max-width: 100%; }
 .arcana-details { border-color: #8f6e96; background: linear-gradient(145deg, #281f37, #171f26 70%); }
 .arcana-details > img { width: 75px; aspect-ratio: 1; border: 1px solid #bd91c5; border-radius: 4px; }
 .arcana-details .button { margin-block: 10px; }
-@media (max-width: 760px) { .arcana-layout { grid-template-columns: 1fr; } }
-@media (max-width: 470px) {
+.arcana-loadout { margin-top: 14px; }
+.arcana-slots { display: flex; align-items: baseline; flex-wrap: wrap; gap: 8px 14px; margin-top: 9px; }
+.arcana-slots > b { min-width: 88px; color: #efcda4; }
+.arcana-slots > div { display: flex; flex-wrap: wrap; gap: 6px; }
+@media (max-width: 1000px) { .arcana-layout { grid-template-columns: 1fr; } }
+@media (max-width: 640px) {
   .arcana-board { aspect-ratio: auto; padding: 9px; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 7px; }
   .arcana-node { position: relative; width: 100%; left: auto; top: auto; transform: none; font-size: 11px; }
   .arcana-link, .arcana-compass { display: none; }

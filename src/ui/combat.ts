@@ -1,10 +1,10 @@
-import { abyssSpecs, encounters, items, type EncounterId, type Skill } from '../content/adventure'
+import { abyssSpecs, effectNames, encounters, items, type EncounterId, type Skill } from '../content/adventure'
 import { regions, zone } from '../content/campaign'
 import { mageIcon } from '../content/mage'
 import { isZone } from '../domain/campaign'
 import { relicSpec, stock, type StockId } from '../content/relics'
 import { classes, heroArt } from '../content/classes'
-import { areaTargets, availableTargets, initiative, juraCost, shieldOf, skillBlocked, type Battle, type Unit } from '../domain/battle'
+import { abyssRounds, areaTargets, availableTargets, initiative, juraCost, shieldOf, skillBlocked, skillUsesMacula, type Battle, type Unit } from '../domain/battle'
 import { type Profile } from '../domain/profile'
 import { arenaCamera, arenaHeight, arenaWidth, pointFor } from '../game/layout'
 import { safe, sigil } from './html'
@@ -33,8 +33,7 @@ function healthBar(unit: Unit, shield: number): string {
 function unitLabel(unit: Unit, actionable: boolean, affected: boolean, aura: boolean): string {
   const point = pointFor(unit)
   const shield = shieldOf(unit)
-  const conditionName = { shield: 'Escudo', marked: 'Marca', weakened: 'Fraqueza', burning: 'Queimadura' }
-  const effects = unit.effects.map((effect) => conditionName[effect.kind])
+  const effects = unit.effects.map((effect) => effectNames[effect.kind])
   const tag = actionable ? 'button' : 'div'
   const control = actionable ? `type="button" data-action="target" data-value="${unit.id}" aria-label="Selecionar alvo: ${safe(unit.name)}, ${unit.hp} de ${unit.maxHp} de vida"` : ''
   return `<${tag} ${control} class="unit-label ${unit.team} ${unit.hp === 0 ? 'fallen' : ''} ${actionable ? 'actionable' : ''} ${affected ? 'area-target' : ''} ${aura ? 'abyss-unit' : ''}"
@@ -60,7 +59,8 @@ export function battleView(display: BattleDisplay): string {
   const active = battle.abyss
   const hero = battle.units[0]!
   const cost = juraCost(battle, selected.id)
-  const canOvercharge = canAct && !selected.abyss && selected.cost > 0 && !selectedBlocked && hero.hp > cost && battle.corrosion < 3
+  const canJura = !skillUsesMacula(selected) && selected.cost > 0
+  const canOvercharge = canAct && canJura && !selectedBlocked && hero.hp > cost && battle.corrosion < 3
   const area = selected.target === 'allies' || selected.target === 'enemies' || selected.target === 'row'
     ? new Set(targets.flatMap((entry) => areaTargets(battle, selected, entry).map((target) => target.id)))
     : new Set()
@@ -109,19 +109,19 @@ export function battleView(display: BattleDisplay): string {
               const art = battle.classId === 'mage' ? mageIcon(skill.id) : undefined
               return `<button class="skill ${skill.abyss ? 'ultimate-skill' : ''}" data-action="skill" data-value="${skill.id}" aria-pressed="${selected.id === skill.id}" aria-disabled="${!canAct || !!blocked}">
                 <span class="skill-icon" aria-hidden="true">${art ? `<img src="${art}" alt="">` : skill.icon}</span><strong>${skill.name}</strong>
-                <small>${blocked && canAct ? blocked : skill.cost ? `${skill.cost} ${skill.abyss ? 'Mácula' : ownClass.resource}` : 'Sem custo'} <kbd>${index + 1}</kbd></small>
+                <small>${blocked && canAct ? blocked : skill.cost ? `${skill.cost} ${skillUsesMacula(skill) ? 'Mácula' : ownClass.resource}` : 'Sem custo'} <kbd>${index + 1}</kbd></small>
               </button>`
             }).join('')}
           </div>
-          <p class="skill-info">${selected.description}${selected.abyss ? ` Nível ${battle.abyssRank} · ${battle.abyssRank + 1} rodadas.` : ''}</p>
+          <p class="skill-info">${selected.description}${selected.abyss ? ` Nível ${battle.abyssRank} · ${abyssRounds(battle)} rodadas.` : ''}</p>
           ${battle.jurasUnlocked ? `<div class="jura-controls">
             <span>Mácula <strong>${battle.macula}/100</strong></span>
             <span>Corrosão Interna <strong>${battle.corrosion}/3</strong></span>
             <button class="small-button" data-action="jura" aria-pressed="${overcharge}" ${!canOvercharge && !overcharge ? 'disabled' : ''}>Jura Profana</button>
-            ${selected.cost && !selected.abyss ? `<small>+30% de potência · −${cost} Vida · +1 Corrosão (2 de dano por acúmulo no fim da rodada)</small>` : ''}
+            ${canJura ? `<small>+30% de potência · −${cost} Vida · +1 Corrosão (2 de dano por acúmulo no fim da rodada)</small>` : ''}
           </div>` : ''}
           <div class="target-list">
-            ${canAct && !selectedBlocked ? `<span class="field-label">${selected.target === 'row' ? 'Escolha uma fileira' : selected.target === 'allies' ? 'Área aliada' : 'Escolha o alvo'}</span>${targets.map((target) => `<button class="small-button target" data-action="target" data-value="${target.id}">${selected.target === 'allies' ? (selected.abyss ? 'Abrir Abismo' : 'Toda a formação') : safe(target.name)}</button>`).join('')}` : ''}
+            ${canAct && !selectedBlocked ? `<span class="field-label">${selected.target === 'row' ? 'Escolha uma fileira' : selected.target === 'allies' ? 'Área aliada' : selected.target === 'lowest-ally' ? 'Aliado com menor porcentagem de Vida' : 'Escolha o alvo'}</span>${targets.map((target) => `<button class="small-button target" data-action="target" data-value="${target.id}">${selected.target === 'allies' ? (selected.abyss ? 'Abrir Abismo' : 'Toda a formação') : safe(target.name)}</button>`).join('')}` : ''}
           </div>
           <p class="form-error" role="status">${safe(error)}</p>
           ${error && (battle.phase === 'victory' || battle.phase === 'defeat') ? '<button class="small-button" data-action="save-result">Tentar salvar novamente</button>' : ''}

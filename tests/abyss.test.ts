@@ -28,14 +28,17 @@ it.each(classIds)('abre e encerra o Abismo de %s com duas formações completas'
   const target = availableTargets(battle, skill)[0]!
   const start = playerAction(battle, skill.id, target.id)
   expect(start.events.some((event) => event.kind === 'abyss-start')).toBe(true)
-  expect(start.state.abyss?.rounds).toBe(2)
+  const duration = id === 'mage' ? 3 : 2
+  expect(start.state.abyss?.rounds).toBe(duration)
   expect(start.state.macula).toBe(40)
   if (id === 'warrior') expect(start.state.units.filter((unit) => shieldOf(unit) === 20)).toHaveLength(6)
   if (id === 'archer') expect(start.state.abyss?.target).toBe(target.id)
   battle = round(start.state)
-  expect(battle.abyss?.rounds).toBe(1)
   const basic = battle.skills[0]!
-  battle = round(playerAction(battle, basic.id, availableTargets(battle, basic)[0]!.id).state)
+  for (let remaining = duration - 1; remaining > 0; remaining--) {
+    expect(battle.abyss?.rounds).toBe(remaining)
+    battle = round(playerAction(battle, basic.id, availableTargets(battle, basic)[0]!.id).state)
+  }
   expect(battle.abyss).toBeNull()
 })
 

@@ -9,9 +9,9 @@ import { isWardrobe, newWardrobe, styleBonuses, type Wardrobe } from './wardrobe
 import { relicSpec } from '../content/relics'
 import { addRelic, addStock, equipRelic, gearBonuses, isRelicary, isRelicId, newRelicary, type Relicary } from './relicary'
 
-import { validMageRanks, type MageRanks } from './mage'
+import { startingMageLoadout, validMageLoadout, validMageRanks, type MageLoadout, type MageRanks } from './mage'
 
-export const schemaVersion = 7
+export const schemaVersion = 8
 
 export interface Hero {
   name: string
@@ -50,6 +50,7 @@ export interface Profile {
   wardrobe: Wardrobe
   events: Events
   mageRanks: MageRanks
+  mageLoadout: MageLoadout | null
 }
 
 export function validName(name: string): boolean {
@@ -95,6 +96,7 @@ export function newProfile(name: string, classId: ClassId, presentation: Present
     wardrobe: newWardrobe(),
     events: newEvents(),
     mageRanks: {},
+    mageLoadout: classId === 'mage' ? startingMageLoadout() : null,
   }
 }
 
@@ -142,7 +144,9 @@ function isAttempt(value: unknown): value is Attempt {
 export function isProfile(value: unknown): value is Profile {
   if (!isRecord(value) || value.schemaVersion !== schemaVersion || !isHero(value.hero)) return false
   const { completed, recruits, nextAttempt, pending } = value
-  return validMageRanks(value.mageRanks, value.hero.xp, value.hero.classId === 'mage') && isCity(value.city) && isRelicary(value.relicary) && isCampaign(value.campaign) && isWardrobe(value.wardrobe) && isEvents(value.events) && typeof value.revision === 'string' && isCount(value.gold) && isCount(value.supplies)
+  const mage = value.hero.classId === 'mage'
+  return validMageRanks(value.mageRanks, value.hero.xp, mage) && validMageLoadout(value.mageLoadout, value.mageRanks, mage)
+    && isCity(value.city) && isRelicary(value.relicary) && isCampaign(value.campaign) && isWardrobe(value.wardrobe) && isEvents(value.events) && typeof value.revision === 'string' && isCount(value.gold) && isCount(value.supplies)
     && isCount(nextAttempt) && nextAttempt > 0
     && Array.isArray(completed) && completed.every(isEncounter) && new Set(completed).size === completed.length
     && Array.isArray(recruits) && recruits.every(isRecruit) && new Set(recruits.map((unit) => unit.id)).size === recruits.length
@@ -152,9 +156,14 @@ export function isProfile(value: unknown): value is Profile {
 
 export function decodeProfile(value: unknown): Profile | null {
   if (isProfile(value)) return value
+  const mageLoadout = isRecord(value) && isHero(value.hero) && value.hero.classId === 'mage' ? startingMageLoadout() : null
+  if (isRecord(value) && value.schemaVersion === 7) {
+    const migrated = { ...value, schemaVersion, mageLoadout }
+    return isProfile(migrated) ? migrated : null
+  }
   if (isRecord(value) && (value.schemaVersion === 4 || value.schemaVersion === 5 || value.schemaVersion === 6)) {
     const migrated = { ...value, schemaVersion, campaign: value.schemaVersion === 4 ? newCampaign() : value.campaign,
-      wardrobe: value.schemaVersion === 6 ? value.wardrobe : newWardrobe(), events: value.schemaVersion === 6 ? value.events : newEvents(), mageRanks: {} }
+      wardrobe: value.schemaVersion === 6 ? value.wardrobe : newWardrobe(), events: value.schemaVersion === 6 ? value.events : newEvents(), mageRanks: {}, mageLoadout }
     return isProfile(migrated) ? migrated : null
   }
   if (isRecord(value) && (value.schemaVersion === 2 || value.schemaVersion === 3)
@@ -172,6 +181,7 @@ export function decodeProfile(value: unknown): Profile | null {
       wardrobe: newWardrobe(),
       events: newEvents(),
       mageRanks: {},
+      mageLoadout,
       city: legacy.schemaVersion === 2 ? newCity() : legacy.city,
       recruits: legacy.schemaVersion === 2 ? value.recruits.map((entry) => isRecord(entry) ? { ...entry, level: 1 } : entry) : value.recruits,
     }

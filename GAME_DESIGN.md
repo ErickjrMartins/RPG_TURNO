@@ -41,19 +41,19 @@ As referências de balanceamento propostas são 20 pontos de recurso inicial, 12
 
 Depois das Ruínas do Farol, ações comuns alimentam o medidor de Mácula. Uma Jura Profana fortalece a habilidade escolhida em 30%, cobra Vida e acrescenta Corrosão Interna. Cada acúmulo de Corrosão causa 2 de dano ao fim da rodada, até três. Afinidades de relíquias e o Caminho da Jura podem reduzir o custo.
 
-Cada Abismo consome 60 de Mácula e dura duas rodadas. No nível 2 do herói, o nível 2 do Conselho ou a vitória no Portão Caído elevam o Abismo a três rodadas e fortalecem seu efeito.
+Cada Abismo tem custo-base de 60 de Mácula. Vanguarda e Atirador começam com duas rodadas e passam a três no nível 2 do Abismo. O Canalizador tem três rodadas nos dois níveis, com pulsos mais fortes no nível 2. O nível 2 do Abismo exige herói no nível 2 e Conselho no nível 2 ou vitória no Portão Caído.
 
 | Classe | Abismo | Efeito |
 | --- | --- | --- |
 | Vanguarda | Bastião de Cinzas | Escudos para toda a formação e redução do dano que ela recebe. |
-| Canalizador | Círculo do Vazio | Reduz a iniciativa de uma fileira inimiga e causa dano periódico nessa área. |
+| Canalizador | Círculo do Vazio | Reduz a iniciativa de uma fileira inimiga, pulsa no fim de cada rodada e amplifica em 20% o dano direto do Canalizador nessa fileira. |
 | Atirador | Firmamento da Caça | Amplifica o dano contra a presa. Se ela cair, a marca passa ao inimigo vivo de maior Ataque. |
 
 A câmera parte de uma escala mais aberta e pulsa durante a abertura. Traçados, círculos, ícones de estado e cores separam disparo, dano em área, cura, proteção, penalidade e efeito persistente. O Campo de Treino do Refúgio oferece as duas formações completas, com saída imediata e sem espólio.
 
 ### Árvore do Mago e leitura de combate
 
-O Canalizador acessa a árvore após as Ruínas do Farol. Recebe dois pontos no nível inicial e dois por nível de herói. Cada nó custa um ponto e verifica os caminhos anteriores. A redistribuição é gratuita no Refúgio. Os nove nós modificam potência da Centelha, dano periódico da Chuva Astral, cura individual e coletiva, Foco inicial, Mácula inicial, custo de Vida das Juras e dano e custo do Círculo do Vazio.
+O Canalizador acessa a árvore após as Ruínas do Farol. Recebe dois pontos no nível inicial e dois por nível de herói. Cada nível de nó custa um ponto e verifica os pré-requisitos. O Refúgio permite redistribuir pontos e preparar até seis ativas, três passivas e o Círculo do Vazio. A Centelha fica no primeiro espaço para recuperar Foco. O Núcleo de Foco funciona como fundamento da árvore. Os quatro feitiços iniciais e as três passivas existentes preservam a configuração inicial ao migrar da versão 0.3.0.
 
 Na arena, a vida atual e máxima aparece junto à unidade e no painel do herói. Aliados usam verde, inimigos usam vermelho e escudos têm contorno azul. A Centelha viaja até um alvo. A Chuva Astral projeta meteoros sobre a fileira, a Renovação envolve o aliado em luz ascendente, o Coro Vital pulsa sobre toda a formação e o Círculo do Vazio forma fendas e sigilos sobre a área. Cada feitiço tem ícone e som próprios e a opção de pular efeitos preserva a resolução do combate.
 
@@ -169,7 +169,72 @@ O plano técnico prevê verificar a entrega com `npm run dev`, `npm run build`, 
 
 A jornada inicial passa por Ruínas do Farol, Refúgio de Alvor e Portão Caído. Nas ruínas, o guarda do tutorial acompanha o herói contra um Rastejante de Pedra e um Vulto do Véu. No Refúgio, o jogador pode recrutar Sentinela e Besteiro, reposicioná-los e equipar o Broche do Alvorecer para o segundo encontro. As duas primeiras vitórias concedem moedas, provisões, XP, um acessório e materiais. As Expedições ampliam o ciclo de combate, preparação na base e progressão.
 
-O salvamento v7 registra a tentativa ativa e seu resultado de forma transacional. A migração preserva os IDs das classes, acessórios, inventário anterior, tropas, formação, recursos e progresso. Ao retomar um combate interrompido, o encontro reinicia com a mesma formação e seed. A build de produção pode ser reaberta offline após carregar e preparar o cache em HTTPS ou localhost.
+O salvamento v8 registra a tentativa ativa e seu resultado de forma transacional e conserva a preparação do Canalizador. A migração preserva os IDs das classes, acessórios, inventário anterior, tropas, formação, recursos e progresso. Ao retomar um combate interrompido, o encontro reinicia com a mesma formação e seed. A build de produção pode ser reaberta offline após carregar e preparar o cache em HTTPS ou localhost.
+
+## Expansão ritual
+
+A direção visual usa nanquim, placas de carvão, branco de sal e fitas carmesim. Vermelho, azul-elétrico e violeta identificam Vanguarda, Atirador de Precisão e Canalizador. Símbolos e texto acompanham as cores nos controles de combate. O Refúgio e a Praça de Alvor são a entrada para a futura expansão do Enclave. As ilustrações conceituais orientam o trabalho de arte, navegação e leitura em combate.
+
+### Canalizador na versão 0.4.0
+
+As recargas usam rodadas. Um feitiço de Foco gera Mácula no fluxo atual. A Jura desses feitiços acrescenta 30% de potência e cobra Vida e Corrosão. Alvorada e Círculo disputam a mesma reserva de Mácula e ficam fora da Jura. Bônus de cura multiplicam a potência antes do arredondamento e do limite da Vida máxima. Curar uma formação afeta apenas os integrantes vivos.
+
+| Nó / habilidade | Tipo, custo e recarga | Efeito e progressão |
+| --- | --- | --- |
+| Núcleo de Foco | Fundamento | +4 Foco inicial por nível, até 3. |
+| Centelha / Rastro de Cometa | Ativa, 0, sem recarga | 92% de Poder e +12 Foco. Cada nível soma 12 pontos percentuais ao bônus de potência, até 3. |
+| Chuva Astral / Constelação Ardente | Ativa, 20 Foco, 2 | 112% de Poder na fileira e queimadura de 5 por 2 rodadas. +3 de dano periódico por nível, até 3. |
+| Renovação / Seiva de Estrelas | Ativa, 35 Foco, 2 | 45 de cura em aliado escolhido. +6 por nível, até 3. |
+| Coro Vital / Ressonância Vital | Ativa, 45 Foco, 3 | 22 de cura em cada aliado vivo. +4 por nível, até 3. |
+| Fio de Âmbar | Ativa, 22 Foco, 2 | Cura 26% da Vida máxima do aliado vivo com menor percentual de Vida. Empate prioriza o menor índice de formação. +3 pontos percentuais nos níveis 2 e 3. |
+| Orvalho de Sal | Ativa, 28 Foco, 3 | Cura 6% da Vida máxima de cada aliado ao fim de cada rodada por três rodadas. A aplicação substitui a anterior. +1 ponto percentual nos níveis 2 e 3. |
+| Alvorada de Marfim | Ativa, 70 Mácula, 4 | Cura imediata de 32% da Vida máxima de cada aliado. +4 pontos percentuais nos níveis 2 e 3. |
+| Prisma de Selos | Ativa, 25 Foco, 2 | Escudo de 32 por 2 rodadas em aliado escolhido. +6 pontos de escudo nos níveis 2 e 3. |
+| Rasgo de Nanquim | Ativa, 32 Foco, 3 | 90% de Poder na fileira e marca de 12% de dano recebido por duas rodadas. +5 pontos percentuais ao dano nos níveis 2 e 3. |
+| Trama Restauradora | Passiva | +8% de cura direta e periódica ao Canalizador por nível, até 3. |
+| Margem do Vazio | Passiva | +3 de dano por pulso do Círculo por nível, até 3. |
+| Juramento Sereno | Passiva | −2 no custo de Vida por Jura por nível, até 3. |
+| Selo de Órbita | Passiva | +5 Mácula inicial por nível, até 2. |
+| Círculo do Vazio / Horizonte do Abismo | Soberania, 60 Mácula, 3 | −4 de iniciativa, pulso de 9 ou 12 e +20% de dano direto do Canalizador na fileira por três rodadas. −5 de Mácula por nível do nó, até 2. |
+
+| Preparação | Sequência e contrapartida |
+| --- | --- |
+| Sustento | Centelha para repor Foco, Orvalho antes do dano, Fio no aliado mais ferido e Alvorada quando a formação precisar de cura imediata. A Trama aumenta a cura e ocupa um espaço de passiva. Gastar Mácula na Alvorada adia o Círculo. |
+| Pressão em fileira | Centelha recarrega recursos, Círculo escolhe a fileira, Rasgo expõe os alvos e Chuva inflige queimadura. Ações consecutivas na mesma fileira aumentam a pressão e deixam a outra responder normalmente. |
+| Híbrido de contenção | Prisma cobre o aliado exposto, Fio resolve ferimentos graves e Chuva pune uma fileira cheia. A Jura acelera a sequência em troca de Vida e Corrosão. |
+
+Os testes determinísticos verificam o custo da Alvorada, os três pulsos do Orvalho, o alvo proporcional do Fio e o bônus restrito à fileira do Círculo. Com 100 de Mácula, a Alvorada deixa 30, abaixo do custo mesmo com o Horizonte no máximo. Esse intervalo limita uma sequência de cura em massa seguida de Soberania. O balanceamento de PvP depende de partidas com builds completas de todas as classes.
+
+### Próximos sistemas e integração
+
+| Frente | Regras previstas | Dependência e aceitação |
+| --- | --- | --- |
+| Vanguarda e Atirador | 15 nós por classe, com um básico fixo, escolhas de até 6 ativas e 3 passivas e uma Soberania de três rodadas. Vanguarda deve alternar contenção, defesa e impacto. Atirador escolhe marcar, perfurar, pressionar a retaguarda ou sustentar-se com reposicionamento. | Testar duas composições viáveis por classe contra o mesmo encontro e medir dano, proteção, frequência da Soberania e custo das Juras. |
+| XP e Índice de Calamidade | Degraus: início rápido para apresentar os recursos, meio sustentado por Relíquias, Pregos e Núcleos e fim guiado por cooperação. Primeira Purificação forte, Varredura após domínio, XP fixo de rotina e Bônus de Auxílio cooperativo. | Exibir XP e poder em separado. Bônus de retorno exige referência real de clã ou servidor e teto. Recompensa previsível e troca direta precisam coexistir com o saque variável. |
+| Saque e conversão | Garantia visível para Núcleos, Pregos e relíquias-chave. Marcas de Expurgo financiam trocas fixas. Desmonte converte excedentes em Cinzas, Icor ou materiais. Selos de Enxerto preservam refinamento. | Reusar o Relicário, o Altar e a Calamidade Desperta existentes. Validar média e pior caso até uma peça-chave, com custo e retorno explícitos. |
+| Rotina diária | Chamado da Quarentena conta purificações e Varredura. Pacto do Dia conta Juras ou Soberanias válidas. Forja e Contenção conta refinamento e encaixes. Expurgo em Grupo conta Ninhos ou auxílio. Metas, janela e pagamentos em dados, com alvo de 10–20 minutos e resgate único. | Começar pelos três contadores locais em ações confirmadas. O bloco cooperativo exige Ninho autoritativo. Reencaixar repetidamente o mesmo Prego deve contar uma vez por objetivo. |
+| Rotação semanal | Colheita Profana concede Fios garantidos por energia gasta. Calamidade Desperta premia marcos configuráveis, inicialmente 100, 300 e 600 pontos. Semana do Grimório e do Clã mede contribuição e coleção em sete dias. | Usar ações do jogo, recompensas fixas e resgates idempotentes. Fragmentos permitem escolher uma peça ou acumular para o conjunto; a meta coletiva exige clãs reais. |
+| Indumentárias | Quatro slots livres. Penteados e máscaras competem no adorno, junto de traje, projeção de arma e manifestação. A Bolsa abre prévia do herói, síntese e presets. Conjunto completo mantém bônus de coleção e título equipado mesmo com aparência misturada. | Somar ganhos PvE em limites calibráveis para que a coleção tenha peso e Relíquias sigam como fonte principal de força. Igualar bônus disponíveis por jogo e compra e normalizar poder cosmético em PvP competitivo. |
+
+| Enclave | Recurso e progressão propostas |
+| --- | --- |
+| Santuário Central | Cinzas e marcos da campanha liberam os níveis e o teto das outras estruturas. Reaproveitar o papel atual do Conselho. |
+| Câmara de Contenção | Talismãs selam candidatos enfraquecidos nas Zonas ou Ninhos. Icor e fragmentos evoluem graus Inferior, Médio, Superior e Calamidade. Prever um selo garantido na introdução e dois lugares na formação ativa. |
+| Forja de Selamento | Cinzas refinam Relíquias. Pregos e Selos de Enxerto aproveitam as regras já existentes do Relicário sem duplicar carteiras. Melhorias liberam capacidades com o teto do Santuário. |
+| Obelisco de Coleta | Produz Cinzas e Estilhaços de Obsidiana ao longo do tempo. Definir taxa e estoque por nível depois de medir a receita das campanhas. Teto inicial de referência de 12 horas para permitir duas coletas diárias. |
+
+O primeiro elenco planejado da Câmara inclui **Colosso de Vidro** (Inferior, frente e proteção), **Predador de Tinta** (Médio, pressão em alvos enfraquecidos) e **Oráculo de Marfim** (Médio, cura ou manipulação de Mácula). Valores iniciais para simulação de treino são 12, 18 e 18 Coágulos de Icor, respectivamente. Cada evolução deve mostrar materiais, função, mudança nos atributos e contribuição ao Índice de Calamidade. A formação atual continuará carregando os recrutados durante a migração do sistema.
+
+As **Bestas de Selamento** têm trilha única de nível e estrelas, com Icor e Selos de Domínio obtidos em jogo. Cão de Cinzas é a referência inicial, Corcel Ósseo no 10, Quimera de Talismãs no 20 e Leviatã de Nanquim no 30. Aparências especiais por eventos e trocas podem ser exibidas sem alterar a trilha de treino. O bônus de coleção é cumulativo com teto e a velocidade do mapa depende do terreno. Ganhos permanentes e formas especiais precisam ter limites e caminho gratuito antes de serem habilitados.
+
+| Economia futura | Efeito, custo e limite |
+| --- | --- |
+| Mercado Profano | Obsidiana de atividades paga frascos com limite diário, encaixes de bolsa e Selos de Enxerto. Altar de Expurgo reserva Núcleos e Pregos avançados a Marcas de Expurgo ganhas em atividade. Alta Costura tem preço explícito em Lágrimas de Sangue ou caminho semanal. |
+| Altar do Destino | Oito resultados úteis. Um giro gratuito por dia, um extra pelo Selo de Patrocínio e um terceiro opcional. A garantia de 30 giros precisa de contador persistente e deve avançar também com giros gratuitos. O protótipo atual conserva suas regras até a revisão da economia. |
+| Selo de Patrocínio | 30 dias, dose diária de Lágrimas, giro extra, Varredura em lote, desconto de 10% em Cinzas nas melhorias da base e borda visual. Preços e limites ficam em aberto até testar a economia gratuita. Benefícios de tempo e aparência devem preservar a competição. |
+| Relicário do Tempo | Vigília mensal acumula apenas com atividade útil visível, pausa em ausência e tem teto. A loja indica a virada do mês, saldo e expiração. Resgates predefinidos de Cinzas, Icor, Selos, Marcas, fragmentos e Indumentária. Definir teto e valores com telemetria antes de usar o relógio como fonte de recompensa. |
+
+A primeira trilha após o Canalizador é estender a preparação a Vanguarda e Atirador. A segunda é instrumentar as ações de rotina e fechar a economia local de fragmentos, XP e garantia. Captura, Enclave e Bestas seguem sobre essa economia. Clã, Ninhos cooperativos, Vigília autoritativa, VIP e comércio real exigem identidade do jogador, serviço persistente e validação de transações e prazos no servidor.
 
 ## Questões em aberto
 

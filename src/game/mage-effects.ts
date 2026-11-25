@@ -2,7 +2,7 @@ import type Phaser from 'phaser'
 import { pointFor } from './layout'
 import type { Unit } from '../domain/battle'
 
-const spells = ['spark', 'rain', 'renew', 'chorus', 'void-circle', 'void-pulse']
+const spells = ['spark', 'rain', 'renew', 'chorus', 'void-circle', 'void-pulse', 'thread', 'dew', 'dawn', 'prism', 'tear']
 
 function rune(ink: Phaser.GameObjects.Graphics, x: number, y: number, radius: number, alpha: number, color: number): void {
   ink.lineStyle(2, color, alpha)
@@ -81,6 +81,41 @@ export function animateMageSpell(scene: Phaser.Scene, spell: string, origin: Uni
           rune(ink, x, ground - ring * 10, 19 + phase * 52, (1 - phase) * 0.86, ring % 2 ? 0xc8ffe4 : 0x5ad8dc)
         }
         particles(ink, x, hit, 52, t, 10, 0x79e8d5)
+      } else if (spell === 'thread') {
+        rune(ink, x, ground, 27 + t * 12, 1 - t, 0xffce86)
+        if (source) {
+          const start = source.y - 57
+          ink.lineStyle(2, 0xffebbf, Math.sin(t * Math.PI))
+          ink.lineBetween(source.x, start, x, hit)
+          ink.fillStyle(0xffce86, 1 - t)
+          ink.fillCircle(source.x + (x - source.x) * t, start + (hit - start) * t, 6)
+        }
+        particles(ink, x, hit, 37, t, 12, 0xffc27e)
+      } else if (spell === 'dew' || spell === 'dawn') {
+        const burst = spell === 'dawn'
+        const color = burst ? 0xfff0c8 : 0x94d5e4
+        rune(ink, x, ground, 25 + t * (burst ? 55 : 17), 1 - t, color)
+        ink.fillStyle(color, Math.sin(t * Math.PI) * (burst ? 0.31 : 0.12))
+        ink.fillEllipse(x, hit, burst ? 92 : 42, burst ? 165 : 72)
+        for (let ray = -2; ray <= 2; ray++) {
+          const y = burst ? ground - t * (99 - 10 * Math.abs(ray)) : hit + t * 37 - (ray + 2) * 8
+          ink.lineStyle(burst ? 3 : 2, color, 1 - t)
+          ink.lineBetween(x + 12 * ray, y, x + 12 * ray, y - (burst ? 26 : 7))
+        }
+      } else if (spell === 'prism') {
+        rune(ink, x, ground, 34 + t * 8, 1 - t, 0xaadfff)
+        ink.lineStyle(2, 0xccedff, 1 - t)
+        for (let facet = 0; facet < 6; facet++) {
+          const angle = facet * Math.PI / 3 + t
+          const next = angle + Math.PI / 3
+          ink.lineBetween(x + 27 * Math.cos(angle), hit + 42 * Math.sin(angle), x + 27 * Math.cos(next), hit + 42 * Math.sin(next))
+        }
+      } else if (spell === 'tear') {
+        ink.lineStyle(15, 0x120a29, 1 - t)
+        ink.lineBetween(x - 37, hit + 27, x + 41, hit - 37)
+        ink.lineStyle(3, 0xd48af7, 1 - t)
+        ink.lineBetween(x - 40, hit + 24, x + 43, hit - 39)
+        particles(ink, x, hit, 66, t, 15, 0xaf77fa)
       } else {
         const radius = 34 + t * (ambient ? 112 : 44)
         ink.fillStyle(0x3b1a62, (1 - t) * 0.42)

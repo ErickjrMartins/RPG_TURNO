@@ -17,7 +17,7 @@ npm ci
 npm run dev
 ```
 
-Abra `http://localhost:5173`. Escolha **Novo jogo** para criar um herói ou **Continuar** para recuperar a campanha do mesmo navegador e endereço. Use mouse ou toque para escolher a habilidade e o alvo. Pelo teclado, as teclas **1** a **5** selecionam habilidades disponíveis, e **Tab** e **Enter** operam os controles.
+Abra `http://localhost:5173`. Escolha **Novo jogo** para criar um herói ou **Continuar** para recuperar a campanha do mesmo navegador e endereço. Use mouse ou toque para escolher a habilidade e o alvo. Pelo teclado, as teclas **1** a **7** selecionam habilidades disponíveis, e **Tab** e **Enter** operam os controles.
 
 ## Verificar e executar a build de produção
 
@@ -50,14 +50,14 @@ A build em `dist/` pode ser servida por um host estático em HTTPS. Para jogar o
 
 `GAME_DESIGN.md` registra as decisões atuais, `TECHNICAL_DESIGN.md` descreve a arquitetura planejada e `TASKS.md` acompanha os marcos.
 
-## Jornada da versão 0.3.0
+## Jornada da versão 0.4.0
 
 - **Refúgio de Alvor** permite administrar Conselho, Quartel, Fazenda e Tesouraria. A Fazenda acumula provisões e o Conselho define o limite de nível dos demais edifícios.
 - **Campo de Treino** permite praticar Juras e Abismos com duas formações de seis unidades.
 - **Expedições** se expandem após o Portão Caído. Os capítulos solo têm nota, Primeira Purificação e Varredura. O Ninho é uma simulação local com companheiros controlados pelo jogo.
 - **Relicário** reúne equipamento, Forja, Enxerto, Pregos, Glifos, linhagens e maestria, com atalhos para Indumentárias.
 - **Eventos** inclui login, recompensas de expedição, roleta e recargas simuladas.
-- **Árvore de Habilidades** fica no Refúgio do Canalizador e altera seus feitiços. Os Pântanos e a Cordilheira aparecem nas Expedições depois de Alvor.
+- **Árvore de Habilidades** fica no Refúgio do Canalizador após as Ruínas do Farol. Aprenda com pontos, depois equipe a habilidade na preparação. A Centelha sempre fica no primeiro espaço. Seis ativas, três passivas e o Círculo do Vazio podem entrar em combate. Os Pântanos e a Cordilheira aparecem nas Expedições depois de Alvor.
 - **Praça de Alvor** exibe os avatares de quem entrar no mesmo servidor. Clique numa posição da praça ou use as setas com o mapa focado.
 
 ## Jogar na mesma praça

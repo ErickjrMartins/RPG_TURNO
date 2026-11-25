@@ -1,7 +1,7 @@
 import { Plaza } from './game/plaza'
 import { paintPlaza, plazaView } from './ui/plaza'
 import { type MageNodeId } from './content/mage'
-import { isMageNode, resetMageTree, trainMageNode } from './domain/mage'
+import { isMageNode, resetMageTree, toggleMageSlot, trainMageNode } from './domain/mage'
 import { mageView } from './ui/mage'
 import '@fontsource-variable/cinzel'
 import '@fontsource-variable/dm-sans'
@@ -43,7 +43,7 @@ root.innerHTML = `
     </header>
     <main id="view" aria-busy="true"><p class="loading">Carregando Reinos da Aurora…</p></main>
     <div class="stage-storage" aria-hidden="true"><div id="phaser-stage"></div></div>
-    <footer class="game-footer"><div class="view-width footer-inner"><span>VERSÃO 0.3.0</span><span>SALVAMENTO NESTE NAVEGADOR</span></div></footer>
+    <footer class="game-footer"><div class="view-width footer-inner"><span>VERSÃO 0.4.0</span><span>SALVAMENTO NESTE NAVEGADOR</span></div></footer>
   </div>`
 
 const view = root.querySelector<HTMLElement>('#view')!
@@ -239,6 +239,7 @@ async function continueGame(): Promise<void> {
 
 const mageCues: Record<string, Cue> = {
   spark: 'arcane-spark', rain: 'arcane-rain', renew: 'arcane-renew', chorus: 'arcane-chorus',
+  thread: 'arcane-renew', dew: 'arcane-chorus', dawn: 'arcane-chorus', prism: 'arcane-spark', tear: 'arcane-void',
   'void-circle': 'arcane-void', 'void-pulse': 'arcane-void',
 }
 
@@ -443,6 +444,7 @@ root.addEventListener('click', (event) => {
     case 'mage-tree': if (profile?.hero.classId === 'mage') screen = 'mage'; break
     case 'mage-node': if (isMageNode(value)) mageNode = value; break
     case 'mage-train': void campaign((current) => trainMageNode(current, mageNode)); return
+    case 'mage-slot': void campaign((current) => toggleMageSlot(current, mageNode)); return
     case 'mage-reset': void campaign(resetMageTree); return
     case 'missions': screen = 'missions'; break
     case 'wardrobe': {
@@ -511,7 +513,7 @@ document.addEventListener('keydown', (event) => {
     return
   }
   if (screen !== 'battle' || !battle || busy || paused || event.altKey || event.ctrlKey || event.metaKey) return
-  if (!/^[1-5]$/.test(event.key)) return
+  if (!/^[1-7]$/.test(event.key)) return
   const skill = battle.skills[Number(event.key) - 1]
   if (skill) {
     event.preventDefault()

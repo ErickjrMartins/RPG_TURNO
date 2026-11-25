@@ -1,8 +1,11 @@
 import { zones } from './campaign'
 import type { ClassId } from './classes'
 
-export type TargetRule = 'front' | 'enemy' | 'row' | 'ally' | 'self' | 'allies' | 'enemies'
-export type EffectKind = 'shield' | 'marked' | 'weakened' | 'burning'
+export type TargetRule = 'front' | 'enemy' | 'row' | 'ally' | 'lowest-ally' | 'self' | 'allies' | 'enemies'
+export type EffectKind = 'shield' | 'marked' | 'weakened' | 'burning' | 'mending'
+export const effectNames: Readonly<Record<EffectKind, string>> = {
+  shield: 'Escudo', marked: 'Marca', weakened: 'Fraqueza', burning: 'Queimadura', mending: 'Regeneração',
+}
 
 export type Visual = 'slash' | 'arrow' | 'bolt' | 'blast' | 'heal' | 'healing-field' | 'ward' | 'hex' | 'abyss'
 
@@ -16,8 +19,10 @@ export interface Skill {
   target: TargetRule
   visual?: Visual
   abyss?: true
+  resource?: 'macula'
   damage?: number
   heal?: number
+  healPercent?: number
   energy?: number
   effect?: { kind: EffectKind; strength: number; rounds: number }
 }
@@ -57,7 +62,7 @@ export const abyssSpecs = {
   mage: {
     name: 'Círculo do Vazio', visual: 'abyss', id: 'void-circle', target: 'row',
     icon: '✶', cost: 60, cooldown: 3, abyss: true,
-    description: 'Desacelera a fileira inimiga escolhida e causa dano a suas unidades no fim de cada rodada.',
+    description: 'Desacelera a fileira escolhida por 3 rodadas, pulsa no fim de cada rodada e amplifica em 20% as magias ofensivas contra essa fileira.',
     tint: '#c4a5f9',
   },
 } as const satisfies Record<ClassId, Skill & { tint: string }>
