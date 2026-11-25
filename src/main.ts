@@ -43,7 +43,7 @@ root.innerHTML = `
     </header>
     <main id="view" aria-busy="true"><p class="loading">Carregando Reinos da Aurora…</p></main>
     <div class="stage-storage" aria-hidden="true"><div id="phaser-stage"></div></div>
-    <footer class="game-footer"><div class="view-width footer-inner"><span>VERSÃO 0.4.1</span><span>SALVAMENTO NESTE NAVEGADOR</span></div></footer>
+    <footer class="game-footer"><div class="view-width footer-inner"><span>VERSÃO 0.4.2</span><span>SALVAMENTO NESTE NAVEGADOR</span></div></footer>
   </div>`
 
 const view = root.querySelector<HTMLElement>('#view')!
@@ -555,7 +555,12 @@ render()
 
 if (import.meta.env.PROD && import.meta.env.MODE !== 'portable' && 'serviceWorker' in navigator) {
   const workerUrl = new URL('service-worker.js', document.baseURI)
-  void navigator.serviceWorker.register(workerUrl).catch(() => {
-    // The online build remains playable when the host or browser disallows offline caching.
-  })
+  void navigator.serviceWorker.register(workerUrl)
+    .then(async (registration) => {
+      // A hard reload can open the game without its existing worker controlling the page.
+      if (registration.active && !navigator.serviceWorker.controller) await registration.update()
+    })
+    .catch(() => {
+      // The online build remains playable when the host or browser disallows offline caching.
+    })
 }

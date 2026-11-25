@@ -20,12 +20,17 @@ const cacheName = prefix + ${JSON.stringify(revision)}
 const paths = ${JSON.stringify(files.filter((file) => file !== 'index.html'))}
 const assets = new Set(paths.map((path) => new URL(path, scope).href))
 const home = scope.href
-const homeAlias = new URL('index.html', scope).pathname
+const homeAlias = new URL('index.html', scope)
 
 self.addEventListener('install', (event) => {
   // Sites redirects /index.html. Cache the canonical document without a redirect.
   const document = new Request(home, { cache: 'reload', redirect: 'error' })
-  event.waitUntil(caches.open(cacheName).then((cache) => cache.addAll([document, ...paths])))
+  event.waitUntil(caches.open(cacheName).then(async (cache) => {
+    await cache.addAll([document, ...paths])
+    const legacy = await caches.match(homeAlias.href).catch(() => undefined)
+    // Replace a broken worker even if a tab is still stuck on its navigation.
+    if (legacy?.redirected) await self.skipWaiting()
+  }))
 })
 
 self.addEventListener('activate', (event) => {
@@ -49,7 +54,7 @@ self.addEventListener('fetch', (event) => {
   const { request } = event
   if (request.method !== 'GET') return
   const url = new URL(request.url)
-  if (request.mode === 'navigate' && url.origin === scope.origin && [scope.pathname, homeAlias].includes(url.pathname)) {
+  if (request.mode === 'navigate' && url.origin === scope.origin && [scope.pathname, homeAlias.pathname].includes(url.pathname)) {
     event.respondWith(navigate(request))
     return
   }

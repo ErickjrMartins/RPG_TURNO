@@ -13,6 +13,17 @@ const html = (title) => `<!doctype html><title>${title}</title><h1>${title}</h1>
 let title = 'Versão em cache'
 let status = 200
 let worker
+const legacyWorker = `
+  const page = new URL('index.html', self.registration.scope).href
+  const cacheName = 'reinos-da-aurora:' + self.registration.scope + ':legacy'
+  self.addEventListener('install', (event) => event.waitUntil(caches.open(cacheName).then((cache) => cache.add(page))))
+  self.addEventListener('activate', (event) => event.waitUntil(self.clients.claim()))
+  self.addEventListener('fetch', (event) => {
+    if (event.request.mode === 'navigate') {
+      event.respondWith(caches.match(page, { cacheName }).then((cached) => cached ?? fetch(event.request)))
+    }
+  })
+`
 const server = createServer((request, response) => {
   const path = new URL(request.url, 'http://localhost').pathname
   if (path === '/index.html') return response.writeHead(307, { Location: '/' }).end()
@@ -26,7 +37,8 @@ try {
   await mkdir(join(fixture, 'dist'))
   await writeFile(join(fixture, 'dist/index.html'), html(title))
   execFileSync(process.execPath, [generator], { cwd: fixture })
-  worker = await readFile(join(fixture, 'dist/service-worker.js'))
+  const currentWorker = await readFile(join(fixture, 'dist/service-worker.js'))
+  worker = legacyWorker
   await new Promise((resolve) => server.listen(0, resolve))
   const url = `http://localhost:${server.address().port}/`
   browser = await chromium.launch({ executablePath: process.env.AURORA_CHROMIUM_PATH })
@@ -34,6 +46,18 @@ try {
   const page = await context.newPage()
   await page.goto(url)
   await page.waitForFunction(() => navigator.serviceWorker.controller !== null)
+  const brokenTab = await context.newPage()
+  await assert.rejects(brokenTab.goto(url), /ERR_FAILED/)
+  await brokenTab.close()
+  worker = currentWorker
+  await page.evaluate(async () => {
+    const registration = await navigator.serviceWorker.getRegistration()
+    await registration.update()
+  })
+  await page.waitForFunction(async () => {
+    const keys = await caches.keys()
+    return keys.some((key) => key.startsWith('reinos-da-aurora:')) && keys.every((key) => !key.endsWith(':legacy'))
+  })
 
   title = 'Versão atualizada'
   await page.reload()
@@ -53,7 +77,7 @@ try {
   assert.equal(await page.title(), 'Versão em cache')
   await page.goto(`${url}index.html`)
   assert.equal(await page.title(), 'Versão em cache')
-  console.log('Redirecionamento, atualização online, login e retomada offline verificados.')
+  console.log('Troca do cache antigo, redirecionamento, atualização online, login e retomada offline verificados.')
 } finally {
   await browser?.close()
   await new Promise((resolve) => server.close(resolve))
