@@ -39,6 +39,8 @@ O combate passa por preparação, início de rodada, entrada do jogador, resolu�
 
 O Disparo básico do Atirador e da Atiradora mostra a preparação, a puxada do arco dourado, a soltura e a volta à guarda. A Vida do alvo muda quando a flecha chega. A animação acompanha a pausa e a velocidade de combate. Com **Pular efeitos** ou movimento reduzido, a ação resolve diretamente.
 
+No Golpe Firme, o Vanguarda corre até o adversário selecionado, desfere o corte com arco de fogo, faíscas, fumaça e som no impacto, e corre de volta à posição inicial antes da próxima ação. Os quadros vêm do vídeo de referência. A aparência feminina reaproveita o rosto e o cabelo do retrato de jogo. O retorno usa os quadros de corrida espelhados.
+
 Na Centelha, o Canalizador aponta o cajado, carrega o cristal em azul e dispara uma esfera. A Vida do alvo muda com a pequena explosão no contato. Durante a espera na arena, heróis, tropas, inimigos e chefes vivos respiram em ciclos fora de fase, com os pés apoiados. Tecidos, cabelo, pelo, asas ou vinhas se movem conforme a criatura. A pausa congela o repouso, e **Pular efeitos** e a preferência de movimento reduzido mantêm os sprites estáticos.
 
 As referências de balanceamento propostas são 20 pontos de recurso inicial, 12 gerados no ataque básico, recuperação de 5 por turno e custos de 20 e 35 para as duas habilidades. A duração desejada é de 3–6 rodadas para uma batalha comum e 5–9 para um miniboss. Os valores serão calibrados em testes.

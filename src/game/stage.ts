@@ -11,6 +11,7 @@ import { idleFrames, prepareIdleTexture } from './idle-motion'
 import { animateMageSpell } from './mage-effects'
 import { animateMageRain } from './mage-rain'
 import { animateMageSpark, sparkTexture } from './mage-spark'
+import { animateWarriorStrike, strikeCellSize, strikeTexture } from './warrior-strike'
 import { arenaCamera, arenaHeight, arenaWidth, pointFor } from './layout'
 
 const opponentTextures = ['crawler', 'wisp', 'warden', 'sentry', ...monsterIds] as const
@@ -33,6 +34,8 @@ export class BootScene extends Phaser.Scene {
       for (const key of [shotTexture(form), sparkTexture(form)]) {
         this.load.spritesheet(key, assetUrl(`${key}.webp`), { frameWidth: attackCellSize, frameHeight: attackCellSize })
       }
+      const key = strikeTexture(form)
+      this.load.spritesheet(key, assetUrl(`${key}.webp`), { frameWidth: strikeCellSize, frameHeight: strikeCellSize })
     }
   }
 
@@ -55,7 +58,7 @@ interface Actor {
   idle?: string | null
 }
 
-export type AnimatedAttack = 'shot' | 'spark' | 'rain'
+export type AnimatedAttack = 'strike' | 'shot' | 'spark' | 'rain'
 
 export class ArenaScene extends Phaser.Scene {
   private readonly actors = new Map<string, Actor>()
@@ -84,15 +87,16 @@ export class ArenaScene extends Phaser.Scene {
     this.idleEnabled = false
   }
 
-  playHeroAttack(spell: AnimatedAttack, form: Presentation, targets: readonly Unit[], speed: number, impact: () => void): boolean {
+  playHeroAttack(spell: AnimatedAttack, form: Presentation, targets: readonly Unit[], speed: number, impact: () => void, onFinish?: () => void): boolean {
     const hero = this.actors.get('hero')
-    const texture = spell === 'shot' ? shotTexture(form) : sparkTexture(form)
+    const texture = spell === 'strike' ? strikeTexture(form) : spell === 'shot' ? shotTexture(form) : sparkTexture(form)
     const target = targets[0]
     if (!hero || !target || !this.textures.exists(texture)) return false
     this.stopHeroAttack()
     this.restoreIdleBase(hero)
-    const finished = () => { this.attack = undefined }
-    const playback = spell === 'rain' ? animateMageRain(this, hero.sprite, form, targets, speed, impact, finished)
+    const finished = () => { this.attack = undefined; onFinish?.() }
+    const playback = spell === 'strike' ? animateWarriorStrike(this, hero, form, target, speed, impact, finished)
+      : spell === 'rain' ? animateMageRain(this, hero.sprite, form, targets, speed, impact, finished)
       : (spell === 'shot' ? animateArcherShot : animateMageSpark)(this, hero.sprite, form, target, speed, impact, finished)
     this.attack = { spell, playback }
     return true
@@ -175,7 +179,7 @@ export class ArenaScene extends Phaser.Scene {
         }
       }
       if (event.visual && !customAttack) this.skillEffect(hero, effectUnits, event, speed)
-      if (event.kind === 'action' && event.visual === 'slash' && target && event.actor !== target.id) {
+      if (!customAttack && event.kind === 'action' && event.visual === 'slash' && target && event.actor !== target.id) {
         const actor = units.find((unit) => unit.id === event.actor)
         const entry = actor && this.actors.get(actor.id)
         if (actor && entry) {

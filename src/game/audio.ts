@@ -1,6 +1,8 @@
-export type Cue = 'select' | 'hit' | 'heal' | 'victory' | 'defeat' | 'arcane-spark' | 'arcane-rain' | 'arcane-renew' | 'arcane-chorus' | 'arcane-void'
+import { assetUrl } from '../assets'
 
-const notes: Record<Cue, number[]> = {
+export type Cue = 'select' | 'hit' | 'heal' | 'victory' | 'defeat' | 'arcane-spark' | 'arcane-rain' | 'arcane-renew' | 'arcane-chorus' | 'arcane-void' | 'warrior-strike'
+
+const notes: Record<Exclude<Cue, 'warrior-strike'>, number[]> = {
   select: [392, 523],
   hit: [165, 110],
   heal: [330, 440, 554],
@@ -15,7 +17,12 @@ const notes: Record<Cue, number[]> = {
 
 export class GameAudio {
   private context?: AudioContext
+  private readonly strike = new Audio(assetUrl('warrior-strike.mp3'))
   enabled = this.loadPreference()
+
+  constructor() {
+    this.strike.preload = this.enabled ? 'auto' : 'none'
+  }
 
   private loadPreference(): boolean {
     try {
@@ -27,6 +34,7 @@ export class GameAudio {
 
   toggle(): void {
     this.enabled = !this.enabled
+    if (!this.enabled) this.strike.pause()
     try {
       localStorage.setItem('aurora-audio', this.enabled ? 'on' : 'off')
     } catch {
@@ -36,7 +44,13 @@ export class GameAudio {
   }
 
   play(cue: Cue): void {
-    if (!this.enabled || typeof AudioContext === 'undefined') return
+    if (!this.enabled) return
+    if (cue === 'warrior-strike') {
+      this.strike.currentTime = 0
+      void this.strike.play().catch(() => this.play('hit'))
+      return
+    }
+    if (typeof AudioContext === 'undefined') return
     try {
       const context = this.context ??= new AudioContext()
       if (context.state === 'suspended') void context.resume().catch(() => undefined)

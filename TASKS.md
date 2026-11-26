@@ -1,6 +1,12 @@
 # TASKS — Reinos da Aurora
 
-> Versão 0.4.6. Marque [x] após implementar e verificar no repositório.
+> Versão 0.4.7. Marque [x] após implementar e verificar no repositório.
+
+## Golpe Firme do Vanguarda
+
+- [x] Recortar os quadros de corrida e corte do vídeo de referência e adaptar a aparência feminina.
+- [x] Sincronizar o dano com o golpe e completar o retorno acelerado antes da próxima ação.
+- [x] Verificar a animação, pausa e pulo de efeitos no Chromium em desktop e celular.
 
 ## Testes de progressão e Chuva Astral
 
