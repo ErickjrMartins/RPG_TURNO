@@ -1,6 +1,12 @@
 # TASKS — Reinos da Aurora
 
-> Versão 0.4.7. Marque [x] após implementar e verificar no repositório.
+> Versão 0.4.8. Marque [x] após implementar e verificar no repositório.
+
+## Efeitos de combate da versão 0.4.8
+
+- [x] Verificar a esfera maior da Centelha, as descargas durante o voo e a explosão no contato.
+- [x] Verificar duas explosões separadas no chão da Chuva Astral enquanto outros meteoros ainda caem.
+- [x] Verificar que a lâmina e o arco de fogo do Golpe Firme passam da antiga borda do sprite.
 
 ## Golpe Firme do Vanguarda
 
