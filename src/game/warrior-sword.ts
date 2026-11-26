@@ -1,59 +1,53 @@
 import type Phaser from 'phaser'
 
-// Grip positions in the source poses where the video no longer contains the whole blade.
 const grip: Readonly<Record<number, readonly [x: number, y: number, angle: number]>> = {
-  16: [218, 119, -0.14], 17: [218, 115, -0.25], 18: [218, 115, -0.30],
-  19: [218, 110, -0.34], 20: [217, 107, -0.37], 21: [216, 109, -0.38],
-  22: [214, 107, -0.39], 23: [208, 103, -0.45], 24: [166, 128, -0.08],
+  14: [214, 107, -0.39],
+  15: [208, 103, -0.45],
+  16: [166, 128, -0.08],
 }
 
-function cubic(a: number, b: number, c: number, d: number, t: number): number {
-  const u = 1 - t
-  return a * u ** 3 + 3 * b * u ** 2 * t + 3 * c * u * t ** 2 + d * t ** 3
-}
-
-function tangent(a: number, b: number, c: number, d: number, t: number): number {
-  const u = 1 - t
-  return (b - a) * u ** 2 + 2 * (c - b) * u * t + (d - c) * t ** 2
-}
+const glow = [
+  { width: 24, color: 0xff7a19, alpha: 0.38 },
+  { width: 15, color: 0xff922e, alpha: 0.94 },
+  { width: 8, color: 0xffd16a, alpha: 1 },
+  { width: 3.5, color: 0xfff4af, alpha: 0.95 },
+]
 
 export function paintWarriorSword(ink: Phaser.GameObjects.Graphics, sprite: Phaser.GameObjects.Image, time: number, impactAt: number): void {
   const pose = grip[Number(sprite.frame.name)]
+  const after = time - impactAt
+  const sweep = Math.min(1, Math.max(0, (after + 84) / 84))
+  const flame = Math.min(1, sweep * 2.6) * Math.max(0, 1 - Math.max(0, after - 24) / 195)
+  if (!pose && flame === 0) return
   const position = (x: number, y: number) => ({
     x: sprite.x + (x - sprite.width / 2) * sprite.scaleX,
     y: sprite.y + (y - sprite.height) * sprite.scaleY,
   })
-  const after = time - impactAt
-  const flame = Math.min(1, Math.max(0, (after + 48) / 48)) * Math.max(0, 1 - Math.max(0, after - 76) / 159)
 
   if (flame > 0) {
-    const advance = Math.min(1, Math.max(0, (after + 34) / 90))
-    const bend = 9 * advance
-    const ribbons = [
-      { width: 34, color: 0xff7816, alpha: 0.26, offset: 0 },
-      { width: 22, color: 0xff932d, alpha: 0.91, offset: 0 },
-      { width: 11, color: 0xffdc72, alpha: 1, offset: 2 },
-      { width: 4, color: 0xfff3b6, alpha: 0.9, offset: 4 },
-      { width: 3, color: 0xffbb54, alpha: 0.76, offset: -12 },
-    ]
-    for (const ribbon of ribbons) {
-      const leading = []
-      const trailing = []
-      for (let i = 0; i <= 22; i++) {
-        const t = i / 22
-        const x = cubic(165, 241, 347 + bend, 297 + bend, t)
-        const y = cubic(173, 211, 159, 101 - bend, t)
-        const wave = Math.sin(t * 24 - time * 0.064) * 3.4 * Math.sin(t * Math.PI)
-        const width = ribbon.width * Math.sin(t * Math.PI) ** 0.78 * (0.82 + 0.18 * Math.sin(t * 15 + time * 0.05))
-        const tx = tangent(165, 241, 347 + bend, 297 + bend, t)
-        const ty = tangent(173, 211, 159, 101 - bend, t)
-        const length = Math.hypot(tx, ty)
-        const dx = -ty / length
-        const dy = tx / length
-        leading.push(position(x + dx * (ribbon.offset + width), y + wave + dy * (ribbon.offset + width)))
-        trailing.push(position(x + dx * (ribbon.offset - width), y + wave + dy * (ribbon.offset - width)))
+    const tail = 2.95 - Math.max(0, after - 56) * 0.0065
+    const tip = 2.95 - sweep * 3.52
+    const curve = Array.from({ length: 33 }, (_, i) => {
+      const t = i / 32
+      const angle = tail + (tip - tail) * t
+      const bend = Math.sin(t * 21 - time * 0.061) * 2.6 * Math.sin(t * Math.PI)
+      const nx = 64 * Math.cos(angle)
+      const ny = 155 * Math.sin(angle)
+      const length = Math.hypot(nx, ny)
+      return {
+        x: 160 + 155 * Math.cos(angle),
+        y: 128 + 64 * Math.sin(angle) + bend,
+        nx: nx / length,
+        ny: ny / length,
+        taper: Math.sin(t * Math.PI) ** 0.67 * (0.85 + 0.15 * Math.sin(t * 12 + time * 0.052)),
       }
-      ink.fillStyle(ribbon.color, ribbon.alpha * flame).fillPoints([...leading, ...trailing.reverse()], true)
+    })
+    for (const layer of glow) {
+      const edge = (side: number) => curve.map(({ x, y, nx, ny, taper }) => {
+        const offset = taper * layer.width * side
+        return position(x + nx * offset, y + ny * offset)
+      })
+      ink.fillStyle(layer.color, layer.alpha * flame).fillPoints([...edge(1), ...edge(-1).reverse()], true)
     }
   }
 

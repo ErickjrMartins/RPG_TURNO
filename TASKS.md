@@ -1,6 +1,12 @@
 # TASKS — Reinos da Aurora
 
-> Versão 0.4.8. Marque [x] após implementar e verificar no repositório.
+> Versão 0.4.9. Marque [x] após implementar e verificar no repositório.
+
+## Golpe Firme e Investida
+
+- [x] Compor um único arco de fogo completo no Golpe Firme.
+- [x] Integrar corrida, salto e corte da Investida com sprites do vídeo SALTO GOLPE.
+- [x] Coordenar som dos passos, grito de ataque e explosão no impacto.
 
 ## Efeitos de combate da versão 0.4.8
 

@@ -11,7 +11,7 @@ import { idleFrames, prepareIdleTexture } from './idle-motion'
 import { animateMageSpell } from './mage-effects'
 import { animateMageRain } from './mage-rain'
 import { animateMageSpark, sparkTexture } from './mage-spark'
-import { animateWarriorStrike, strikeCellSize, strikeTexture } from './warrior-strike'
+import { animateWarriorAttack, warriorCellHeight, warriorCellWidth, warriorTexture, type WarriorAttack, type WarriorCue } from './warrior-strike'
 import { arenaCamera, arenaHeight, arenaWidth, pointFor } from './layout'
 
 const opponentTextures = ['crawler', 'wisp', 'warden', 'sentry', ...monsterIds] as const
@@ -34,8 +34,10 @@ export class BootScene extends Phaser.Scene {
       for (const key of [shotTexture(form), sparkTexture(form)]) {
         this.load.spritesheet(key, assetUrl(`${key}.webp`), { frameWidth: attackCellSize, frameHeight: attackCellSize })
       }
-      const key = strikeTexture(form)
-      this.load.spritesheet(key, assetUrl(`${key}.webp`), { frameWidth: strikeCellSize, frameHeight: strikeCellSize })
+      for (const move of ['strike', 'charge'] as const) {
+        const key = warriorTexture(move, form)
+        this.load.spritesheet(key, assetUrl(`${key}.webp`), { frameWidth: warriorCellWidth[move], frameHeight: warriorCellHeight })
+      }
     }
   }
 
@@ -58,7 +60,13 @@ interface Actor {
   idle?: string | null
 }
 
-export type AnimatedAttack = 'strike' | 'shot' | 'spark' | 'rain'
+export type AnimatedAttack = WarriorAttack | 'shot' | 'spark' | 'rain'
+
+interface AttackCallbacks {
+  impact(): void
+  finish?(): void
+  playCue?(cue: WarriorCue): void
+}
 
 export class ArenaScene extends Phaser.Scene {
   private readonly actors = new Map<string, Actor>()
@@ -87,15 +95,17 @@ export class ArenaScene extends Phaser.Scene {
     this.idleEnabled = false
   }
 
-  playHeroAttack(spell: AnimatedAttack, form: Presentation, targets: readonly Unit[], speed: number, impact: () => void, onFinish?: () => void): boolean {
+  playHeroAttack(spell: AnimatedAttack, form: Presentation, targets: readonly Unit[], speed: number, callbacks: AttackCallbacks): boolean {
     const hero = this.actors.get('hero')
-    const texture = spell === 'strike' ? strikeTexture(form) : spell === 'shot' ? shotTexture(form) : sparkTexture(form)
+    const warrior = spell === 'strike' || spell === 'charge'
+    const texture = warrior ? warriorTexture(spell, form) : spell === 'shot' ? shotTexture(form) : sparkTexture(form)
     const target = targets[0]
     if (!hero || !target || !this.textures.exists(texture)) return false
     this.stopHeroAttack()
     this.restoreIdleBase(hero)
-    const finished = () => { this.attack = undefined; onFinish?.() }
-    const playback = spell === 'strike' ? animateWarriorStrike(this, hero, form, target, speed, impact, finished)
+    const { impact, finish, playCue } = callbacks
+    const finished = () => { this.attack = undefined; finish?.() }
+    const playback = warrior ? animateWarriorAttack(this, hero, spell, form, target, speed, impact, finished, playCue)
       : spell === 'rain' ? animateMageRain(this, hero.sprite, form, targets, speed, impact, finished)
       : (spell === 'shot' ? animateArcherShot : animateMageSpark)(this, hero.sprite, form, target, speed, impact, finished)
     this.attack = { spell, playback }
