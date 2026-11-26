@@ -49,7 +49,7 @@ root.innerHTML = `
     </header>
     <main id="view" aria-busy="true"><p class="loading">Carregando Reinos da Aurora…</p></main>
     <div class="stage-storage" aria-hidden="true"><div id="phaser-stage"></div></div>
-    <footer class="game-footer"><div class="view-width footer-inner"><span>VERSÃO 0.4.8</span><span>SALVAMENTO NESTE NAVEGADOR</span></div></footer>
+    <footer class="game-footer"><div class="view-width footer-inner"><span>VERSÃO 0.4.9</span><span>SALVAMENTO NESTE NAVEGADOR</span></div></footer>
   </div>`
 
 const view = root.querySelector<HTMLElement>('#view')!
@@ -356,7 +356,8 @@ function record(events: readonly BattleEvent[]): void {
   history = [...history, ...events.map((event) => event.text)].slice(-30)
   const spell = battle?.classId === 'mage' && events.find((event) => event.actor === 'hero' && event.spell)?.spell
   const cue = spell ? mageCues[spell] : undefined
-  if (events.some((event) => event.actor === 'hero' && event.kind === 'action' && event.spell === 'strike')) audio.play('warrior-strike')
+  const warriorMove = events.find((event) => event.actor === 'hero' && event.kind === 'action' && (event.spell === 'strike' || event.spell === 'charge'))?.spell
+  if (warriorMove) audio.play(warriorMove === 'charge' ? 'warrior-blast' : 'warrior-strike')
   else if (cue) audio.play(cue)
   else if (events.some((event) => event.kind === 'heal')) audio.play('heal')
   else if (events.some((event) => event.kind === 'damage')) audio.play('hit')
@@ -408,19 +409,25 @@ function presentTurn(next: ReturnType<typeof playerAction>): void {
 function act(targetId: string): void {
   if (!battle || busy || paused || battle.phase !== 'player') return
   try {
-    const next = playerAction(battle, selected, targetId, overcharge)
-    if ((selected === 'strike' || selected === 'shot' || selected === 'spark' || selected === 'rain') && profile && arena && !skip && !reducedMotion.matches) {
-      const targetIds = next.events.find((event) => event.kind === 'action' && event.actor === 'hero' && event.spell === selected)?.targets
+    const spell = selected
+    const next = playerAction(battle, spell, targetId, overcharge)
+    const warrior = spell === 'strike' || spell === 'charge'
+    if ((warrior || spell === 'shot' || spell === 'spark' || spell === 'rain') && profile && arena && !skip && !reducedMotion.matches) {
+      const targetIds = next.events.find((event) => event.kind === 'action' && event.actor === 'hero' && event.spell === spell)?.targets
       const targets = battle.units.filter((unit) => targetIds?.includes(unit.id))
       const impact = () => {
         attackImpact = undefined
         presentTurn(next)
       }
-      const finishBeforeNextAction = selected === 'strike' || selected === 'rain'
-      if (arena.playHeroAttack(selected, profile.hero.presentation, targets, speed, impact, finishBeforeNextAction ? () => {
-        attackFinishing = false
-        schedule()
-      } : undefined)) {
+      const finishBeforeNextAction = warrior || spell === 'rain'
+      if (arena.playHeroAttack(spell, profile.hero.presentation, targets, speed, {
+        impact,
+        finish: finishBeforeNextAction ? () => {
+          attackFinishing = false
+          schedule()
+        } : undefined,
+        playCue: (cue) => audio.play(cue),
+      })) {
         attackImpact = impact
         attackFinishing = finishBeforeNextAction
         battle = { ...battle, phase: 'resolution' }

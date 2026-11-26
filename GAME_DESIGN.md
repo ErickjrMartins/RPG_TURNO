@@ -39,7 +39,9 @@ O combate passa por preparação, início de rodada, entrada do jogador, resolu�
 
 O Disparo básico do Atirador e da Atiradora mostra a preparação, a puxada do arco dourado, a soltura e a volta à guarda. A Vida do alvo muda quando a flecha chega. A animação acompanha a pausa e a velocidade de combate. Com **Pular efeitos** ou movimento reduzido, a ação resolve diretamente.
 
-No Golpe Firme, o Vanguarda corre até o adversário selecionado, desfere o corte com arco de fogo, faíscas, fumaça e som no impacto, e corre de volta à posição inicial antes da próxima ação. Os quadros vêm do vídeo de referência. A ponta da espada e a continuação do arco de fogo são desenhadas na arena, além da borda do sprite. A aparência feminina reaproveita o rosto e o cabelo do retrato de jogo. O retorno usa os quadros de corrida espelhados.
+No Golpe Firme, o Vanguarda corre até o adversário selecionado, desfere o corte com um arco de fogo, faíscas e som no impacto, e corre de volta à posição inicial antes da próxima ação. A arena desenha o arco inteiro e a ponta da espada depois de compor as poses recortadas do vídeo de referência. A aparência feminina reaproveita o rosto e o cabelo do retrato de jogo. O retorno usa os quadros de corrida espelhados.
+
+Na Investida, o Vanguarda corre, salta e desce a espada junto do alvo. As poses vêm de SALTO GOLPE.mp4. Os sons marcam as pisadas durante a corrida, o grito antes do corte e a explosão no chão. A Vida do alvo muda no impacto da espada e a próxima ação começa depois que o Vanguarda retorna à formação.
 
 Na Centelha, o Canalizador carrega o cajado e dispara uma esfera azul de núcleo luminoso com descargas elétricas ao redor. Seu raio visível principal é de 31 unidades na escala da arena. A Vida do alvo muda quando a esfera explode no contato. Durante a espera na arena, heróis, tropas, inimigos e chefes vivos respiram em ciclos fora de fase, com os pés apoiados. Tecidos, cabelo, pelo, asas ou vinhas se movem conforme a criatura. A pausa congela o repouso, e **Pular efeitos** e a preferência de movimento reduzido mantêm os sprites estáticos.
 
