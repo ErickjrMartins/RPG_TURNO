@@ -49,7 +49,7 @@ root.innerHTML = `
     </header>
     <main id="view" aria-busy="true"><p class="loading">Carregando Reinos da Aurora…</p></main>
     <div class="stage-storage" aria-hidden="true"><div id="phaser-stage"></div></div>
-    <footer class="game-footer"><div class="view-width footer-inner"><span>VERSÃO 0.4.6</span><span>SALVAMENTO NESTE NAVEGADOR</span></div></footer>
+    <footer class="game-footer"><div class="view-width footer-inner"><span>VERSÃO 0.4.7</span><span>SALVAMENTO NESTE NAVEGADOR</span></div></footer>
   </div>`
 
 const view = root.querySelector<HTMLElement>('#view')!
@@ -83,6 +83,7 @@ let speed = 1
 let skip = reducedMotion.matches
 let paused = false
 let attackImpact: (() => void) | undefined
+let strikeInProgress = false
 let timer: number | undefined
 let building: BuildingId = 'barracks'
 let earnedGold = 0
@@ -183,6 +184,7 @@ function render(focusHeading = false, events: readonly BattleEvent[] = []): void
   }
   if (screen !== 'battle') {
     attackImpact = undefined
+    strikeInProgress = false
     arena?.stopHeroAttack()
     if (arena?.scene.isActive()) arena.scene.pause()
   }
@@ -293,6 +295,7 @@ function enterBattle(): void {
   if (!profile) return
   stopTimer()
   attackImpact = undefined
+  strikeInProgress = false
   arena?.clear()
   battle = startBattle(profile)
   selected = battle.skills[0]!.id
@@ -353,7 +356,8 @@ function record(events: readonly BattleEvent[]): void {
   history = [...history, ...events.map((event) => event.text)].slice(-30)
   const spell = battle?.classId === 'mage' && events.find((event) => event.actor === 'hero' && event.spell)?.spell
   const cue = spell ? mageCues[spell] : undefined
-  if (cue) audio.play(cue)
+  if (events.some((event) => event.actor === 'hero' && event.kind === 'action' && event.spell === 'strike')) audio.play('warrior-strike')
+  else if (cue) audio.play(cue)
   else if (events.some((event) => event.kind === 'heal')) audio.play('heal')
   else if (events.some((event) => event.kind === 'damage')) audio.play('hit')
 }
@@ -374,7 +378,7 @@ function saveResult(): void {
 
 function schedule(): void {
   stopTimer()
-  if (paused || attackImpact || screen !== 'battle' || !battle || battle.phase === 'player') return
+  if (paused || attackImpact || strikeInProgress || screen !== 'battle' || !battle || battle.phase === 'player') return
   timer = window.setTimeout(() => {
     if (!battle || paused || screen !== 'battle') return
     if (battle.phase === 'victory' || battle.phase === 'defeat') {
@@ -405,15 +409,20 @@ function act(targetId: string): void {
   if (!battle || busy || paused || battle.phase !== 'player') return
   try {
     const next = playerAction(battle, selected, targetId, overcharge)
-    if ((selected === 'shot' || selected === 'spark' || selected === 'rain') && profile && arena && !skip && !reducedMotion.matches) {
+    if ((selected === 'strike' || selected === 'shot' || selected === 'spark' || selected === 'rain') && profile && arena && !skip && !reducedMotion.matches) {
       const targetIds = next.events.find((event) => event.kind === 'action' && event.actor === 'hero' && event.spell === selected)?.targets
       const targets = battle.units.filter((unit) => targetIds?.includes(unit.id))
       const impact = () => {
         attackImpact = undefined
         presentTurn(next)
       }
-      if (arena.playHeroAttack(selected, profile.hero.presentation, targets, speed, impact)) {
+      const strike = selected === 'strike'
+      if (arena.playHeroAttack(selected, profile.hero.presentation, targets, speed, impact, strike ? () => {
+        strikeInProgress = false
+        schedule()
+      } : undefined)) {
         attackImpact = impact
+        strikeInProgress = strike
         battle = { ...battle, phase: 'resolution' }
         render()
         return

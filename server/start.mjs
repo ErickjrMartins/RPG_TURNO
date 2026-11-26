@@ -17,6 +17,7 @@ const types = {
   '.css': 'text/css; charset=utf-8',
   '.png': 'image/png',
   '.webp': 'image/webp',
+  '.mp3': 'audio/mpeg',
   '.woff2': 'font/woff2',
   '.txt': 'text/plain; charset=utf-8',
 }

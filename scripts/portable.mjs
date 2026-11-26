@@ -3,7 +3,7 @@ import { basename, dirname, extname, join } from 'node:path'
 
 const build = 'work/portable-build'
 const destination = process.argv[2] ?? 'dist/reinos-da-aurora.html'
-const mime = { '.png': 'image/png', '.webp': 'image/webp', '.woff2': 'font/woff2' }
+const mime = { '.png': 'image/png', '.webp': 'image/webp', '.woff2': 'font/woff2', '.mp3': 'audio/mpeg' }
 
 async function dataUrl(path) {
   const mediaType = mime[extname(path)]
@@ -33,7 +33,7 @@ css = css.replace(/url\((["']?)([^"')]+)\1\)/g, (declaration, _quote, url) => (
 const cssAssets = new Set([...cssUrls.keys()].map((url) => basename(url)))
 const assets = {}
 for (const name of await readdir(join(build, 'assets'))) {
-  if (name.endsWith('.webp') && !cssAssets.has(name)) {
+  if (/\.(webp|mp3)$/.test(name) && !cssAssets.has(name)) {
     assets[name] = await dataUrl(join(build, 'assets', name))
   }
 }
