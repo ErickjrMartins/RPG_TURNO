@@ -37,6 +37,24 @@ img { max-width: 100%; }
   background: #141c20;
 }
 .topbar-inner { min-height: 76px; display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+.topbar-actions { display: flex; align-items: center; gap: clamp(4px, 1.4vw, 12px); }
+.test-admin-button[hidden] { display: none; }
+.test-admin { padding-block: clamp(20px, 4vw, 45px); }
+.test-admin header { margin-block: 18px; }
+.test-admin header p, .test-admin-note { color: var(--muted); }
+.test-admin-note { border-inline-start: 2px solid var(--gold); padding-inline-start: 12px; }
+.test-admin-notice { color: #bfe7be; }
+.test-admin-notice:empty { display: none; }
+.test-admin-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr)); gap: 16px; }
+.test-admin-card { padding: clamp(16px, 3vw, 28px); align-self: start; }
+.test-admin-card fieldset { min-inline-size: 0; border: 0; margin: 0; padding: 15px 0 0; }
+.test-admin-card fieldset, .test-admin-card label { display: grid; gap: 10px; }
+.test-admin-card label { color: var(--muted); }
+.test-admin-card input, .test-admin-card select {
+  width: 100%; min-height: 44px; padding: 6px 10px; color: inherit;
+  border: 1px solid var(--line); border-radius: 4px; background: #12191e; font: inherit;
+}
+.test-admin-card .button { margin-top: 6px; }
 .brand, .audio-button, .back {
   display: inline-flex;
   align-items: center;

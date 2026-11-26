@@ -1,6 +1,13 @@
 # TASKS — Reinos da Aurora
 
-> Versão 0.4.0. Marque [x] após implementar e verificar no repositório.
+> Versão 0.4.6. Marque [x] após implementar e verificar no repositório.
+
+## Testes de progressão e Chuva Astral
+
+- [x] Painel de testes para nível do herói e das tropas, ouro, provisões, relíquias, materiais e indumentárias.
+- [x] Validar formação, reinício do combate após alterar níveis, retomada do save e bloqueio para visitantes.
+- [x] Animar a Chuva Astral com gelo azul e sincronizar o dano da fileira com o impacto.
+- [x] Verificar a animação no Chromium nas duas aparências do Canalizador, em desktop e tela móvel.
 
 ## M0 — Fundação
 - [x] Inspecionar estrutura de arquivos e inicializar package.json/scripts.

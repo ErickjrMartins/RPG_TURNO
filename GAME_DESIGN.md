@@ -61,7 +61,7 @@ A câmera parte de uma escala mais aberta e pulsa durante a abertura. Traçados,
 
 O Canalizador acessa a árvore após as Ruínas do Farol. Recebe dois pontos no nível inicial e dois por nível de herói. Cada nível de nó custa um ponto e verifica os pré-requisitos. O Refúgio permite redistribuir pontos e preparar até seis ativas, três passivas e o Círculo do Vazio. A Centelha fica no primeiro espaço para recuperar Foco. O Núcleo de Foco funciona como fundamento da árvore. Os quatro feitiços iniciais e as três passivas existentes preservam a configuração inicial ao migrar da versão 0.3.0.
 
-Na arena, a vida atual e máxima aparece junto à unidade e no painel do herói. Aliados usam verde, inimigos usam vermelho e escudos têm contorno azul. A Centelha viaja até um alvo. A Chuva Astral projeta meteoros sobre a fileira, a Renovação envolve o aliado em luz ascendente, o Coro Vital pulsa sobre toda a formação e o Círculo do Vazio forma fendas e sigilos sobre a área. Cada feitiço tem ícone e som próprios e a opção de pular efeitos preserva a resolução do combate.
+Na arena, a vida atual e máxima aparece junto à unidade e no painel do herói. Aliados usam verde, inimigos usam vermelho e escudos têm contorno azul. A Centelha viaja até um alvo. A Chuva Astral derruba cristais de gelo azul sobre os adversários da fileira atingida. Os cristais aceleram na queda e estilhaçam no momento em que o dano aparece. A Renovação envolve o aliado em luz ascendente, o Coro Vital pulsa sobre toda a formação e o Círculo do Vazio forma fendas e sigilos sobre a área. Cada feitiço tem ícone e som próprios e a opção de pular efeitos preserva a resolução do combate.
 
 ### Exploração
 
@@ -241,6 +241,10 @@ As **Bestas de Selamento** têm trilha única de nível e estrelas, com Icor e S
 | Relicário do Tempo | Vigília mensal acumula apenas com atividade útil visível, pausa em ausência e tem teto. A loja indica a virada do mês, saldo e expiração. Resgates predefinidos de Cinzas, Icor, Selos, Marcas, fragmentos e Indumentária. Definir teto e valores com telemetria antes de usar o relógio como fonte de recompensa. |
 
 A primeira trilha após o Canalizador é estender a preparação a Vanguarda e Atirador. A segunda é instrumentar as ações de rotina e fechar a economia local de fragmentos, XP e garantia. Captura, Enclave e Bestas seguem sobre essa economia. Clã, Ninhos cooperativos, Vigília autoritativa, VIP e comércio real exigem identidade do jogador, serviço persistente e validação de transações e prazos no servidor.
+
+## Painel de testes
+
+A conta proprietária da prévia pode abrir **Testes** na barra superior depois de criar ou carregar um herói. O painel edita níveis do herói e das tropas recrutadas, ouro e provisões, e concede relíquias, materiais e aparências do catálogo. A operação usa o salvamento local da campanha, com os mesmos controles de revisão. A redução do nível do Canalizador requer pontos gastos compatíveis com o novo nível. No combate, o painel abre durante o turno do jogador. Uma mudança de nível reinicia o mesmo encontro na primeira rodada ao voltar, com a mesma semente e sem conceder recompensa adicional.
 
 ## Questões em aberto
 

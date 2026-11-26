@@ -12,6 +12,7 @@ import { addRelic, addStock, equipRelic, gearBonuses, isRelicary, isRelicId, new
 import { startingMageLoadout, validMageLoadout, validMageRanks, type MageLoadout, type MageRanks } from './mage'
 
 export const schemaVersion = 8
+export const xpPerLevel = 100
 
 export interface Hero {
   name: string
@@ -58,7 +59,7 @@ export function validName(name: string): boolean {
 }
 
 export function levelFor(xp: number): number {
-  return Math.floor(xp / 100) + 1
+  return Math.floor(xp / xpPerLevel) + 1
 }
 
 export function attributesFor(profile: Profile) {

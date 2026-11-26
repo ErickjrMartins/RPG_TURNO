@@ -84,10 +84,53 @@ async function verifySpark(form, isMobile = false) {
   }
 }
 
+async function verifyRain(form, isMobile = false) {
+  const context = await browser.newContext({ reducedMotion: 'no-preference', ...(isMobile ? { viewport: { width: 390, height: 844 }, isMobile: true } : {}) })
+  const page = await context.newPage()
+  const errors = []
+  page.on('pageerror', (error) => errors.push(error.message))
+  try {
+    await enterArena(page, form)
+    await page.locator('[data-action="skill"][data-value="rain"]').click()
+    const phases = await page.evaluate(() => new Promise((resolve) => {
+      const ctx = document.querySelector('.arena-canvas canvas').getContext('2d')
+      const meter = (name) => Number(document.querySelector(`[aria-label="Vida de ${name}"]`).getAttribute('aria-valuenow'))
+      const health = meter('Rastejante de Pedra')
+      const other = meter('Vulto do Véu')
+      const count = (x, y, width, height) => ctx.getImageData(x, y, width, height).data.filter((value, i, data) =>
+        i % 4 === 2 && value > 226 && data[i - 2] < 140 && data[i - 1] > 130 && data[i + 1] > 170).length
+      const boxes = [[651, 28, 124, 69], [670, 102, 141, 85], [698, 175, 90, 58]]
+      const base = boxes.map((box) => count(...box))
+      document.querySelector('.target[data-value="crawler"]').click()
+      const state = { above: false, falling: false, impact: false, otherUnchanged: true }
+      const deadline = performance.now() + 1700
+      function scan() {
+        state.otherUnchanged &&= other === meter('Vulto do Véu')
+        if (meter('Rastejante de Pedra') === health) {
+          state.above ||= count(...boxes[0]) > base[0] + 15
+          state.falling ||= count(...boxes[1]) > base[1] + 15
+        } else {
+          state.impact ||= count(...boxes[2]) > base[2] + 10
+        }
+        if ((state.above && state.falling && state.impact) || performance.now() > deadline) resolve(state)
+        else requestAnimationFrame(scan)
+      }
+      scan()
+    }))
+    assert.deepEqual(phases, { above: true, falling: true, impact: true, otherUnchanged: true }, `Chuva Astral: ${form}`)
+    await page.getByText(/usou Chuva Astral\./).first().waitFor()
+    assert.deepEqual(errors, [])
+  } finally {
+    await context.close()
+  }
+}
+
 try {
   await verifySpark('Masculina')
   await verifySpark('Feminina', true)
-  console.log('Centelha azul nas duas aparências, impacto, repouso, pausa e pulo de efeitos verificados no Chromium.')
+  await verifyRain('Masculina')
+  await verifyRain('Feminina', true)
+  console.log('Centelha e Chuva Astral azuis nas duas aparências, impacto, repouso, pausa e pulo de efeitos verificados no Chromium.')
 } finally {
   await browser.close()
 }

@@ -51,10 +51,12 @@ try {
   await brokenTab.close()
   worker = currentWorker
   await page.evaluate(async () => {
+    window.legacyWorkerController = navigator.serviceWorker.controller
     const registration = await navigator.serviceWorker.getRegistration()
     await registration.update()
   })
   await page.waitForFunction(async () => {
+    if (!navigator.serviceWorker.controller || navigator.serviceWorker.controller === window.legacyWorkerController) return false
     const keys = await caches.keys()
     return keys.some((key) => key.startsWith('reinos-da-aurora:')) && keys.every((key) => !key.endsWith(':legacy'))
   })

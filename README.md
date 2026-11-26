@@ -6,6 +6,12 @@ RPG estratégico de fantasia para navegador. A jornada começa com a criação d
 
 Use a prévia privada no Sites para testar as atualizações pelo navegador. Entre com a conta do ChatGPT que recebeu acesso e use o mesmo navegador e perfil para retomar seu save. [Abrir a prévia de Reinos da Aurora](https://reinos-da-aurora-previa.erickmartins1.chatgpt.site)
 
+## Painel de testes
+
+Crie um herói ou retome a campanha e clique em **Testes** no topo. O painel salva níveis, ouro e provisões na campanha aberta. Itens concedidos ficam no Relicário ou em Indumentárias. Na arena, abra o painel durante seu turno. Mudanças de nível reiniciam o mesmo combate ao voltar.
+
+Na prévia privada, o servidor libera o painel para a identidade autenticada da conta proprietária, configurada em `AURORA_ADMIN_EMAIL`. No Windows, **Iniciar-Testes.cmd** libera o painel apenas na instância local do computador. No checkout, execute `npm run build` e `npm start -- --admin`, depois abra o endereço impresso pelo servidor. Rode `npm run test:admin` com essa instância ativa. Para usar outra porta, defina `AURORA_URL` no teste.
+
 ## Executar
 
 Use Node.js 22.13 ou superior na linha 22, ou Node.js 24+.

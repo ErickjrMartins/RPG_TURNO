@@ -16,6 +16,7 @@ import { claimLogin, claimRecharge, earnAppearance, isPack, openSeason, simulate
 import { isAppearance, wearAppearance } from './domain/wardrobe'
 import { harvestFarm, improveBuilding, isBuildingId, updateCity } from './domain/city'
 import { equip, hire, levelFor, isTroop, moveRecruit, newProfile, settleAttempt, startAttempt, trainRecruit, type Profile } from './domain/profile'
+import { grantTestItem, setTestProgress } from './domain/test-admin'
 import { chooseLineage, chooseMastery, dismantleRelics, gradeRelic, isGearSlot, isGlyph, isLineage, isPath, isPin, lockRelic, organizeRelics, refineRelic, removePin, setPin, toggleGlyph, trainMastery, transferRefinement, type Relicary } from './domain/relicary'
 import { GameAudio, type Cue } from './game/audio'
 import type { ArenaScene } from './game/stage'
@@ -28,6 +29,7 @@ import { filters, relicaryView, type RelicFilter } from './ui/relicary'
 import { createView, titleView } from './ui/foundation'
 import { message, sigil } from './ui/html'
 import { mountPortraitMotion } from './ui/portrait-motion'
+import { testAdminView } from './ui/test-admin'
 
 const root = document.querySelector<HTMLDivElement>('#app')
 if (!root) throw new Error('A interface do jogo está indisponível.')
@@ -39,23 +41,33 @@ root.innerHTML = `
         <button class="brand" type="button" data-action="title" aria-label="Reinos da Aurora, voltar ao título">
           ${sigil}<span>Reinos da <b>Aurora</b></span>
         </button>
-        <button class="audio-button" data-action="audio" aria-label="Áudio" aria-pressed="true"><span aria-hidden="true">♪</span> <span id="audio-text">Áudio ligado</span></button>
+        <div class="topbar-actions">
+          <button type="button" class="audio-button test-admin-button" data-action="test-admin-open" hidden>Testes</button>
+          <button class="audio-button" data-action="audio" aria-label="Áudio" aria-pressed="true"><span aria-hidden="true">♪</span> <span id="audio-text">Áudio ligado</span></button>
+        </div>
       </div>
     </header>
     <main id="view" aria-busy="true"><p class="loading">Carregando Reinos da Aurora…</p></main>
     <div class="stage-storage" aria-hidden="true"><div id="phaser-stage"></div></div>
-    <footer class="game-footer"><div class="view-width footer-inner"><span>VERSÃO 0.4.5</span><span>SALVAMENTO NESTE NAVEGADOR</span></div></footer>
+    <footer class="game-footer"><div class="view-width footer-inner"><span>VERSÃO 0.4.6</span><span>SALVAMENTO NESTE NAVEGADOR</span></div></footer>
   </div>`
 
 const view = root.querySelector<HTMLElement>('#view')!
 const audioButton = root.querySelector<HTMLButtonElement>('[data-action="audio"]')!
 const audioText = root.querySelector<HTMLElement>('#audio-text')!
+const testAdminButton = root.querySelector<HTMLButtonElement>('[data-action="test-admin-open"]')!
 const stageStorage = root.querySelector<HTMLElement>('.stage-storage')!
 const stageHost = root.querySelector<HTMLElement>('#phaser-stage')!
 const audio = new GameAudio()
 const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)')
 const draft = { name: '', classId: 'warrior' as ClassId, presentation: 'masculine' as Presentation }
-let screen: 'title' | 'create' | 'camp' | 'battle' | 'result' | 'relicary' | 'missions' | 'wardrobe' | 'events' | 'mage' | 'plaza' = 'title'
+type GameScreen = 'title' | 'create' | 'camp' | 'battle' | 'result' | 'relicary' | 'missions' | 'wardrobe' | 'events' | 'mage' | 'plaza' | 'test-admin'
+let screen: GameScreen = 'title'
+let testAdminAllowed = false
+let testAdminChecking = false
+let testAdminReturn: GameScreen = 'camp'
+let testAdminNotice = ''
+let restartTestBattle = false
 let profile: Profile | null = null
 let repository: SaveRepository | undefined
 let arena: ArenaScene | undefined
@@ -94,6 +106,35 @@ function renderAudio(): void {
   audioText.textContent = audio.enabled ? 'Áudio ligado' : 'Áudio desligado'
 }
 
+function canOpenTestAdmin(): boolean {
+  return !!profile && !busy && !testAdminChecking && testAdminAllowed
+    && !['title', 'create', 'result', 'plaza', 'test-admin'].includes(screen)
+    && (screen !== 'battle' || battle?.phase === 'player')
+}
+
+function renderTestAdminButton(): void {
+  testAdminButton.hidden = !canOpenTestAdmin()
+}
+
+async function checkTestAdmin(): Promise<boolean> {
+  if (import.meta.env.MODE === 'portable' || !navigator.onLine) return false
+  try {
+    const response = await fetch(new URL('api/test-admin/access', document.baseURI), {
+      cache: 'no-store', redirect: 'error', signal: AbortSignal.timeout(5000),
+    })
+    return response.ok && (await response.json()).allowed === true
+  } catch {
+    return false
+  }
+}
+
+function refreshTestAdminAccess(): void {
+  void checkTestAdmin().then((allowed) => {
+    testAdminAllowed = allowed && navigator.onLine
+    renderTestAdminButton()
+  })
+}
+
 function paintBattle(events: readonly BattleEvent[] = []): void {
   if (screen !== 'battle' || !battle || !profile || !arena) return
   if (arena.scene.isPaused()) arena.scene.resume()
@@ -107,10 +148,13 @@ function render(focusHeading = false, events: readonly BattleEvent[] = []): void
   const active = document.activeElement instanceof HTMLElement && view.contains(document.activeElement) ? document.activeElement : null
   stageStorage.append(stageHost)
   view.setAttribute('aria-busy', String(busy))
+  renderTestAdminButton()
   if (screen === 'create') {
     view.innerHTML = createView(draft, error, busy)
     const portrait = view.querySelector<HTMLElement>('.character-portrait')
     if (portrait) stopPortrait = mountPortraitMotion(portrait, draft.classId, draft.presentation, reducedMotion)
+  } else if (screen === 'test-admin' && profile) {
+    view.innerHTML = testAdminView(profile, testAdminReturn === 'battle', busy, error, testAdminNotice)
   } else if (screen === 'battle' && profile && battle) {
     const skill = battle.skills.find((entry) => entry.id === selected) ?? battle.skills[0]!
     view.innerHTML = battleView({ battle, profile, selected: skill, history, error, speed, skip, paused, saving: busy, overcharge, opening: events.some((event) => event.kind === 'abyss-start') })
@@ -184,6 +228,56 @@ function campaign(change: (current: Profile) => Profile, onSuccess = () => {}): 
     if (!current) throw new Error('Crie um herói antes de começar.')
     return change(updateCity(current, Date.now()))
   }, onSuccess)
+}
+
+async function openTestAdmin(): Promise<void> {
+  if (!canOpenTestAdmin()) return
+  const previous = screen
+  testAdminChecking = true
+  testAdminButton.disabled = true
+  testAdminAllowed = await checkTestAdmin()
+  testAdminChecking = false
+  testAdminButton.disabled = false
+  if (screen !== previous || !canOpenTestAdmin()) return renderTestAdminButton()
+  testAdminReturn = previous
+  testAdminNotice = ''
+  restartTestBattle = false
+  stopTimer()
+  screen = 'test-admin'
+  render(true)
+}
+
+async function saveTestChanges(form: HTMLFormElement): Promise<void> {
+  if (screen !== 'test-admin' || !testAdminAllowed || testAdminChecking || busy) return
+  const values = new FormData(form)
+  testAdminChecking = true
+  testAdminAllowed = await checkTestAdmin()
+  testAdminChecking = false
+  if (screen !== 'test-admin') return
+  if (!testAdminAllowed) {
+    error = 'O acesso ao painel não está disponível. Volte ao jogo e confira sua conexão e conta.'
+    render()
+    return
+  }
+  const granting = form.id === 'test-admin-item'
+  const number = (field: string) => {
+    const value = values.get(field)
+    return typeof value === 'string' && value.trim() ? Number(value) : Number.NaN
+  }
+  testAdminNotice = ''
+  let battleLevelsChanged = false
+  await campaign((current) => {
+    if (granting) return grantTestItem(current, String(values.get('item') ?? ''), number('test-quantity'))
+    const next = setTestProgress(current, {
+      level: number('test-level'), gold: number('test-gold'), supplies: number('test-supplies'),
+      troops: Object.fromEntries(current.recruits.map(({ id }) => [id, number(`troop:${id}`)])),
+    })
+    battleLevelsChanged = next.hero.xp !== current.hero.xp || next.recruits.some((unit, index) => unit.level !== current.recruits[index]?.level)
+    return next
+  }, () => {
+    restartTestBattle ||= battleLevelsChanged && testAdminReturn === 'battle'
+    testAdminNotice = granting ? 'Item liberado e salvo.' : 'Alterações salvas.'
+  })
 }
 
 function seed(): number {
@@ -311,13 +405,14 @@ function act(targetId: string): void {
   if (!battle || busy || paused || battle.phase !== 'player') return
   try {
     const next = playerAction(battle, selected, targetId, overcharge)
-    if ((selected === 'shot' || selected === 'spark') && profile && arena && !skip && !reducedMotion.matches) {
-      const target = battle.units.find((unit) => unit.id === targetId)!
+    if ((selected === 'shot' || selected === 'spark' || selected === 'rain') && profile && arena && !skip && !reducedMotion.matches) {
+      const targetIds = next.events.find((event) => event.kind === 'action' && event.actor === 'hero' && event.spell === selected)?.targets
+      const targets = battle.units.filter((unit) => targetIds?.includes(unit.id))
       const impact = () => {
         attackImpact = undefined
         presentTurn(next)
       }
-      if (arena.playHeroAttack(selected, profile.hero.presentation, target, speed, impact)) {
+      if (arena.playHeroAttack(selected, profile.hero.presentation, targets, speed, impact)) {
         attackImpact = impact
         battle = { ...battle, phase: 'resolution' }
         render()
@@ -412,7 +507,13 @@ root.addEventListener('change', (event) => {
 })
 
 root.addEventListener('submit', (event) => {
-  if (!(event.target instanceof HTMLFormElement) || event.target.id !== 'create-hero') return
+  if (!(event.target instanceof HTMLFormElement)) return
+  if (event.target.id === 'test-admin-progress' || event.target.id === 'test-admin-item') {
+    event.preventDefault()
+    void saveTestChanges(event.target)
+    return
+  }
+  if (event.target.id !== 'create-hero') return
   event.preventDefault()
   void createHero().catch((cause: unknown) => {
     error = message(cause)
@@ -434,6 +535,13 @@ root.addEventListener('click', (event) => {
   error = ''
   if (action && relicAction(action, value)) return
   switch (action) {
+    case 'test-admin-open': void openTestAdmin(); return
+    case 'test-admin-close':
+      if (screen !== 'test-admin' || testAdminChecking) return
+      screen = testAdminReturn
+      if (screen === 'battle' && restartTestBattle) enterBattle()
+      if (!testAdminAllowed) refreshTestAdminAccess()
+      break
     case 'title':
       stopTimer()
       screen = 'title'
@@ -590,6 +698,9 @@ try {
   error = message(cause)
 }
 render()
+refreshTestAdminAccess()
+window.addEventListener('online', refreshTestAdminAccess)
+window.addEventListener('offline', refreshTestAdminAccess)
 
 if (import.meta.env.PROD && import.meta.env.MODE !== 'portable' && 'serviceWorker' in navigator) {
   const workerUrl = new URL('service-worker.js', document.baseURI)

@@ -1,5 +1,6 @@
 import type Phaser from 'phaser'
 import { pointFor } from './layout'
+import { paintAstralRain, rainDuration } from './mage-rain'
 import type { Unit } from '../domain/battle'
 
 const spells = ['spark', 'rain', 'renew', 'chorus', 'void-circle', 'void-pulse', 'thread', 'dew', 'dawn', 'prism', 'tear']
@@ -30,9 +31,10 @@ export function animateMageSpell(scene: Phaser.Scene, spell: string, origin: Uni
   const ink = scene.add.graphics().setDepth(875)
   const points = targets.map(pointFor)
   const source = origin && pointFor(origin)
-  const duration = (ambient ? 365 : 340) / speed
+  const duration = (spell === 'rain' ? rainDuration : ambient ? 365 : 340) / speed
   const draw = (t: number) => {
     ink.clear()
+    if (spell === 'rain') return paintAstralRain(ink, points, t * rainDuration)
     for (const point of points) {
       const x = point.x
       const ground = point.y - 8
@@ -53,18 +55,6 @@ export function animateMageSpell(scene: Phaser.Scene, spell: string, origin: Uni
           ink.fillCircle(travelX, travelY, 6)
         }
         if (t > 0.43) particles(ink, x, hit, 33, (t - 0.43) / 0.57, 8, 0x88daff)
-      } else if (spell === 'rain') {
-        rune(ink, x, ground, 32 + t * 21, 1 - t, 0xc59bff)
-        for (let i = 0; i < 5; i++) {
-          const drop = Math.max(0, Math.min(1, t * 2.55 - i * 0.16))
-          const beamX = x + (i - 2) * 14
-          const beamY = hit - 101 * (1 - drop)
-          ink.lineStyle(7, 0x6a49bd, (1 - t) * 0.7)
-          ink.lineBetween(beamX + 15, beamY - 29, beamX, beamY)
-          ink.lineStyle(2, 0xffd69c, 1 - t)
-          ink.lineBetween(beamX + 15, beamY - 29, beamX, beamY)
-        }
-        particles(ink, x, hit, 68, t, 19, 0xe0a1ff)
       } else if (spell === 'renew') {
         rune(ink, x, ground, 46, 1 - t, 0xaef3b9)
         for (let i = 0; i < 9; i++) {

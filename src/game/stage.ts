@@ -9,6 +9,7 @@ import { animateArcherShot, shotTexture } from './archer-shot'
 import { attackCellSize, type AttackPlayback } from './attack-playback'
 import { idleFrames, prepareIdleTexture } from './idle-motion'
 import { animateMageSpell } from './mage-effects'
+import { animateMageRain } from './mage-rain'
 import { animateMageSpark, sparkTexture } from './mage-spark'
 import { arenaCamera, arenaHeight, arenaWidth, pointFor } from './layout'
 
@@ -54,7 +55,7 @@ interface Actor {
   idle?: string | null
 }
 
-export type AnimatedAttack = 'shot' | 'spark'
+export type AnimatedAttack = 'shot' | 'spark' | 'rain'
 
 export class ArenaScene extends Phaser.Scene {
   private readonly actors = new Map<string, Actor>()
@@ -83,14 +84,17 @@ export class ArenaScene extends Phaser.Scene {
     this.idleEnabled = false
   }
 
-  playHeroAttack(spell: AnimatedAttack, form: Presentation, target: Unit, speed: number, impact: () => void): boolean {
+  playHeroAttack(spell: AnimatedAttack, form: Presentation, targets: readonly Unit[], speed: number, impact: () => void): boolean {
     const hero = this.actors.get('hero')
     const texture = spell === 'shot' ? shotTexture(form) : sparkTexture(form)
-    if (!hero || !this.textures.exists(texture)) return false
+    const target = targets[0]
+    if (!hero || !target || !this.textures.exists(texture)) return false
     this.stopHeroAttack()
     this.restoreIdleBase(hero)
-    const play = spell === 'shot' ? animateArcherShot : animateMageSpark
-    this.attack = { spell, playback: play(this, hero.sprite, form, target, speed, impact, () => { this.attack = undefined }) }
+    const finished = () => { this.attack = undefined }
+    const playback = spell === 'rain' ? animateMageRain(this, hero.sprite, form, targets, speed, impact, finished)
+      : (spell === 'shot' ? animateArcherShot : animateMageSpark)(this, hero.sprite, form, target, speed, impact, finished)
+    this.attack = { spell, playback }
     return true
   }
 
