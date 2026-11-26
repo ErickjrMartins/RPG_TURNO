@@ -3,6 +3,7 @@ import type { Presentation } from '../content/classes'
 import type { Unit } from '../domain/battle'
 import { attackCellSize, playAttack, poseScale } from './attack-playback'
 import { pointFor } from './layout'
+import { paintWarriorSword } from './warrior-sword'
 
 export const strikeTexture = (form: Presentation) => `warrior-strike-${form}`
 export const strikeCellSize = 256
@@ -58,6 +59,7 @@ export function animateWarriorStrike(scene: Phaser.Scene, { sprite, shadow, clot
     if (time < retreatAt) place(Math.max(0, Math.min(1, (time - approachAt) / (arriveAt - approachAt))), false)
     else place(Math.max(0, (homeAt - time) / (homeAt - retreatAt)), time < homeAt)
 
+    if (time < retreatAt) paintWarriorSword(ink, sprite, time, impactAt)
     if (time < impactAt || time >= retreatAt) return
     const fade = (time - impactAt) / (retreatAt - impactAt)
     const x = enemy.x - 14

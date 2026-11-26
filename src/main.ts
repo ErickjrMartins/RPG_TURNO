@@ -49,7 +49,7 @@ root.innerHTML = `
     </header>
     <main id="view" aria-busy="true"><p class="loading">Carregando Reinos da Aurora…</p></main>
     <div class="stage-storage" aria-hidden="true"><div id="phaser-stage"></div></div>
-    <footer class="game-footer"><div class="view-width footer-inner"><span>VERSÃO 0.4.7</span><span>SALVAMENTO NESTE NAVEGADOR</span></div></footer>
+    <footer class="game-footer"><div class="view-width footer-inner"><span>VERSÃO 0.4.8</span><span>SALVAMENTO NESTE NAVEGADOR</span></div></footer>
   </div>`
 
 const view = root.querySelector<HTMLElement>('#view')!
@@ -83,7 +83,7 @@ let speed = 1
 let skip = reducedMotion.matches
 let paused = false
 let attackImpact: (() => void) | undefined
-let strikeInProgress = false
+let attackFinishing = false
 let timer: number | undefined
 let building: BuildingId = 'barracks'
 let earnedGold = 0
@@ -184,7 +184,7 @@ function render(focusHeading = false, events: readonly BattleEvent[] = []): void
   }
   if (screen !== 'battle') {
     attackImpact = undefined
-    strikeInProgress = false
+    attackFinishing = false
     arena?.stopHeroAttack()
     if (arena?.scene.isActive()) arena.scene.pause()
   }
@@ -295,7 +295,7 @@ function enterBattle(): void {
   if (!profile) return
   stopTimer()
   attackImpact = undefined
-  strikeInProgress = false
+  attackFinishing = false
   arena?.clear()
   battle = startBattle(profile)
   selected = battle.skills[0]!.id
@@ -378,7 +378,7 @@ function saveResult(): void {
 
 function schedule(): void {
   stopTimer()
-  if (paused || attackImpact || strikeInProgress || screen !== 'battle' || !battle || battle.phase === 'player') return
+  if (paused || attackImpact || attackFinishing || screen !== 'battle' || !battle || battle.phase === 'player') return
   timer = window.setTimeout(() => {
     if (!battle || paused || screen !== 'battle') return
     if (battle.phase === 'victory' || battle.phase === 'defeat') {
@@ -416,13 +416,13 @@ function act(targetId: string): void {
         attackImpact = undefined
         presentTurn(next)
       }
-      const strike = selected === 'strike'
-      if (arena.playHeroAttack(selected, profile.hero.presentation, targets, speed, impact, strike ? () => {
-        strikeInProgress = false
+      const finishBeforeNextAction = selected === 'strike' || selected === 'rain'
+      if (arena.playHeroAttack(selected, profile.hero.presentation, targets, speed, impact, finishBeforeNextAction ? () => {
+        attackFinishing = false
         schedule()
       } : undefined)) {
         attackImpact = impact
-        strikeInProgress = strike
+        attackFinishing = finishBeforeNextAction
         battle = { ...battle, phase: 'resolution' }
         render()
         return

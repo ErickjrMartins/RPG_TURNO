@@ -20,19 +20,26 @@ async function testStrike(form, mobile) {
     })
     const phases = await page.evaluate(() => new Promise((resolve) => {
       const ctx = document.querySelector('.arena-canvas canvas').getContext('2d')
-      const opaque = (x, y, width, height) => ctx.getImageData(x, y, width, height).data.filter((n, i) => i % 4 === 3 && n > 230).length
+      const opaque = (x, y, width, height, threshold) => {
+        const pixels = ctx.getImageData(x, y, width, height).data
+        let count = 0
+        for (let i = 3; i < pixels.length; i += 4) {
+          if (pixels[i] > 230 && ++count > threshold) return true
+        }
+        return false
+      }
       const life = () => Number(document.querySelector('[aria-label="Vida de Rastejante de Pedra"]').getAttribute('aria-valuenow'))
       const initial = life()
-      const deadline = performance.now() + 2900
-      const state = { approach: false, fire: false, impact: false, retreat: false, home: false, fasterReturn: false }
+      const deadline = performance.now() + 3800
+      const state = { approach: false, fire: false, completeArc: false, impact: false, retreat: false, home: false, fasterReturn: false }
       let start, firstCrossing, hit, secondCrossing
       document.querySelector('.target[data-value="crawler"]').click()
       function scan() {
         const time = performance.now()
         start ??= time
-        const center = opaque(496, 179, 73, 96) > 150
-        const landing = opaque(630, 163, 80, 106) > 550
-        const inFormation = opaque(350, 159, 48, 111) > 500
+        const center = opaque(472, 179, 112, 96, 130)
+        const landing = opaque(630, 163, 80, 106, 550)
+        const inFormation = opaque(350, 159, 48, 111, 500)
         const fire = ctx.getImageData(646, 175, 123, 81).data.filter((red, index, data) =>
           index % 4 === 0 && red > 221 && data[index + 1] > 78 && data[index + 1] < 240 && data[index + 2] < 145 && data[index + 3] > 185).length
         if (state.approach && fire > 82) state.fire = true
@@ -48,6 +55,11 @@ async function testStrike(form, mobile) {
           state.retreat = true
           secondCrossing = time
         }
+        if (state.impact && !state.completeArc && time - hit < 190) {
+          const beyondSprite = ctx.getImageData(783, 158, 54, 84).data.filter((red, i, pixels) =>
+            i % 4 === 0 && red > 235 && pixels[i + 1] > 99 && pixels[i + 2] < 165 && pixels[i + 3] > 180).length
+          state.completeArc ||= beyondSprite > 84
+        }
         if (state.retreat && inFormation && !center && !landing) {
           state.home = true
           state.fasterReturn = time - secondCrossing < hit - firstCrossing && time - secondCrossing < time - start
@@ -57,7 +69,7 @@ async function testStrike(form, mobile) {
       }
       requestAnimationFrame(scan)
     }))
-    assert.deepEqual(phases, { approach: true, fire: true, impact: true, retreat: true, home: true, fasterReturn: true }, form)
+    assert.deepEqual(phases, { approach: true, fire: true, completeArc: true, impact: true, retreat: true, home: true, fasterReturn: true }, form)
     await page.getByText(/usou Golpe Firme\./).waitFor()
     await page.getByRole('heading', { name: 'Sua vez' }).waitFor()
     await page.getByRole('button', { name: 'Velocidade 1 vezes' }).click()

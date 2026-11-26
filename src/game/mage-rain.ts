@@ -5,69 +5,97 @@ import { playAttack } from './attack-playback'
 import { pointFor } from './layout'
 import { sparkTexture } from './mage-spark'
 
-const impactAt = 625
-export const rainDuration = 975
-const timeline = { duration: rainDuration, impactAt, poses: [[0, 0], [85, 1], [200, 2], [675, 1], [790, 0]] } as const
-const crystalBlue = 0x2e78ff
-const facetBlue = 0x67ceff
-const frost = 0xdff9ff
-
+const landAt = 510
+const blastDuration = 304
+const targetDelay = 26
 const drops = [
-  { offset: -30, delay: 215, size: 23, drift: 42 },
-  { offset: 30, delay: 270, size: 25, drift: 34 },
-  { offset: -14, delay: 304, size: 37, drift: 55 },
-  { offset: 15, delay: 230, size: 33, drift: 37 },
-  { offset: 0, delay: 175, size: 58, drift: 68 },
+  { offset: -17, start: 142, land: landAt, size: 20, drift: 67 },
+  { offset: 22, start: 222, land: 604, size: 16, drift: 42 },
+  { offset: -36, start: 303, land: 699, size: 12, drift: 59 },
+  { offset: 11, start: 397, land: 794, size: 22, drift: 75 },
+  { offset: -12, start: 489, land: 886, size: 16, drift: 51 },
+  { offset: 34, start: 584, land: 982, size: 13, drift: 55 },
 ] as const
+export const rainDuration = 1360
+const timeline = { duration: rainDuration, impactAt: landAt, poses: [[0, 0], [85, 1], [200, 2], [705, 1], [820, 0]] } as const
+const flame = 0x275cff
+const ice = 0x64ddff
+const frost = 0xe1faff
 
-function crystal(ink: Phaser.GameObjects.Graphics, x: number, y: number, size: number, alpha: number): void {
-  const high = { x: x - size * 0.43, y: y - size }
-  const left = { x: x - size * 0.55, y: y - size * 0.51 }
-  const right = { x: x - size * 0.10, y: y - size * 0.71 }
-  const ridge = { x: x - size * 0.32, y: y - size * 0.55 }
-  const tip = { x, y }
-  ink.lineStyle(size * 0.46, crystalBlue, alpha * 0.17)
-  ink.lineBetween(high.x - size * 0.4, high.y - size * 0.9, x, y)
-  ink.fillStyle(crystalBlue, alpha)
-  ink.fillPoints([high, left, tip, right], true)
-  ink.fillStyle(facetBlue, alpha)
-  ink.fillPoints([high, ridge, tip, right], true)
-  ink.lineStyle(Math.max(1, size * 0.04), frost, alpha * 0.93)
-  ink.lineBetween(high.x, high.y, ridge.x, ridge.y)
-  ink.lineBetween(ridge.x, ridge.y, x, y)
+function meteor(ink: Phaser.GameObjects.Graphics, x: number, y: number, size: number, time: number, alpha: number): void {
+  const fireLength = size * (3.05 + Math.sin(time * 0.055) * 0.28)
+  ink.fillStyle(flame, alpha * 0.25).fillCircle(x, y, size * 1.42)
+  for (let i = 0; i < 4; i++) {
+    const sway = Math.sin(time * 0.045 + i * 2.4) * size * 0.3
+    const offset = (i - 1.5) * size * 0.49
+    const tailX = x - fireLength * (0.42 - i * 0.026) + sway
+    const tailY = y - fireLength * (1 - i * 0.12)
+    ink.fillStyle(i % 2 ? ice : flame, alpha * (i % 2 ? 0.63 : 0.79))
+    ink.fillPoints([
+      { x: x + offset - size * 0.47, y: y + size * 0.23 },
+      { x: tailX + size * 0.16, y: tailY + fireLength * 0.38 },
+      { x: tailX, y: tailY },
+      { x: tailX + size * 0.54, y: tailY + fireLength * 0.33 },
+      { x: x + offset + size * 0.46, y: y + size * 0.27 },
+    ], true)
+  }
+  const body = [
+    { x: x - size * 0.76, y: y - size * 0.40 },
+    { x: x - size * 0.24, y: y - size * 0.94 },
+    { x: x + size * 0.34, y: y - size * 0.76 },
+    { x: x + size * 0.82, y: y - size * 0.22 },
+    { x: x + size * 0.61, y: y + size * 0.48 },
+    { x: x + size * 0.13, y: y + size * 0.85 },
+    { x: x - size * 0.51, y: y + size * 0.60 },
+  ]
+  ink.fillStyle(0x142b6a, alpha).fillPoints(body, true)
+  ink.lineStyle(1.6, ice, alpha * 0.86).strokePoints(body, true)
+  ink.fillStyle(0x3d7fc8, alpha).fillPoints([body[0]!, body[1]!, body[2]!, { x: x + size * 0.12, y: y + size * 0.16 }, body[6]!], true)
+  ink.lineStyle(1.3, frost, alpha * 0.88).lineBetween(x - size * 0.23, y - size * 0.60, x + size * 0.11, y + size * 0.12)
+  for (let i = 0; i < 3; i++) {
+    const length = fireLength * (0.64 + i * 0.21)
+    ink.fillStyle(i % 2 ? frost : ice, alpha * (0.75 - i * 0.14))
+    ink.fillCircle(x - length * 0.32 + Math.sin(time * 0.052 + i * 6) * size * 0.47, y - length, 1.45 + size * 0.038)
+  }
+}
+
+function burstOnGround(ink: Phaser.GameObjects.Graphics, x: number, y: number, size: number, age: number): void {
+  const t = age / blastDuration
+  const alpha = (1 - t) ** 1.22
+  const radius = (size * 0.86 + 49 * t)
+  ink.fillStyle(flame, alpha * 0.31).fillEllipse(x, y, radius * 2.27, radius * 0.73)
+  ink.lineStyle(2, ice, alpha * 0.86).strokeEllipse(x, y, radius * 2, radius * 0.57)
+  const flash = Math.max(0, 1 - t * 3.6)
+  ink.fillStyle(ice, flash * 0.75).fillEllipse(x, y - 8, size * 3.15, size * 1.75)
+  ink.fillStyle(frost, flash).fillEllipse(x, y - 7, size * 1.85, size * 0.89)
+  for (let i = 0; i < 8; i++) {
+    const spread = (i - 3.5) * (size * 0.17 + t * (12 + i % 3 * 4))
+    const height = Math.sin(t * Math.PI) * (19 + (i % 4) * 10) + 5 + i % 4 * 4
+    const shard = (2.8 + i % 3 * 1.3) * alpha + 0.4
+    const chipX = x + spread
+    const chipY = y - height
+    ink.fillStyle(i % 3 ? ice : frost, alpha)
+    ink.fillTriangle(chipX - shard, chipY, chipX + shard, chipY - shard * 0.7, chipX - Math.sign(spread) * shard, chipY - shard * 3.3)
+  }
 }
 
 export function paintAstralRain(ink: Phaser.GameObjects.Graphics, points: readonly ReturnType<typeof pointFor>[], time: number): void {
-  for (const { x, y } of points) {
-    const hit = y - 74
-    const burst = Math.max(0, (time - impactAt) / (rainDuration - impactAt))
-    const glow = Math.min(1, time / 180) * (1 - burst)
-    ink.fillStyle(crystalBlue, glow * 0.10)
-    ink.fillEllipse(x, y - 7, 84 + burst * 84, 22 + burst * 16)
-    ink.lineStyle(2, facetBlue, glow * 0.47)
-    ink.strokeEllipse(x, y - 7, 80 + burst * 91, 20 + burst * 14)
+  points.forEach(({ x, y }, index) => {
+    const local = time - index * targetDelay
     for (const drop of drops) {
-      const progress = (time - drop.delay) / (impactAt - drop.delay)
-      if (progress <= 0 || progress >= 1) continue
-      const fall = progress * progress
-      const rise = Math.max(95, hit + 8)
-      crystal(ink, x + drop.offset - drop.drift * (1 - fall), hit - rise * (1 - fall), drop.size, Math.min(1, progress * 6))
+      if (local < drop.start || local >= drop.land + blastDuration) continue
+      const groundX = x + drop.offset
+      const groundY = y - 5 + drop.offset * 0.08
+      if (local >= drop.land) {
+        burstOnGround(ink, groundX, groundY, drop.size, local - drop.land)
+        continue
+      }
+      const progress = (local - drop.start) / (drop.land - drop.start)
+      const fall = progress * (0.30 + progress * 0.70)
+      const altitude = (groundY + 17) * (1 - fall)
+      meteor(ink, groundX - drop.drift * (1 - fall), groundY - altitude - drop.size * 0.70, drop.size, local, Math.min(1, progress * 5))
     }
-    if (time < impactAt) continue
-    ink.fillStyle(crystalBlue, (1 - burst) * 0.29)
-    ink.fillCircle(x, hit, 19 + burst * 40)
-    ink.fillStyle(frost, Math.max(0, 1 - burst * 6) * 0.82)
-    ink.fillCircle(x, hit, 13 + burst * 18)
-    for (let i = 0; i < 12; i++) {
-      const angle = i * 2.399963 + 0.18
-      const radius = 6 + burst * (35 + i % 4 * 12)
-      const chipX = x + radius * Math.cos(angle)
-      const chipY = hit + radius * Math.sin(angle) * 0.72 + burst * burst * 18
-      const size = (9 + i % 4 * 3) * (1 - burst)
-      ink.fillStyle(i % 3 ? facetBlue : frost, 1 - burst)
-      ink.fillTriangle(chipX - size * 0.45, chipY + size * 0.25, chipX, chipY - size * 0.75, chipX + size * 0.38, chipY + size * 0.36)
-    }
-  }
+  })
 }
 
 export function animateMageRain(scene: Phaser.Scene, sprite: Phaser.GameObjects.Image, form: Presentation, targets: readonly Unit[],
