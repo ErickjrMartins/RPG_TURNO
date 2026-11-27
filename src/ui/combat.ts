@@ -45,7 +45,7 @@ function unitLabel(unit: Unit, actionable: boolean, affected: boolean, aura: boo
   </${tag}>`
 }
 
-export function battleView(display: BattleDisplay): string {
+export function battleView(display: BattleDisplay) {
   const { battle, profile, selected, speed, skip, paused, saving, error, history, overcharge, opening } = display
   const location = encounters[battle.attempt.encounter]
   const region = isZone(battle.attempt.encounter) ? zone(battle.attempt.encounter).region : 'fields'
@@ -68,8 +68,7 @@ export function battleView(display: BattleDisplay): string {
     ? unit.team === 'allies'
     : active.classId === 'mage' ? unit.team === 'enemies' && (unit.slot >= 3) === active.rear : unit.id === active.target)
   const isGate = battle.attempt.encounter === 'gate'
-  return `
-    <section class="view-width battle" aria-labelledby="battle-title">
+  const heading = `
       <header class="battle-head">
         <div>
           <div class="eyebrow"><span></span> ${regions[region]}</div>
@@ -82,7 +81,8 @@ export function battleView(display: BattleDisplay): string {
           <button class="small-button" data-action="pause" aria-pressed="${paused}">${paused ? 'Retomar' : 'Pausar'}</button>
         </div>
       </header>
-      <p class="battle-brief">${paused ? 'Batalha pausada.' : battle.sealed ? 'Barreira do Núcleo ativa. Abra um Abismo Pessoal agora para quebrá-la.' : isGate && battle.reinforced ? 'O Guardião entrou na segunda fase. Atenção ao Corte do Véu.' : location.intro}</p>
+      <p class="battle-brief">${paused ? 'Batalha pausada.' : battle.sealed ? 'Barreira do Núcleo ativa. Abra um Abismo Pessoal agora para quebrá-la.' : isGate && battle.reinforced ? 'O Guardião entrou na segunda fase. Atenção ao Corte do Véu.' : location.intro}</p>`
+  const body = `
       <div class="arena-frame terrain-${region} ${isGate ? 'gate-arena' : ''} ${active ? `is-abyss abyss-${active.classId}` : ''} ${battle.units.length > 8 ? 'full-formation' : ''}"
           style="--abyss-tint:${spec.tint};--activation-zoom:${arenaCamera.activationZoom};--activation-duration:${360 / speed}ms">
         <div class="arena-world ${opening && !skip ? 'abyss-opening' : ''}">
@@ -132,8 +132,8 @@ export function battleView(display: BattleDisplay): string {
           <ol>${history.slice(-4).reverse().map((line) => `<li>${safe(line)}</li>`).join('')}</ol>
           <p class="visually-hidden" role="status">${safe(history.at(-1) ?? '')}</p>
         </aside>
-      </div>
-    </section>`
+      </div>`
+  return { heading, body }
 }
 
 export function resultView(encounter: EncounterId, victory: boolean, profile: Profile, earnedGold: number, attemptId: number): string {

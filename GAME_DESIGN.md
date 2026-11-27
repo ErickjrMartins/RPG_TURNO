@@ -88,6 +88,12 @@ No Refúgio de Alvor, todos os quatro edifícios começam no nível 1. O Conselh
 
 O ouro financia construções, compras e parte do recrutamento. As provisões complementam o custo de tropas. O XP progride o herói. Os cristais são previstos para pesquisa na Academia dos Ecos. Seu uso no MVP depende do escopo dessa construção. Portal dos Caminhos, Forja e Mercado fazem parte da cidade proposta. O acesso ao mapa é obrigatório no MVP, com o painel próprio do Portal ainda a definir. A campanha do MVP é concluível sem compras reais.
 
+### Interface de chefes
+
+O Guardião do Portão e os oito núcleos de expedição usam o mesmo HUD. O núcleo recebe a interface quando emerge após a queda dos focos. Cada chefe tem nível de exibição, retrato, runa, paleta e ornamentação próprios. A barra mostra a camada atual, o número de camadas restantes e a Vida total real. As camadas são divisões visuais da Vida máxima e a perda de uma camada não altera as regras de dano.
+
+A paleta acompanha a invocação do reforço do Guardião e a quebra da barreira da Sentinela da Ruptura. Os demais núcleos mudam de apresentação na última camada. Os ícones mostram efeitos que estão ativos e habilidades especiais quando executadas. A interface respeita a preferência por movimento reduzido e a opção Pular efeitos.
+
 ### Inventário e equipamentos
 
 O Relicário tem seis slots de herói: arma, manto, rosário, dois anéis e talismã. Algumas relíquias podem equipar as tropas. O equipamento atualiza atributos e aparece na comparação com ganhos e perdas. A grade começa com 48 posições, seis colunas no desktop, filtros e materiais em pilhas de até 999. Excedentes entram em reserva. É possível organizar, expandir com ouro e confirmar o desmonte de peças comuns ou incomuns elegíveis. Peças equipadas, bloqueadas ou raras ficam protegidas.

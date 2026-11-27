@@ -1,5 +1,6 @@
 import { abyssSpecs, effectNames, skillsByClass, troops, type EffectKind, type Skill, type Visual } from '../content/adventure'
 import { zone } from '../content/campaign'
+import type { BossId } from '../content/bosses'
 import { monsters, type MonsterId } from '../content/monsters'
 import type { Attributes, ClassId } from '../content/classes'
 import { configuredMageSpell, isMageSpell, mageBonuses } from './mage'
@@ -28,6 +29,7 @@ export interface Unit extends Attributes {
   effects: Effect[]
   precision: number
   resistance: number
+  boss?: BossId
 }
 
 export interface Abyss {
@@ -72,6 +74,7 @@ export interface BattleEvent {
   amount?: number
   visual?: Visual
   spell?: string
+  ability?: string
   targets?: string[]
 }
 
@@ -125,7 +128,7 @@ export function startBattle(profile: Profile): Battle {
           { hp: 73, power: 13, defense: 6, speed: 7 + seat }))
       }
     } else {
-      units.push(unit('warden', 'Guardião do Portão', 'warden', 'enemies', 1, { hp: 120, power: 21, defense: 9, speed: 9 }))
+      units.push({ ...unit('warden', 'Guardião do Portão', 'warden', 'enemies', 1, { hp: 120, power: 21, defense: 9, speed: 9 }), boss: 'gate' })
     }
   }
   const classId = profile.hero.classId
@@ -260,7 +263,8 @@ function heal(target: Unit, potency: number, actor: string, events: BattleEvent[
 
 function applySkill(state: Battle, actor: Unit, targets: Unit[], skill: Skill, events: BattleEvent[], powerUp = 1): void {
   const visual = skill.visual ?? (skill.heal ? 'heal' : actor.art === 'bowman' ? 'arrow' : 'slash')
-  events.push({ kind: 'action', actor: actor.id, target: targets[0]?.id, targets: targets.map((entry) => entry.id), visual, spell: skill.id, text: `${actor.name} usou ${skill.name}.` })
+  events.push({ kind: 'action', actor: actor.id, target: targets[0]?.id, targets: targets.map((entry) => entry.id), visual, spell: skill.id,
+    ability: actor.boss && skill.name !== basicNpcSkill.name ? skill.name : undefined, text: `${actor.name} usou ${skill.name}.` })
   const healingPower = powerUp * (actor.id === 'hero' ? state.mageHealing : 1)
   for (const target of targets) {
     if (skill.damage) {
@@ -297,7 +301,7 @@ function checkOutcome(state: Battle, events: BattleEvent[]): void {
       && state.units.every((entry) => entry.team === 'allies' || entry.hp === 0)) {
       const { core } = zone(state.attempt.encounter)
       state.units = state.units.filter((entry) => entry.team === 'allies')
-      state.units.push(unit('nucleus', core.name, core.art ?? 'warden', 'enemies', 1, core.stats))
+      state.units.push({ ...unit('nucleus', core.name, core.art ?? 'warden', 'enemies', 1, core.stats), boss: state.attempt.encounter })
       state.nucleus = true
       state.sealed = state.attempt.encounter === 'nest'
       events.push({ kind: 'summon', target: 'nucleus', text: state.sealed ? 'Barreira erguida. Abra um Abismo para romper o selo.' : `${core.name} emergiu.` })

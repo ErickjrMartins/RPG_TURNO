@@ -6,6 +6,7 @@ import { mageView } from './ui/mage'
 import '@fontsource-variable/cinzel'
 import '@fontsource-variable/dm-sans'
 import './style.css'
+import './ui/boss-hud.css'
 import { skillsByClass, type EncounterId } from './content/adventure'
 import { classIds, type ClassId, type Presentation } from './content/classes'
 import { styleSlotsIds, type StyleSlot } from './content/wardrobe'
@@ -22,6 +23,7 @@ import { GameAudio, type Cue } from './game/audio'
 import type { ArenaScene } from './game/stage'
 import { SaveRepository } from './persistence/save'
 import { battleView, resultView } from './ui/combat'
+import { BossHud } from './ui/boss-hud'
 import { eventsView, wardrobeView } from './ui/events'
 import { missionsView } from './ui/campaign'
 import { campView, updateCityView } from './ui/city'
@@ -49,7 +51,7 @@ root.innerHTML = `
     </header>
     <main id="view" aria-busy="true"><p class="loading">Carregando Reinos da Aurora…</p></main>
     <div class="stage-storage" aria-hidden="true"><div id="phaser-stage"></div></div>
-    <footer class="game-footer"><div class="view-width footer-inner"><span>VERSÃO 0.4.9</span><span>SALVAMENTO NESTE NAVEGADOR</span></div></footer>
+    <footer class="game-footer"><div class="view-width footer-inner"><span>VERSÃO 0.4.10</span><span>SALVAMENTO NESTE NAVEGADOR</span></div></footer>
   </div>`
 
 const view = root.querySelector<HTMLElement>('#view')!
@@ -76,6 +78,7 @@ let stopPortrait: (() => void) | undefined
 let error = ''
 let busy = false
 let battle: Battle | undefined
+const bossHud = new BossHud()
 let selected = ''
 let overcharge = false
 let history: string[] = []
@@ -158,7 +161,15 @@ function render(focusHeading = false, events: readonly BattleEvent[] = []): void
     view.innerHTML = testAdminView(profile, testAdminReturn === 'battle', busy, error, testAdminNotice)
   } else if (screen === 'battle' && profile && battle) {
     const skill = battle.skills.find((entry) => entry.id === selected) ?? battle.skills[0]!
-    view.innerHTML = battleView({ battle, profile, selected: skill, history, error, speed, skip, paused, saving: busy, overcharge, opening: events.some((event) => event.kind === 'abyss-start') })
+    if (!view.querySelector('.battle')) {
+      view.innerHTML = `<section class="view-width battle" aria-labelledby="battle-title">
+        <div data-battle-heading></div><div class="boss-hud-slot" data-boss-hud></div><div data-battle-body></div>
+      </section>`
+    }
+    const display = battleView({ battle, profile, selected: skill, history, error, speed, skip, paused, saving: busy, overcharge, opening: events.some((event) => event.kind === 'abyss-start') })
+    view.querySelector<HTMLElement>('[data-battle-heading]')!.innerHTML = display.heading
+    view.querySelector<HTMLElement>('[data-battle-body]')!.innerHTML = display.body
+    bossHud.paint(view.querySelector<HTMLElement>('[data-boss-hud]')!, battle, events, !skip && !reducedMotion.matches, paused, speed)
     view.querySelector('[data-stage-slot]')?.append(stageHost)
     mountStage()
     paintBattle(events)
@@ -183,6 +194,7 @@ function render(focusHeading = false, events: readonly BattleEvent[] = []): void
     view.innerHTML = titleView(profile, error)
   }
   if (screen !== 'battle') {
+    bossHud.clear()
     attackImpact = undefined
     attackFinishing = false
     arena?.stopHeroAttack()
@@ -297,6 +309,7 @@ function enterBattle(): void {
   attackImpact = undefined
   attackFinishing = false
   arena?.clear()
+  bossHud.clear()
   battle = startBattle(profile)
   selected = battle.skills[0]!.id
   overcharge = false
@@ -380,6 +393,8 @@ function saveResult(): void {
 function schedule(): void {
   stopTimer()
   if (paused || attackImpact || attackFinishing || screen !== 'battle' || !battle || battle.phase === 'player') return
+  const quick = skip || reducedMotion.matches
+  const resultDelay = !quick && (battle.phase === 'victory' || battle.phase === 'defeat') ? bossHud.exitDelay : 0
   timer = window.setTimeout(() => {
     if (!battle || paused || screen !== 'battle') return
     if (battle.phase === 'victory' || battle.phase === 'defeat') {
@@ -395,7 +410,7 @@ function schedule(): void {
       view.querySelector<HTMLElement>('.skill[aria-pressed="true"]')?.focus({ preventScroll: true })
     }
     schedule()
-  }, (skip || reducedMotion.matches ? 45 : 410) / speed)
+  }, Math.max(resultDelay, (quick ? 45 : 410) / speed))
 }
 
 function presentTurn(next: ReturnType<typeof playerAction>): void {
