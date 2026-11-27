@@ -90,7 +90,7 @@ O ouro financia construções, compras e parte do recrutamento. As provisões co
 
 ### Interface de chefes
 
-O Guardião do Portão e os oito núcleos de expedição usam o mesmo HUD. O núcleo recebe a interface quando emerge após a queda dos focos. Cada chefe tem nível de exibição, retrato, runa, paleta e ornamentação próprios. A barra mostra a camada atual, o número de camadas restantes e a Vida total real. As camadas são divisões visuais da Vida máxima e a perda de uma camada não altera as regras de dano.
+O Guardião do Portão e os oito núcleos de expedição usam o mesmo HUD, no canto superior direito da arena. O núcleo recebe a interface quando emerge após a queda dos focos. Cada chefe tem nível de exibição, retrato, runa, paleta e ornamentação próprios. A barra mostra a camada atual, o número de camadas restantes e a Vida total real. As camadas são divisões visuais da Vida máxima e a perda de uma camada não altera as regras de dano.
 
 A paleta acompanha a invocação do reforço do Guardião e a quebra da barreira da Sentinela da Ruptura. Os demais núcleos mudam de apresentação na última camada. Os ícones mostram efeitos que estão ativos e habilidades especiais quando executadas. A interface respeita a preferência por movimento reduzido e a opção Pular efeitos.
 

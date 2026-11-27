@@ -51,7 +51,7 @@ root.innerHTML = `
     </header>
     <main id="view" aria-busy="true"><p class="loading">Carregando Reinos da Aurora…</p></main>
     <div class="stage-storage" aria-hidden="true"><div id="phaser-stage"></div></div>
-    <footer class="game-footer"><div class="view-width footer-inner"><span>VERSÃO 0.4.10</span><span>SALVAMENTO NESTE NAVEGADOR</span></div></footer>
+    <footer class="game-footer"><div class="view-width footer-inner"><span>VERSÃO 0.4.11</span><span>SALVAMENTO NESTE NAVEGADOR</span></div></footer>
   </div>`
 
 const view = root.querySelector<HTMLElement>('#view')!
@@ -163,11 +163,19 @@ function render(focusHeading = false, events: readonly BattleEvent[] = []): void
     const skill = battle.skills.find((entry) => entry.id === selected) ?? battle.skills[0]!
     if (!view.querySelector('.battle')) {
       view.innerHTML = `<section class="view-width battle" aria-labelledby="battle-title">
-        <div data-battle-heading></div><div class="boss-hud-slot" data-boss-hud></div><div data-battle-body></div>
+        <div data-battle-heading></div>
+        <div data-battle-arena>
+          <div data-arena-content></div><div class="boss-hud-slot" data-boss-hud></div>
+        </div>
+        <div data-battle-body></div>
       </section>`
     }
     const display = battleView({ battle, profile, selected: skill, history, error, speed, skip, paused, saving: busy, overcharge, opening: events.some((event) => event.kind === 'abyss-start') })
     view.querySelector<HTMLElement>('[data-battle-heading]')!.innerHTML = display.heading
+    const frame = view.querySelector<HTMLElement>('[data-battle-arena]')!
+    frame.className = display.arenaClass
+    frame.setAttribute('style', display.arenaStyle)
+    frame.querySelector<HTMLElement>('[data-arena-content]')!.innerHTML = display.arena
     view.querySelector<HTMLElement>('[data-battle-body]')!.innerHTML = display.body
     bossHud.paint(view.querySelector<HTMLElement>('[data-boss-hud]')!, battle, events, !skip && !reducedMotion.matches, paused, speed)
     view.querySelector('[data-stage-slot]')?.append(stageHost)

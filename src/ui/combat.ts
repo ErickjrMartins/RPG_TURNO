@@ -82,16 +82,16 @@ export function battleView(display: BattleDisplay) {
         </div>
       </header>
       <p class="battle-brief">${paused ? 'Batalha pausada.' : battle.sealed ? 'Barreira do Núcleo ativa. Abra um Abismo Pessoal agora para quebrá-la.' : isGate && battle.reinforced ? 'O Guardião entrou na segunda fase. Atenção ao Corte do Véu.' : location.intro}</p>`
-  const body = `
-      <div class="arena-frame terrain-${region} ${isGate ? 'gate-arena' : ''} ${active ? `is-abyss abyss-${active.classId}` : ''} ${battle.units.length > 8 ? 'full-formation' : ''}"
-          style="--abyss-tint:${spec.tint};--activation-zoom:${arenaCamera.activationZoom};--activation-duration:${360 / speed}ms">
+  const arenaClass = `arena-frame terrain-${region} ${isGate ? 'gate-arena' : ''} ${active ? `is-abyss abyss-${active.classId}` : ''} ${battle.units.length > 8 ? 'full-formation' : ''}`
+  const arenaStyle = `--abyss-tint:${spec.tint};--activation-zoom:${arenaCamera.activationZoom};--activation-duration:${360 / speed}ms`
+  const arena = `
         <div class="arena-world ${opening && !skip ? 'abyss-opening' : ''}">
           <div class="arena-canvas" data-stage-slot aria-hidden="true"></div>
           ${battle.units.map((unit) => unitLabel(unit, targets.some((target) => target.id === unit.id), area.has(unit.id), Boolean(affectedByAbyss(unit)))).join('')}
         </div>
-        <div class="arena-badges"><span>ALIANÇA DE ALVOR</span><span>RODADA ${battle.round}</span><span>FORÇAS DO VÉU</span></div>
-        ${active ? `<div class="abyss-banner" role="status"><b>${spec.name}</b><span>${active.rounds} ${active.rounds === 1 ? 'rodada restante' : 'rodadas restantes'}</span></div>` : ''}
-      </div>
+        <div class="arena-badges"><span>ALIANÇA DE ALVOR</span><span>RODADA ${battle.round}</span><span class="arena-enemy-badge">FORÇAS DO VÉU</span></div>
+        ${active ? `<div class="abyss-banner" role="status"><b>${spec.name}</b><span>${active.rounds} ${active.rounds === 1 ? 'rodada restante' : 'rodadas restantes'}</span></div>` : ''}`
+  const body = `
       <div class="combat-columns">
         <section class="panel command-panel" aria-label="Comandos de combate">
           <div class="hero-vitals">
@@ -133,7 +133,7 @@ export function battleView(display: BattleDisplay) {
           <p class="visually-hidden" role="status">${safe(history.at(-1) ?? '')}</p>
         </aside>
       </div>`
-  return { heading, body }
+  return { heading, arenaClass, arenaStyle, arena, body }
 }
 
 export function resultView(encounter: EncounterId, victory: boolean, profile: Profile, earnedGold: number, attemptId: number): string {
