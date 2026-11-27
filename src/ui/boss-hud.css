@@ -28,6 +28,14 @@
   --boss-speed: 1;
   position: relative;
   isolation: isolate;
+  display: grid;
+  grid-template-columns: var(--boss-seal) minmax(0, 1fr) var(--boss-medallion);
+  grid-template-areas:
+    "name name portrait"
+    "layer rail portrait"
+    "effects effects effects";
+  align-items: center;
+  row-gap: 3px;
   color: #fce9cc;
 }
 
@@ -40,13 +48,8 @@
   background: radial-gradient(ellipse at 83% 32%, color-mix(in srgb, var(--boss-energy) 19%, transparent), transparent 67%);
 }
 
-.boss-hud-main {
-  display: grid;
-  grid-template-columns: var(--boss-seal) minmax(0, 1fr) var(--boss-medallion);
-  align-items: center;
-}
-
 .boss-layer {
+  grid-area: layer;
   z-index: 2;
   display: grid;
   place-content: center;
@@ -76,6 +79,7 @@
 }
 
 .boss-rail {
+  grid-area: rail;
   position: relative;
   height: var(--boss-rail);
   margin-inline: calc(var(--boss-seal) * -.12) calc(var(--boss-medallion) * -.14);
@@ -176,10 +180,12 @@
 }
 
 .boss-portrait {
+  grid-area: portrait;
   z-index: 2;
   position: relative;
   display: grid;
   place-items: center;
+  width: var(--boss-medallion);
   aspect-ratio: 1;
   filter: drop-shadow(0 4px 6px #05040a);
 }
@@ -215,20 +221,13 @@
 
 .boss-level small { display: block; font: 750 7px / 1 'DM Sans Variable', sans-serif; }
 
-.boss-hud-details {
-  display: grid;
-  justify-items: end;
-  gap: 4px;
-  position: relative;
-  z-index: 1;
-  margin-top: calc(var(--boss-medallion) * -.22);
-  padding-right: calc(var(--boss-medallion) * .32);
-}
-
 .boss-nameplate {
+  grid-area: name;
+  justify-self: end;
   position: relative;
   min-width: 0;
   max-width: 100%;
+  margin-right: 4px;
   padding: 4px clamp(7px, 1.25vw, 15px) 5px;
   border: 2px solid var(--boss-metal);
   border-radius: 4px 2px 8px 6px;
@@ -245,6 +244,7 @@
   font: 800 clamp(10px, 1.35vw, 17px) / 1.08 'Cinzel Variable', Georgia, serif;
   color: #ffe9c4;
   text-shadow: 0 2px 2px #100b0e;
+  overflow-wrap: anywhere;
 }
 
 .boss-phase {
@@ -278,7 +278,7 @@
 .boss-chain i:nth-child(even) { height: 5px; margin-top: 2px; border-color: #655045; }
 
 .boss-effects {
-  order: 1;
+  grid-area: effects;
   list-style: none;
   margin: 0;
   padding: 0;
@@ -356,11 +356,31 @@
 
 @media (max-width: 680px) {
   .boss-hud-slot { inset: 4px 5px auto auto; width: 55%; }
+  .arena-frame:has(.boss-hud) {
+    display: grid;
+    grid-template: minmax(58px, auto) auto / minmax(0, 1fr);
+    aspect-ratio: auto;
+    background-position: center bottom;
+  }
+  .arena-frame:has(.boss-hud) [data-arena-content] { display: contents; }
+  .arena-frame:has(.boss-hud) .arena-world {
+    position: relative;
+    inset: auto;
+    grid-row: 2;
+    aspect-ratio: 1120 / 420;
+  }
+  .arena-frame:has(.boss-hud) .boss-hud-slot {
+    position: relative;
+    inset: auto;
+    grid-row: 1;
+    align-self: start;
+    justify-self: end;
+    margin: 4px 5px 3px 0;
+  }
   .arena-frame:has(.boss-hud:not([hidden], .defeated:not(.dissolve))) .arena-badges { justify-content: flex-start; }
   .boss-hud { --boss-medallion: 40px; --boss-seal: 27px; }
-  .boss-hud-details { margin-top: -12px; padding-right: 12px; }
-  .boss-nameplate { padding-block: 3px 4px; }
-  .boss-chain { opacity: .65; }
+  .boss-nameplate { padding: 2px 5px 3px; }
+  .boss-chain { display: none; }
   .boss-effect { font-size: 10px; }
 }
 
