@@ -51,7 +51,7 @@ root.innerHTML = `
     </header>
     <main id="view" aria-busy="true"><p class="loading">Carregando Reinos da Aurora…</p></main>
     <div class="stage-storage" aria-hidden="true"><div id="phaser-stage"></div></div>
-    <footer class="game-footer"><div class="view-width footer-inner"><span>VERSÃO 0.4.11</span><span>SALVAMENTO NESTE NAVEGADOR</span></div></footer>
+    <footer class="game-footer"><div class="view-width footer-inner"><span>VERSÃO 0.4.12</span><span>SALVAMENTO NESTE NAVEGADOR</span></div></footer>
   </div>`
 
 const view = root.querySelector<HTMLElement>('#view')!
@@ -74,6 +74,7 @@ let profile: Profile | null = null
 let repository: SaveRepository | undefined
 let arena: ArenaScene | undefined
 let stageLoading = false
+let stageFailed = false
 let stopPortrait: (() => void) | undefined
 let error = ''
 let busy = false
@@ -113,7 +114,7 @@ function renderAudio(): void {
 function canOpenTestAdmin(): boolean {
   return !!profile && !busy && !testAdminChecking && testAdminAllowed
     && !['title', 'create', 'result', 'plaza', 'test-admin'].includes(screen)
-    && (screen !== 'battle' || battle?.phase === 'player')
+    && (screen !== 'battle' || (battle?.phase === 'player' && !arrivalActive()))
 }
 
 function renderTestAdminButton(): void {
@@ -145,6 +146,10 @@ function paintBattle(events: readonly BattleEvent[] = []): void {
   arena.show(battle.attempt.id, profile.hero, profile.wardrobe.looks, battle.units, events, !skip && !reducedMotion.matches, speed, paused)
 }
 
+function arrivalActive(): boolean {
+  return !skip && !reducedMotion.matches && (stageLoading || !!arena?.entering)
+}
+
 function render(focusHeading = false, events: readonly BattleEvent[] = []): void {
   if (screen !== 'plaza') plaza.leave()
   stopPortrait?.()
@@ -152,7 +157,6 @@ function render(focusHeading = false, events: readonly BattleEvent[] = []): void
   const active = document.activeElement instanceof HTMLElement && view.contains(document.activeElement) ? document.activeElement : null
   stageStorage.append(stageHost)
   view.setAttribute('aria-busy', String(busy))
-  renderTestAdminButton()
   if (screen === 'create') {
     view.innerHTML = createView(draft, error, busy)
     const portrait = view.querySelector<HTMLElement>('.character-portrait')
@@ -170,7 +174,10 @@ function render(focusHeading = false, events: readonly BattleEvent[] = []): void
         <div data-battle-body></div>
       </section>`
     }
-    const display = battleView({ battle, profile, selected: skill, history, error, speed, skip, paused, saving: busy, overcharge, opening: events.some((event) => event.kind === 'abyss-start') })
+    mountStage()
+    paintBattle(events)
+    const display = battleView({ battle, profile, selected: skill, history, error, speed, skip, paused, saving: busy,
+      overcharge, arriving: arrivalActive(), opening: events.some((event) => event.kind === 'abyss-start') })
     view.querySelector<HTMLElement>('[data-battle-heading]')!.innerHTML = display.heading
     const frame = view.querySelector<HTMLElement>('[data-battle-arena]')!
     frame.className = display.arenaClass
@@ -179,8 +186,6 @@ function render(focusHeading = false, events: readonly BattleEvent[] = []): void
     view.querySelector<HTMLElement>('[data-battle-body]')!.innerHTML = display.body
     bossHud.paint(view.querySelector<HTMLElement>('[data-boss-hud]')!, battle, events, !skip && !reducedMotion.matches, paused, speed)
     view.querySelector('[data-stage-slot]')?.append(stageHost)
-    mountStage()
-    paintBattle(events)
   } else if (screen === 'result' && profile && battle) {
     view.innerHTML = resultView(battle.attempt.encounter, battle.phase === 'victory', profile, earnedGold, battle.attempt.id)
   } else if (screen === 'plaza' && profile) {
@@ -208,6 +213,7 @@ function render(focusHeading = false, events: readonly BattleEvent[] = []): void
     arena?.stopHeroAttack()
     if (arena?.scene.isActive()) arena.scene.pause()
   }
+  renderTestAdminButton()
   if (focusHeading) {
     const heading = view.querySelector<HTMLElement>('h1')
     heading?.setAttribute('tabindex', '-1')
@@ -317,6 +323,7 @@ function enterBattle(): void {
   attackImpact = undefined
   attackFinishing = false
   arena?.clear()
+  stageFailed = false
   bossHud.clear()
   battle = startBattle(profile)
   selected = battle.skills[0]!.id
@@ -400,7 +407,7 @@ function saveResult(): void {
 
 function schedule(): void {
   stopTimer()
-  if (paused || attackImpact || attackFinishing || screen !== 'battle' || !battle || battle.phase === 'player') return
+  if (paused || attackImpact || attackFinishing || screen !== 'battle' || !battle || battle.phase === 'player' || arrivalActive()) return
   const quick = skip || reducedMotion.matches
   const resultDelay = !quick && (battle.phase === 'victory' || battle.phase === 'defeat') ? bossHud.exitDelay : 0
   timer = window.setTimeout(() => {
@@ -430,7 +437,7 @@ function presentTurn(next: ReturnType<typeof playerAction>): void {
 }
 
 function act(targetId: string): void {
-  if (!battle || busy || paused || battle.phase !== 'player') return
+  if (!battle || busy || paused || battle.phase !== 'player' || arrivalActive()) return
   try {
     const spell = selected
     const next = playerAction(battle, spell, targetId, overcharge)
@@ -466,7 +473,7 @@ function act(targetId: string): void {
 }
 
 function selectSkill(skillId: string): void {
-  if (!battle || paused) return
+  if (!battle || paused || arrivalActive()) return
   const skill = battle.skills.find((entry) => entry.id === skillId)
   if (!skill || skillBlocked(battle, skill)) return
   if (selected !== skillId) overcharge = false
@@ -707,7 +714,7 @@ document.addEventListener('keydown', (event) => {
 })
 
 function mountStage(): void {
-  if (arena || stageLoading) return
+  if (arena || stageLoading || stageFailed) return
   stageLoading = true
   void import('./game/stage').then(({ startStage }) => {
     if (screen !== 'battle') {
@@ -715,19 +722,36 @@ function mountStage(): void {
       return
     }
     const game = startStage(stageHost)
+    game.events.on('aurora:entry-step', () => audio.play('warrior-step'))
+    game.events.on('aurora:entry-complete', () => {
+      if (screen !== 'battle') return
+      render()
+      schedule()
+    })
     game.events.once('aurora:ready', (scene: ArenaScene) => {
       arena = scene
       stageLoading = false
-      if (screen === 'battle') paintBattle()
+      if (screen === 'battle') {
+        render()
+        schedule()
+      }
       else arena.scene.pause()
     })
   }).catch((cause: unknown) => {
     stageLoading = false
+    stageFailed = true
+    if (screen !== 'battle') return
     error = message(cause)
-    const errorTarget = view.querySelector('.form-error')
-    if (errorTarget) errorTarget.textContent = error
+    render()
+    schedule()
   })
 }
+
+reducedMotion.addEventListener('change', () => {
+  if (screen !== 'battle') return
+  render()
+  schedule()
+})
 
 renderAudio()
 try {

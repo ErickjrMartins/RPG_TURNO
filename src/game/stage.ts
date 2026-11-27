@@ -6,6 +6,7 @@ import { monsterIds } from '../content/monsters'
 import type { BattleEvent, Unit } from '../domain/battle'
 import type { Hero } from '../domain/profile'
 import { animateArcherShot, shotTexture } from './archer-shot'
+import { arenaEntry, entryPose, prepareEntryTexture, type ArenaEntry } from './arena-entry'
 import { attackCellSize, type AttackPlayback } from './attack-playback'
 import { idleFrames, prepareIdleTexture } from './idle-motion'
 import { animateMageSpell } from './mage-effects'
@@ -58,6 +59,8 @@ interface Actor {
   alive: boolean
   busyUntil: number
   idle?: string | null
+  entry?: ArenaEntry
+  stride?: string
 }
 
 export type AnimatedAttack = WarriorAttack | 'shot' | 'spark' | 'rain'
@@ -75,6 +78,7 @@ export class ArenaScene extends Phaser.Scene {
   private attack: { spell: AnimatedAttack; playback: AttackPlayback } | undefined
   private motionTime = 0
   private idleEnabled = false
+  private entrySpeed = 1
 
   constructor() {
     super('arena')
@@ -82,6 +86,11 @@ export class ArenaScene extends Phaser.Scene {
 
   create(): void {
     this.game.events.emit('aurora:ready', this)
+  }
+
+  get entering(): boolean {
+    for (const actor of this.actors.values()) if (actor.entry) return true
+    return false
   }
 
   clear(): void {
@@ -100,7 +109,7 @@ export class ArenaScene extends Phaser.Scene {
     const warrior = spell === 'strike' || spell === 'charge'
     const texture = warrior ? warriorTexture(spell, form) : spell === 'shot' ? shotTexture(form) : sparkTexture(form)
     const target = targets[0]
-    if (!hero || !target || !this.textures.exists(texture)) return false
+    if (!hero || this.entering || !target || !this.textures.exists(texture)) return false
     this.stopHeroAttack()
     this.restoreIdleBase(hero)
     const { impact, finish, playCue } = callbacks
@@ -121,10 +130,43 @@ export class ArenaScene extends Phaser.Scene {
     actor.sprite.setScale(actor.scale)
   }
 
+  private finishEntry(actor: Actor, entry: ArenaEntry): void {
+    const { x, y } = entry.home
+    actor.entry = undefined
+    actor.stride = undefined
+    this.restoreIdleBase(actor)
+    actor.sprite.setPosition(x, y).setRotation(0).setAlpha(actor.alive ? 1 : 0.24)
+    actor.shadow.setX(x).setAlpha(actor.alive ? 1 : 0.32)
+    actor.clothes?.setPosition(0, 0).setAlpha(actor.alive ? 1 : 0.25)
+  }
+
+  private poseEntry(actor: Actor, entry: ArenaEntry): void {
+    const pose = entryPose(entry)
+    if (pose.complete) {
+      this.finishEntry(actor, entry)
+      return
+    }
+    if (pose.opacity > 0 && actor.stride) {
+      actor.sprite.setTexture(actor.stride, pose.frame).setDisplaySize(actor.width, actor.height)
+    }
+    actor.sprite.setPosition(pose.x, pose.y).setRotation(pose.tilt).setAlpha(pose.opacity)
+    actor.shadow.setX(pose.x).setAlpha(pose.opacity)
+    actor.clothes?.setPosition(pose.x - entry.home.x, pose.y - entry.home.y).setAlpha(pose.opacity)
+    if (pose.step > entry.step && entry.audible && pose.x > 0 && pose.x < arenaWidth) this.game.events.emit('aurora:entry-step')
+    entry.step = pose.step
+  }
+
   update(_time: number, delta: number): void {
     if (!this.idleEnabled) return
-    this.motionTime += Math.min(delta, 50)
+    const elapsed = Math.min(delta, 50)
+    this.motionTime += elapsed
+    const entering = this.entering
     for (const [id, actor] of this.actors) {
+      if (actor.entry) {
+        actor.entry.elapsed += elapsed * this.entrySpeed
+        this.poseEntry(actor, actor.entry)
+        continue
+      }
       if (!actor.alive || actor.busyUntil > this.motionTime || (id === 'hero' && this.attack)) continue
       if (actor.idle === undefined) actor.idle = prepareIdleTexture(this, actor.art) ?? null
       const cycle = this.motionTime / 3000 + actor.phase
@@ -136,14 +178,17 @@ export class ArenaScene extends Phaser.Scene {
       }
       actor.sprite.setDisplaySize(actor.width * (1 + breath * 0.008), actor.height * (1 + breath * 0.015))
     }
+    if (entering && !this.entering) this.game.events.emit('aurora:entry-complete')
   }
 
   show(run: number, hero: Hero, looks: Partial<Record<StyleSlot, AppearanceId>>, units: readonly Unit[], events: readonly BattleEvent[], animate: boolean, speed: number, paused: boolean): void {
-    if (run !== this.run) {
+    const initial = run !== this.run
+    if (initial) {
       this.clear()
       this.run = run
     }
     this.idleEnabled = animate && !paused
+    this.entrySpeed = speed
     this.attack?.playback.adjust(speed, paused)
     for (const [id, entry] of this.actors) {
       if (units.some((unit) => unit.id === id)) continue
@@ -168,8 +213,17 @@ export class ArenaScene extends Phaser.Scene {
         entry = { sprite, shadow, clothes, art: texture, scale, width: sprite.displayWidth, height: sprite.displayHeight,
           phase: ((unit.slot * 3 + (unit.team === 'allies' ? 0 : 7)) % 19) / 19, alive: unit.hp > 0, busyUntil: 0 }
         this.actors.set(unit.id, entry)
+        if (animate && entry.alive && (initial || events.some((event) => event.kind === 'summon' && event.target === unit.id))) {
+          entry.entry = arenaEntry(unit, entry.width, initial)
+          entry.stride = prepareEntryTexture(this, texture)
+        }
       }
       entry.alive = unit.hp > 0
+      if (entry.entry && (!animate || !entry.alive)) this.finishEntry(entry, entry.entry)
+      if (entry.entry) {
+        this.poseEntry(entry, entry.entry)
+        continue
+      }
       if ((!animate || !entry.alive) && !(unit.id === 'hero' && this.attack)) this.restoreIdleBase(entry)
       entry.sprite.setAlpha(unit.hp > 0 ? 1 : 0.24)
       entry.shadow.setAlpha(unit.hp > 0 ? 1 : 0.32)

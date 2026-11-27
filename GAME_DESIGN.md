@@ -67,6 +67,8 @@ O Canalizador acessa a árvore após as Ruínas do Farol. Recebe dois pontos no 
 
 Na arena, a vida atual e máxima aparece junto à unidade e no painel do herói. Aliados usam verde, inimigos usam vermelho e escudos têm contorno azul. A Centelha viaja até um alvo. A Chuva Astral lança meteoros de gelo com caudas de fogo azul sobre a fileira atingida. Eles caem em sequência e explodem individualmente ao tocar o chão. O dano da habilidade é resolvido na primeira explosão e a próxima ação começa após a sequência. A Renovação envolve o aliado em luz ascendente, o Coro Vital pulsa sobre toda a formação e o Círculo do Vazio forma fendas e sigilos sobre a área. Cada feitiço tem ícone e som próprios e a opção de pular efeitos preserva a resolução do combate.
 
+Cada encontro começa com uma entrada pela lateral da arena. Combatentes terrestres caminham até as posições da formação, e seres voadores entram flutuando. Núcleos e reforços recebem uma entrada própria quando aparecem. Pausa, velocidade, movimento reduzido e Pular efeitos se aplicam à chegada, que termina antes de liberar o próximo comando de combate.
+
 ### Exploração
 
 O jogador seleciona um nó do mapa e abre um encontro que pode conter diálogo, baú, combate ou escolha, conforme o conteúdo. A interface indica o objetivo, os requisitos, o progresso da etapa e a recompensa. Cada encontro oferece um fluxo para continuar a jornada ou voltar à cidade.
