@@ -21,6 +21,7 @@ export interface BattleDisplay {
   saving: boolean
   overcharge: boolean
   opening: boolean
+  arriving: boolean
 }
 
 function healthBar(unit: Unit, shield: number): string {
@@ -46,10 +47,10 @@ function unitLabel(unit: Unit, actionable: boolean, affected: boolean, aura: boo
 }
 
 export function battleView(display: BattleDisplay) {
-  const { battle, profile, selected, speed, skip, paused, saving, error, history, overcharge, opening } = display
+  const { battle, profile, selected, speed, skip, paused, saving, error, history, overcharge, opening, arriving } = display
   const location = encounters[battle.attempt.encounter]
   const region = isZone(battle.attempt.encounter) ? zone(battle.attempt.encounter).region : 'fields'
-  const canAct = battle.phase === 'player' && !paused && !saving
+  const canAct = battle.phase === 'player' && !paused && !saving && !arriving
   const selectedBlocked = skillBlocked(battle, selected)
   const targets = canAct && !selectedBlocked ? availableTargets(battle, selected) : []
   const ownClass = classes[profile.hero.classId]
@@ -82,7 +83,7 @@ export function battleView(display: BattleDisplay) {
         </div>
       </header>
       <p class="battle-brief">${paused ? 'Batalha pausada.' : battle.sealed ? 'Barreira do Núcleo ativa. Abra um Abismo Pessoal agora para quebrá-la.' : isGate && battle.reinforced ? 'O Guardião entrou na segunda fase. Atenção ao Corte do Véu.' : location.intro}</p>`
-  const arenaClass = `arena-frame terrain-${region} ${isGate ? 'gate-arena' : ''} ${active ? `is-abyss abyss-${active.classId}` : ''} ${battle.units.length > 8 ? 'full-formation' : ''}`
+  const arenaClass = `arena-frame terrain-${region} ${isGate ? 'gate-arena' : ''} ${active ? `is-abyss abyss-${active.classId}` : ''} ${battle.units.length > 8 ? 'full-formation' : ''} ${arriving ? 'is-arriving' : ''}`
   const arenaStyle = `--abyss-tint:${spec.tint};--activation-zoom:${arenaCamera.activationZoom};--activation-duration:${360 / speed}ms`
   const arena = `
         <div class="arena-world ${opening && !skip ? 'abyss-opening' : ''}">
@@ -100,7 +101,7 @@ export function battleView(display: BattleDisplay) {
             ${healthBar(hero, shieldOf(hero))}</div>
           </div>
           <div class="command-heading">
-            <h2>${canAct ? 'Sua vez' : paused ? 'Em pausa' : saving ? 'Salvando resultado' : 'Resolução'}</h2>
+            <h2>${canAct ? 'Sua vez' : paused ? 'Em pausa' : saving ? 'Salvando resultado' : arriving ? 'Entrada em cena' : 'Resolução'}</h2>
             <div class="energy" style="--energy:${battle.energy}%"><span>${ownClass.resource}</span><strong>${battle.energy} / 100</strong></div>
           </div>
           <div class="skill-list">

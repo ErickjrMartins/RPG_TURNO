@@ -379,6 +379,7 @@ img { max-width: 100%; }
 .unit-label strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .unit-label small { color: #e8d9c5; font-size: .9em; }
 .unit-label.fallen { opacity: .64; }
+.arena-frame.is-arriving .unit-label { visibility: hidden; }
 .unit-label.actionable { pointer-events: auto; border-color: #e7c48f; box-shadow: 0 0 12px #d6ae7755; }
 .unit-label.actionable::before { content: ""; position: absolute; inset: -38px 0 0; }
 .unit-label.actionable:hover { background: #382c22; border-color: #fbe0ab; }
