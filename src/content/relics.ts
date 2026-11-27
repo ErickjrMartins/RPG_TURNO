@@ -20,6 +20,7 @@ export interface Bonuses {
 
 interface RelicSpec {
   name: string
+  icon?: string
   slots: readonly GearSlot[]
   rarity: 'Comum' | 'Incomum' | 'Rara'
   bonus: Bonuses
@@ -30,8 +31,8 @@ interface RelicSpec {
 export const relics = {
   'dawn-brooch': { name: items['dawn-brooch'].name, slots: ['rosary'], rarity: 'Comum', bonus: { power: 3, defense: 2 }, troop: true },
   'gate-insignia': { name: items['gate-insignia'].name, slots: ['talisman'], rarity: 'Incomum', bonus: { power: 5, defense: 3 }, troop: true },
-  'veil-edge': { name: 'Lâmina do Limiar', slots: ['weapon'], rarity: 'Comum', bonus: { power: 6, precision: 2 } },
-  'ash-mantle': { name: 'Manto de Vigília', slots: ['mantle'], rarity: 'Incomum', bonus: { hp: 18, defense: 4 } },
+  'veil-edge': { name: 'Lâmina do Limiar', icon: 'relic-veil-edge.webp', slots: ['weapon'], rarity: 'Comum', bonus: { power: 6, precision: 2 } },
+  'ash-mantle': { name: 'Manto de Vigília', icon: 'relic-ash-mantle.webp', slots: ['mantle'], rarity: 'Incomum', bonus: { hp: 18, defense: 4 } },
   'ember-loop': { name: 'Elo da Brasa', slots: ['ringLeft', 'ringRight'], rarity: 'Comum', bonus: { power: 3, precision: 1 }, troop: true },
   'hollow-loop': { name: 'Elo do Ocaso', slots: ['ringLeft', 'ringRight'], rarity: 'Incomum', bonus: { hp: 10, resistance: 5 } },
   'veil-rosary': { name: 'Rosário do Limiar', slots: ['rosary'], rarity: 'Rara', bonus: { defense: 5, resistance: 8 }, affinity: 3 },

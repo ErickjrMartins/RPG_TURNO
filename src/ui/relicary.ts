@@ -1,4 +1,5 @@
 import { skillsByClass, troops } from '../content/adventure'
+import { assetUrl } from '../assets'
 import { styledHero } from './events'
 import { gearSlots, masteryPaths, pins, relicSpec, stock, type GearSlot, type GlyphId, type Lineage, type PinId } from '../content/relics'
 import { attributesFor, type Profile } from '../domain/profile'
@@ -21,6 +22,10 @@ function bonusText(item: Relic): string {
   return (Object.keys(stats) as (keyof typeof stats)[]).filter((key) => bonus[key]).map((key) => `+${bonus[key]} ${stats[key]}`).join(' · ')
 }
 
+function relicIcon(filename: string): string {
+  return `<img class="relic-icon" src="${assetUrl(filename)}" alt="" width="48" height="48">`
+}
+
 function detail(profile: Profile, item: Relic): string {
   const { relicary } = profile
   const spec = relicSpec(item.id)
@@ -34,7 +39,7 @@ function detail(profile: Profile, item: Relic): string {
   const transfers = relicary.relics.filter((entry) => !entry.refine && item.refine && !item.locked && entry.key !== item.key)
   return `<section class="panel detail-panel" aria-labelledby="relic-details">
     <div class="eyebrow">${spec.rarity} · GRAU ${item.grade} · REFINO +${item.refine}</div>
-    <h2 id="relic-details">${spec.name}</h2>
+    <h2 id="relic-details"${spec.icon ? ' class="relic-heading"' : ''}>${spec.icon ? relicIcon(spec.icon) : ''}${spec.name}</h2>
     <p>${spec.slots.map((id) => gearSlots[id]).join(' / ')}</p>
     <div class="comparison">
       <div><small>Selecionada</small><b>${spec.name}</b><span>${bonusText(item)}</span></div>
@@ -116,7 +121,8 @@ export function relicaryView(profile: Profile, state: { chosen: string; filter: 
         <div class="detail-actions style-nav"><button class="small-button" data-action="wardrobe" data-value="mantle">Traje de Clã</button><button class="small-button" data-action="wardrobe" data-value="aura">Manifestação</button></div>
         <div class="hero-slot-list">${slots.map((id) => {
           const item = relicary.relics.find((entry) => entry.key === relicary.slots[id])
-          return `<div><strong>${gearSlots[id]}</strong>${item ? `<button class="small-button" data-action="relic-select" data-value="${item.key}">${relicSpec(item.id).name}</button>` : '<span>Vazio</span>'}</div>`
+          const spec = item && relicSpec(item.id)
+          return `<div><strong>${gearSlots[id]}</strong>${item && spec ? `<button class="small-button${spec.icon ? ' relic-slot-item' : ''}" data-action="relic-select" data-value="${item.key}">${spec.icon ? relicIcon(spec.icon) : ''}${spec.name}</button>` : '<span>Vazio</span>'}</div>`
         }).join('')}</div>
       </section>
       <section class="panel detail-panel">
@@ -129,7 +135,7 @@ export function relicaryView(profile: Profile, state: { chosen: string; filter: 
             const level = relicBonuses(item)
             const current = wearing && relicBonuses(wearing)
             const better = !equipped(relicary, item.key) && (!current || gearIndex(level) > gearIndex(current))
-            return `<button class="inventory-cell relic-cell" data-action="relic-select" data-value="${item.key}" aria-pressed="${entry?.key === item.key && !stockItem}"><span aria-hidden="true">◇</span><b>${spec.name}</b><small>${item.locked ? 'Bloqueada' : equipped(relicary, item.key) ? 'Equipada' : better ? '<em>↑ Melhora</em>' : spec.rarity}</small></button>`
+            return `<button class="inventory-cell relic-cell" data-action="relic-select" data-value="${item.key}" aria-pressed="${entry?.key === item.key && !stockItem}">${spec.icon ? relicIcon(spec.icon) : '<span aria-hidden="true">◇</span>'}<b>${spec.name}</b><small>${item.locked ? 'Bloqueada' : equipped(relicary, item.key) ? 'Equipada' : better ? '<em>↑ Melhora</em>' : spec.rarity}</small></button>`
           }).join('')}
           ${shownPiles.map(({ id, amount }) => `<button class="inventory-cell" data-action="relic-select" data-value="stock:${id}"><span aria-hidden="true">✧</span><b>${stock[id].name}</b><small>×${amount}</small></button>`).join('')}
           ${filter === 'Tudo' ? '<span class="inventory-cell empty" aria-hidden="true"></span>'.repeat(Math.max(0, relicary.capacity - used)) : ''}

@@ -564,7 +564,7 @@ img { max-width: 100%; }
 .detail-panel p, .relic-character p { color: var(--muted); font-size: 13px; margin-block: 5px; }
 .base-screen > .detail-panel, .base-tools { margin-top: 14px; }
 .relic-character { text-align: center; }
-.relic-character img { width: 100%; height: clamp(140px, 25vw, 290px); object-fit: contain; background: radial-gradient(ellipse, #3b37522f, transparent 69%); }
+.relic-character .styled-hero img { width: 100%; height: clamp(140px, 25vw, 290px); object-fit: contain; background: radial-gradient(ellipse, #3b37522f, transparent 69%); }
 .hero-slot-list { margin: 12px 0 0; display: grid; grid-template-columns: 1fr 1fr; gap: 6px; text-align: left; }
 .hero-slot-list > div { display: grid; align-content: start; gap: 6px; border: 1px solid var(--line); padding: 7px; font-size: 12px; color: var(--muted); }
 .hero-slot-list strong { color: var(--gold); }
@@ -574,6 +574,10 @@ img { max-width: 100%; }
 .inventory-grid { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 5px; }
 .inventory-cell { min-width: 0; min-height: 62px; background: #1c272e; border: 1px solid var(--line); border-radius: 3px; padding: 4px; display: grid; gap: 2px; place-items: center; overflow-wrap: anywhere; line-height: 1.15; }
 .inventory-cell > span { color: var(--gold-light); }
+.relic-icon { display: block; width: 48px; max-width: 100%; height: auto; object-fit: contain; }
+.relic-heading, .relic-slot-item { display: flex; align-items: center; gap: 6px; }
+.relic-slot-item { overflow-wrap: anywhere; }
+.relic-slot-item .relic-icon { width: 24px; flex: 0 0 24px; }
 .inventory-cell b { font-size: 11px; }
 .inventory-cell small { font-size: 10px; color: var(--muted); }
 .inventory-cell em { color: #cfe697; font-style: normal; }
