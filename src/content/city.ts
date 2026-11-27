@@ -5,7 +5,7 @@ export const buildings = {
     position: [29, 36], upgrades: [{ gold: 18, supplies: 1, seconds: 12 }, { gold: 28, supplies: 2, seconds: 30 }],
   },
   barracks: {
-    name: 'Quartel dos Guardiões', icon: '⚔︎',
+    name: 'Quartel das Maldições', icon: '⚔︎',
     description: 'Recruta tropas e define o nível máximo de treinamento.',
     position: [72, 36], upgrades: [{ gold: 14, supplies: 1, seconds: 15 }, { gold: 23, supplies: 2, seconds: 35 }],
   },

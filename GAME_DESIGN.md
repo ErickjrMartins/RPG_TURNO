@@ -74,7 +74,7 @@ O jogador seleciona um nó do mapa e abre um encontro que pode conter diálogo, 
 | Edifício do MVP | Função |
 | --- | --- |
 | Salão do Conselho | Define o limite de nível dos demais edifícios e participa dos desbloqueios de regiões. |
-| Quartel dos Guardiões | Recruta e melhora tropas. |
+| Quartel das Maldições | Recruta e melhora tropas. |
 | Fazenda do Vale | Produz provisões periodicamente, com coleta e limite de armazenamento. |
 | Tesouraria | Define a capacidade de ouro. |
 
