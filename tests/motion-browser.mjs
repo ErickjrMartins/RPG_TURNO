@@ -61,23 +61,88 @@ async function verifySpark(form, isMobile = false) {
       const ctx = document.querySelector('.arena-canvas canvas').getContext('2d')
       const blue = (x, y, width, height) => ctx.getImageData(x, y, width, height).data.some((value, i, data) =>
         i % 4 === 2 && value > 208 && data[i - 2] < 165 && data[i - 1] > 120 && data[i + 1] > 160)
-      const state = { crystal: false, orb: false, impact: false }
+      const electricSpan = (x, y, width, height) => {
+        const pixels = ctx.getImageData(x, y, width, height).data
+        let first = height
+        let last = 0
+        for (let i = 0; i < pixels.length; i += 4) {
+          if (pixels[i + 2] < 210 || pixels[i + 1] < 85 || pixels[i] > 155 || pixels[i + 3] < 156) continue
+          const line = Math.floor(i / 4 / width)
+          first = Math.min(first, line)
+          last = Math.max(last, line)
+        }
+        return last - first + 1
+      }
+      const state = { crystal: false, orb: false, electric: false, impact: false }
       const deadline = performance.now() + 2400
       function scan() {
         if (meter() === health) {
           state.crystal ||= blue(432, 123, 59, 59)
-          state.orb ||= blue(508, 120, 150, 113)
+          const span = electricSpan(506, 95, 166, 161)
+          state.orb ||= span >= 59
+          state.electric ||= span >= 67
         } else {
-          state.impact ||= blue(715, 186, 66, 55)
+          state.impact ||= electricSpan(653, 137, 185, 159) >= 86
         }
         if (Object.values(state).every(Boolean) || performance.now() >= deadline) resolve(state)
         else requestAnimationFrame(scan)
       }
       scan()
     }))
-    assert.deepEqual(phases, { crystal: true, orb: true, impact: true }, `Fases da Centelha: ${form}`)
+    assert.deepEqual(phases, { crystal: true, orb: true, electric: true, impact: true }, `Fases da Centelha: ${form}`)
     await page.getByText(/usou Centelha\./).first().waitFor()
     await page.getByRole('heading', { name: 'Sua vez' }).waitFor()
+    assert.deepEqual(errors, [])
+  } finally {
+    await context.close()
+  }
+}
+
+async function verifyRain(form, isMobile = false) {
+  const context = await browser.newContext({ reducedMotion: 'no-preference', ...(isMobile ? { viewport: { width: 390, height: 844 }, isMobile: true } : {}) })
+  const page = await context.newPage()
+  const errors = []
+  page.on('pageerror', (error) => errors.push(error.message))
+  try {
+    await enterArena(page, form)
+    await page.locator('[data-action="skill"][data-value="rain"]').click()
+    const phases = await page.evaluate(() => new Promise((resolve) => {
+      const ctx = document.querySelector('.arena-canvas canvas').getContext('2d')
+      const meter = (name) => Number(document.querySelector(`[aria-label="Vida de ${name}"]`).getAttribute('aria-valuenow'))
+      const health = meter('Rastejante de Pedra')
+      const other = meter('Vulto do Véu')
+      const count = (x, y, width, height) => ctx.getImageData(x, y, width, height).data.filter((value, i, data) =>
+        i % 4 === 2 && value > 226 && data[i - 2] < 140 && data[i - 1] > 130 && data[i + 1] > 170).length
+      const flash = (x) => ctx.getImageData(x, 263, 23, 25).data.filter((r, i, data) =>
+        i % 4 === 0 && r > 172 && data[i + 1] > r + 14 && data[i + 2] > 243 && data[i + 3] > 215).length
+      const boxes = [[651, 28, 124, 69], [670, 102, 131, 93]]
+      const base = boxes.map((box) => count(...box))
+      document.querySelector('.target[data-value="crawler"]').click()
+      const state = { above: false, falling: false, firstGroundHit: false, laterGroundHit: false, moreFallingAfterHit: false, otherUnchanged: true }
+      const deadline = performance.now() + 1800
+      let firstImpact
+      function scan() {
+        state.otherUnchanged &&= other === meter('Vulto do Véu')
+        if (meter('Rastejante de Pedra') === health) {
+          state.above ||= count(...boxes[0]) > base[0] + 15
+          state.falling ||= count(...boxes[1]) > base[1] + 15
+        } else {
+          if (!state.firstGroundHit && flash(716) > 30) {
+            state.firstGroundHit = true
+            firstImpact = performance.now()
+          }
+          state.laterGroundHit ||= state.firstGroundHit && performance.now() - firstImpact > 43 && flash(757) > 30
+          state.moreFallingAfterHit ||= count(...boxes[0]) > base[0] + 15
+        }
+        if (Object.values(state).every(Boolean) || performance.now() > deadline) resolve(state)
+        else requestAnimationFrame(scan)
+      }
+      scan()
+    }))
+    assert.deepEqual(phases, {
+      above: true, falling: true, firstGroundHit: true, laterGroundHit: true, moreFallingAfterHit: true, otherUnchanged: true,
+    }, `Chuva Astral: ${form}`)
+    await page.getByText(/usou Chuva Astral\./).first().waitFor()
     assert.deepEqual(errors, [])
   } finally {
     await context.close()
@@ -87,7 +152,9 @@ async function verifySpark(form, isMobile = false) {
 try {
   await verifySpark('Masculina')
   await verifySpark('Feminina', true)
-  console.log('Centelha azul nas duas aparências, impacto, repouso, pausa e pulo de efeitos verificados no Chromium.')
+  await verifyRain('Masculina')
+  await verifyRain('Feminina', true)
+  console.log('Esfera elétrica da Centelha, explosão e sequência de impactos da Chuva Astral verificadas nas duas aparências.')
 } finally {
   await browser.close()
 }

@@ -1,5 +1,7 @@
 import type Phaser from 'phaser'
 import { pointFor } from './layout'
+import { paintAstralRain, rainDuration } from './mage-rain'
+import { paintSpark, sparkDuration } from './mage-spark'
 import type { Unit } from '../domain/battle'
 
 const spells = ['spark', 'rain', 'renew', 'chorus', 'void-circle', 'void-pulse', 'thread', 'dew', 'dawn', 'prism', 'tear']
@@ -30,41 +32,16 @@ export function animateMageSpell(scene: Phaser.Scene, spell: string, origin: Uni
   const ink = scene.add.graphics().setDepth(875)
   const points = targets.map(pointFor)
   const source = origin && pointFor(origin)
-  const duration = (ambient ? 365 : 340) / speed
+  const duration = (spell === 'rain' ? rainDuration : spell === 'spark' ? sparkDuration : ambient ? 365 : 340) / speed
   const draw = (t: number) => {
     ink.clear()
+    if (spell === 'rain') return paintAstralRain(ink, points, t * rainDuration)
     for (const point of points) {
       const x = point.x
       const ground = point.y - 8
       const hit = ground - 51
-      if (spell === 'spark' && source) {
-        const fly = Math.min(1, t / 0.48)
-        const travelX = source.x + (x - source.x) * fly
-        const travelY = source.y - 62 + (hit - source.y + 62) * fly - Math.sin(fly * Math.PI) * 20
-        const trail = Math.max(0, fly - 0.17)
-        const tailX = source.x + (x - source.x) * trail
-        const tailY = source.y - 62 + (hit - source.y + 62) * trail - Math.sin(trail * Math.PI) * 20
-        if (t < 0.57) {
-          ink.lineStyle(14, 0x3279ff, 0.28)
-          ink.lineBetween(tailX, tailY, travelX, travelY)
-          ink.lineStyle(4, 0x88daff, 0.95)
-          ink.lineBetween(tailX, tailY, travelX, travelY)
-          ink.fillStyle(0xe4fbff, 0.95)
-          ink.fillCircle(travelX, travelY, 6)
-        }
-        if (t > 0.43) particles(ink, x, hit, 33, (t - 0.43) / 0.57, 8, 0x88daff)
-      } else if (spell === 'rain') {
-        rune(ink, x, ground, 32 + t * 21, 1 - t, 0xc59bff)
-        for (let i = 0; i < 5; i++) {
-          const drop = Math.max(0, Math.min(1, t * 2.55 - i * 0.16))
-          const beamX = x + (i - 2) * 14
-          const beamY = hit - 101 * (1 - drop)
-          ink.lineStyle(7, 0x6a49bd, (1 - t) * 0.7)
-          ink.lineBetween(beamX + 15, beamY - 29, beamX, beamY)
-          ink.lineStyle(2, 0xffd69c, 1 - t)
-          ink.lineBetween(beamX + 15, beamY - 29, beamX, beamY)
-        }
-        particles(ink, x, hit, 68, t, 19, 0xe0a1ff)
+      if (spell === 'spark') {
+        if (source) paintSpark(ink, { x: source.x + 72, y: source.y - 126 }, { x, y: point.y - 72 }, t * sparkDuration)
       } else if (spell === 'renew') {
         rune(ink, x, ground, 46, 1 - t, 0xaef3b9)
         for (let i = 0; i < 9; i++) {

@@ -1,6 +1,15 @@
-export type Cue = 'select' | 'hit' | 'heal' | 'victory' | 'defeat' | 'arcane-spark' | 'arcane-rain' | 'arcane-renew' | 'arcane-chorus' | 'arcane-void'
+import { assetUrl } from '../assets'
 
-const notes: Record<Cue, number[]> = {
+const sampleSources = {
+  'warrior-strike': 'warrior-strike.mp3',
+  'warrior-step': 'warrior-step.mp3',
+  'warrior-cry': 'warrior-cry.mp3',
+  'warrior-blast': 'warrior-blast.mp3',
+}
+type SampleCue = keyof typeof sampleSources
+export type Cue = 'select' | 'hit' | 'heal' | 'victory' | 'defeat' | 'arcane-spark' | 'arcane-rain' | 'arcane-renew' | 'arcane-chorus' | 'arcane-void' | SampleCue
+
+const notes: Record<Exclude<Cue, SampleCue>, number[]> = {
   select: [392, 523],
   hit: [165, 110],
   heal: [330, 440, 554],
@@ -13,9 +22,22 @@ const notes: Record<Cue, number[]> = {
   'arcane-void': [158, 119, 238, 89],
 }
 
+function isSample(cue: Cue): cue is SampleCue {
+  return Object.hasOwn(sampleSources, cue)
+}
+
 export class GameAudio {
   private context?: AudioContext
+  private readonly samples = new Map<SampleCue, HTMLAudioElement>()
   enabled = this.loadPreference()
+
+  constructor() {
+    for (const cue of Object.keys(sampleSources) as SampleCue[]) {
+      const sample = new Audio(assetUrl(sampleSources[cue]))
+      sample.preload = this.enabled ? 'auto' : 'none'
+      this.samples.set(cue, sample)
+    }
+  }
 
   private loadPreference(): boolean {
     try {
@@ -27,6 +49,7 @@ export class GameAudio {
 
   toggle(): void {
     this.enabled = !this.enabled
+    if (!this.enabled) for (const sample of this.samples.values()) sample.pause()
     try {
       localStorage.setItem('aurora-audio', this.enabled ? 'on' : 'off')
     } catch {
@@ -36,7 +59,16 @@ export class GameAudio {
   }
 
   play(cue: Cue): void {
-    if (!this.enabled || typeof AudioContext === 'undefined') return
+    if (!this.enabled) return
+    if (isSample(cue)) {
+      const sample = this.samples.get(cue)!
+      sample.currentTime = 0
+      void sample.play().catch(() => {
+        if (cue === 'warrior-strike' || cue === 'warrior-blast') this.play('hit')
+      })
+      return
+    }
+    if (typeof AudioContext === 'undefined') return
     try {
       const context = this.context ??= new AudioContext()
       if (context.state === 'suspended') void context.resume().catch(() => undefined)

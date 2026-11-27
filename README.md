@@ -6,6 +6,12 @@ RPG estratégico de fantasia para navegador. A jornada começa com a criação d
 
 Use a prévia privada no Sites para testar as atualizações pelo navegador. Entre com a conta do ChatGPT que recebeu acesso e use o mesmo navegador e perfil para retomar seu save. [Abrir a prévia de Reinos da Aurora](https://reinos-da-aurora-previa.erickmartins1.chatgpt.site)
 
+## Painel de testes
+
+Crie um herói ou retome a campanha e clique em **Testes** no topo. O painel salva níveis, ouro e provisões na campanha aberta. Itens concedidos ficam no Relicário ou em Indumentárias. Na arena, abra o painel durante seu turno. Mudanças de nível reiniciam o mesmo combate ao voltar.
+
+Na prévia privada, o servidor libera o painel para a identidade autenticada da conta proprietária, configurada em `AURORA_ADMIN_EMAIL`. No Windows, **Iniciar-Testes.cmd** libera o painel apenas na instância local do computador. No checkout, execute `npm run build` e `npm start -- --admin`, depois abra o endereço impresso pelo servidor. Rode `npm run test:admin` com essa instância ativa. Para usar outra porta, defina `AURORA_URL` no teste.
+
 ## Executar
 
 Use Node.js 22.13 ou superior na linha 22, ou Node.js 24+.
@@ -35,12 +41,15 @@ Abra `http://localhost:4173` para verificar a build. Em outro terminal, execute 
 npx playwright install chromium
 npm run test:browser
 npm run test:archer
+npm run test:strike
 npm run test:motion
 npm run test:portrait
 npm run test:offline
 ```
 
 Se o Chromium já estiver instalado, indique seu executável com `AURORA_CHROMIUM_PATH`. Para testar outro endereço, use `AURORA_URL`. A suíte verifica as três classes, Abismos em formação completa, a cidade, expedições, Relicário, eventos e retomada. A jornada do Atirador usa toque em uma viewport de 390 px, offline após o cache inicial. `test:archer` verifica a flecha do Disparo, a Vida no impacto e os controles de apresentação nas duas aparências.
+
+`test:strike` verifica a corrida do Vanguarda, a Vida no impacto, o arco de fogo e a volta à formação nas duas aparências, em desktop e celular. A pausa e o pulo de efeitos também entram no teste.
 
 A build em `dist/` pode ser servida por um host estático em HTTPS. A abertura consulta o servidor e usa a cópia local quando a conexão falha. Para jogar offline, abra a build uma vez online e aguarde o cache local. O modo offline requer HTTPS ou localhost. `test:offline` verifica redirecionamento, atualização, tela de login e retomada offline no Chromium. O progresso é independente por origem, portanto as portas 5173 e 4173 terão saves diferentes. O save registra pontos de controle. Ao retomar uma batalha interrompida, ela recomeça com a mesma formação e semente.
 

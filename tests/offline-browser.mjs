@@ -51,13 +51,21 @@ try {
   await brokenTab.close()
   worker = currentWorker
   await page.evaluate(async () => {
+    window.legacyWorkerController = navigator.serviceWorker.controller
     const registration = await navigator.serviceWorker.getRegistration()
     await registration.update()
   })
-  await page.waitForFunction(async () => {
-    const keys = await caches.keys()
-    return keys.some((key) => key.startsWith('reinos-da-aurora:')) && keys.every((key) => !key.endsWith(':legacy'))
-  })
+  const deadline = Date.now() + 10_000
+  let updated = false
+  while (!updated && Date.now() < deadline) {
+    updated = await page.evaluate(async () => {
+      if (navigator.serviceWorker.controller?.state !== 'activated' || navigator.serviceWorker.controller === window.legacyWorkerController) return false
+      const keys = await caches.keys()
+      return keys.some((key) => key.startsWith('reinos-da-aurora:')) && keys.every((key) => !key.endsWith(':legacy'))
+    })
+    if (!updated) await new Promise((resolve) => setTimeout(resolve, 50))
+  }
+  assert.ok(updated, 'A nova versão deve controlar a aba e remover o cache antigo.')
 
   title = 'Versão atualizada'
   await page.reload()

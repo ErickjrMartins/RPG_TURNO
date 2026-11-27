@@ -1,6 +1,31 @@
 # TASKS — Reinos da Aurora
 
-> Versão 0.4.0. Marque [x] após implementar e verificar no repositório.
+> Versão 0.4.9. Marque [x] após implementar e verificar no repositório.
+
+## Golpe Firme e Investida
+
+- [x] Compor um único arco de fogo completo no Golpe Firme.
+- [x] Integrar corrida, salto e corte da Investida com sprites do vídeo SALTO GOLPE.
+- [x] Coordenar som dos passos, grito de ataque e explosão no impacto.
+
+## Efeitos de combate da versão 0.4.8
+
+- [x] Verificar a esfera maior da Centelha, as descargas durante o voo e a explosão no contato.
+- [x] Verificar duas explosões separadas no chão da Chuva Astral enquanto outros meteoros ainda caem.
+- [x] Verificar que a lâmina e o arco de fogo do Golpe Firme passam da antiga borda do sprite.
+
+## Golpe Firme do Vanguarda
+
+- [x] Recortar os quadros de corrida e corte do vídeo de referência e adaptar a aparência feminina.
+- [x] Sincronizar o dano com o golpe e completar o retorno acelerado antes da próxima ação.
+- [x] Verificar a animação, pausa e pulo de efeitos no Chromium em desktop e celular.
+
+## Testes de progressão e Chuva Astral
+
+- [x] Painel de testes para nível do herói e das tropas, ouro, provisões, relíquias, materiais e indumentárias.
+- [x] Validar formação, reinício do combate após alterar níveis, retomada do save e bloqueio para visitantes.
+- [x] Animar a Chuva Astral com gelo azul e sincronizar o dano da fileira com o impacto.
+- [x] Verificar a animação no Chromium nas duas aparências do Canalizador, em desktop e tela móvel.
 
 ## M0 — Fundação
 - [x] Inspecionar estrutura de arquivos e inicializar package.json/scripts.

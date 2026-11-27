@@ -7,6 +7,8 @@ interface AttackTimeline {
   duration: number
   impactAt: number
   poses: readonly (readonly [time: number, frame: number])[]
+  scale?: number
+  originY?: number
 }
 
 export interface AttackPlayback {
@@ -20,14 +22,17 @@ export function playAttack(
 ): AttackPlayback {
   const idle = sprite.texture.key
   const { scaleX, scaleY } = sprite
+  const { originX, originY } = sprite
   const ink = scene.add.graphics().setDepth(865)
   let pose = 0
   let arrived = false
-  sprite.setTexture(texture, timeline.poses[0]![1]).setScale(scaleX / poseScale, scaleY / poseScale)
+  const spriteScale = timeline.scale ?? poseScale
+  sprite.setTexture(texture, timeline.poses[0]![1]).setScale(scaleX / spriteScale, scaleY / spriteScale)
+  sprite.setOrigin(originX, timeline.originY ?? originY)
 
   const dispose = () => {
     ink.destroy()
-    sprite.setTexture(idle).setScale(scaleX, scaleY)
+    sprite.setTexture(idle).setScale(scaleX, scaleY).setOrigin(originX, originY)
     finish()
   }
   const arrive = () => {

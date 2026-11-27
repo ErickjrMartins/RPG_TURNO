@@ -9,7 +9,9 @@ import { animateArcherShot, shotTexture } from './archer-shot'
 import { attackCellSize, type AttackPlayback } from './attack-playback'
 import { idleFrames, prepareIdleTexture } from './idle-motion'
 import { animateMageSpell } from './mage-effects'
+import { animateMageRain } from './mage-rain'
 import { animateMageSpark, sparkTexture } from './mage-spark'
+import { animateWarriorAttack, warriorCellHeight, warriorCellWidth, warriorTexture, type WarriorAttack, type WarriorCue } from './warrior-strike'
 import { arenaCamera, arenaHeight, arenaWidth, pointFor } from './layout'
 
 const opponentTextures = ['crawler', 'wisp', 'warden', 'sentry', ...monsterIds] as const
@@ -31,6 +33,10 @@ export class BootScene extends Phaser.Scene {
     for (const form of ['masculine', 'feminine'] as const) {
       for (const key of [shotTexture(form), sparkTexture(form)]) {
         this.load.spritesheet(key, assetUrl(`${key}.webp`), { frameWidth: attackCellSize, frameHeight: attackCellSize })
+      }
+      for (const move of ['strike', 'charge'] as const) {
+        const key = warriorTexture(move, form)
+        this.load.spritesheet(key, assetUrl(`${key}.webp`), { frameWidth: warriorCellWidth[move], frameHeight: warriorCellHeight })
       }
     }
   }
@@ -54,7 +60,13 @@ interface Actor {
   idle?: string | null
 }
 
-export type AnimatedAttack = 'shot' | 'spark'
+export type AnimatedAttack = WarriorAttack | 'shot' | 'spark' | 'rain'
+
+interface AttackCallbacks {
+  impact(): void
+  finish?(): void
+  playCue?(cue: WarriorCue): void
+}
 
 export class ArenaScene extends Phaser.Scene {
   private readonly actors = new Map<string, Actor>()
@@ -83,14 +95,20 @@ export class ArenaScene extends Phaser.Scene {
     this.idleEnabled = false
   }
 
-  playHeroAttack(spell: AnimatedAttack, form: Presentation, target: Unit, speed: number, impact: () => void): boolean {
+  playHeroAttack(spell: AnimatedAttack, form: Presentation, targets: readonly Unit[], speed: number, callbacks: AttackCallbacks): boolean {
     const hero = this.actors.get('hero')
-    const texture = spell === 'shot' ? shotTexture(form) : sparkTexture(form)
-    if (!hero || !this.textures.exists(texture)) return false
+    const warrior = spell === 'strike' || spell === 'charge'
+    const texture = warrior ? warriorTexture(spell, form) : spell === 'shot' ? shotTexture(form) : sparkTexture(form)
+    const target = targets[0]
+    if (!hero || !target || !this.textures.exists(texture)) return false
     this.stopHeroAttack()
     this.restoreIdleBase(hero)
-    const play = spell === 'shot' ? animateArcherShot : animateMageSpark
-    this.attack = { spell, playback: play(this, hero.sprite, form, target, speed, impact, () => { this.attack = undefined }) }
+    const { impact, finish, playCue } = callbacks
+    const finished = () => { this.attack = undefined; finish?.() }
+    const playback = warrior ? animateWarriorAttack(this, hero, spell, form, target, speed, impact, finished, playCue)
+      : spell === 'rain' ? animateMageRain(this, hero.sprite, form, targets, speed, impact, finished)
+      : (spell === 'shot' ? animateArcherShot : animateMageSpark)(this, hero.sprite, form, target, speed, impact, finished)
+    this.attack = { spell, playback }
     return true
   }
 
@@ -171,7 +189,7 @@ export class ArenaScene extends Phaser.Scene {
         }
       }
       if (event.visual && !customAttack) this.skillEffect(hero, effectUnits, event, speed)
-      if (event.kind === 'action' && event.visual === 'slash' && target && event.actor !== target.id) {
+      if (!customAttack && event.kind === 'action' && event.visual === 'slash' && target && event.actor !== target.id) {
         const actor = units.find((unit) => unit.id === event.actor)
         const entry = actor && this.actors.get(actor.id)
         if (actor && entry) {
