@@ -28,7 +28,7 @@ export function testAdminView(profile: Profile, fromBattle: boolean, busy: boole
         <h2>Progressão e recursos</h2>
         <fieldset${busy ? ' disabled' : ''}>
           ${numberField('Nível do herói', 'test-level', level, 1, Math.max(testLimits.hero, level))}
-          ${numberField('Ouro', 'test-gold', profile.gold, 0, Math.max(testLimits.balance, profile.gold))}
+          ${numberField('Créditos', 'test-gold', profile.gold, 0, Math.max(testLimits.balance, profile.gold))}
           ${numberField('Provisões', 'test-supplies', profile.supplies, 0, Math.max(testLimits.balance, profile.supplies))}
           ${unlockedTroops}
           <button class="button primary" type="submit">Salvar alterações</button>

@@ -1,5 +1,5 @@
-import { troops, type TroopId } from '../content/adventure'
-import { buildingIds, buildings, goldLimits, maxBuildingLevel, type BuildingId } from '../content/city'
+import { encounters, troops, type TroopId } from '../content/adventure'
+import { baseName, buildingIds, buildings, goldLimits, maxBuildingLevel, plazaName, type BuildingId } from '../content/city'
 import { className } from '../content/classes'
 import { farmRate, goldLimit, upgradeBlocked, updateCity } from '../domain/city'
 import { relicSpec } from '../content/relics'
@@ -16,7 +16,7 @@ function troopsPanel(profile: Profile): string {
     const recruit = profile.recruits.find((entry) => entry.id === id)
     if (!recruit) {
       return `<div class="management-row"><div><strong>${troop.name}</strong><span>${troop.role}</span></div>
-        <button class="small-button" data-action="hire" data-value="${id}" ${profile.gold < troop.gold || profile.supplies < troop.supplies ? 'disabled title="Recursos insuficientes"' : ''}>Recrutar · ${troop.gold} ouro + ${troop.supplies} prov.</button></div>`
+        <button class="small-button" data-action="hire" data-value="${id}" ${profile.gold < troop.gold || profile.supplies < troop.supplies ? 'disabled title="Recursos insuficientes"' : ''}>Recrutar · ${troop.gold} créditos + ${troop.supplies} prov.</button></div>`
     }
     const { hp, power, defense } = recruitAttributes(recruit, profile.relicary)
     const train = recruit.level < profile.city.buildings.barracks.level
@@ -24,7 +24,7 @@ function troopsPanel(profile: Profile): string {
     return `<div class="troop-card">
       <div class="management-row"><div><strong>${troop.name} · Nv. ${recruit.level}</strong><span>${hp} Vida · ${power} Poder · ${defense} Defesa</span></div>
       <label class="visually-hidden" for="formation-${id}">Posição de ${troop.name}</label><select id="formation-${id}" data-troop="${id}">${slotLabels.map((label, slot) => `<option value="${slot}" ${slot === recruit.slot ? 'selected' : ''} ${slot === 1 || profile.recruits.some((entry) => entry.id !== id && entry.slot === slot) ? 'disabled' : ''}>${label}</option>`).join('')}</select></div>
-      ${train ? `<button class="small-button" data-action="train" data-value="${id}" ${profile.gold < cost.gold || profile.supplies < cost.supplies ? 'disabled title="Recursos insuficientes"' : ''}>Treinar ${troop.name} · ${cost.gold} ouro + ${cost.supplies} prov.</button>` : ''}
+      ${train ? `<button class="small-button" data-action="train" data-value="${id}" ${profile.gold < cost.gold || profile.supplies < cost.supplies ? 'disabled title="Recursos insuficientes"' : ''}>Treinar ${troop.name} · ${cost.gold} créditos + ${cost.supplies} prov.</button>` : ''}
     </div>`
   }).join('')
 }
@@ -34,7 +34,7 @@ function buildingEffect(id: BuildingId, level: number): string {
     case 'council': return `Edifícios até o nível ${level}`
     case 'barracks': return `Treinamento até o nível ${level}`
     case 'farm': return `1 provisão a cada ${farmRate(level).seconds}s · estoque de ${farmRate(level).capacity}`
-    case 'treasury': return `Capacidade de ${goldLimits[level - 1]} ouro`
+    case 'treasury': return `Capacidade de ${goldLimits[level - 1]} créditos`
   }
 }
 
@@ -59,13 +59,13 @@ function inspector(profile: Profile, id: BuildingId, now: number): string {
     ${next ? `<div class="upgrade-box">
       ${building.readyAt !== null
         ? `<strong>Melhoria em andamento</strong><p>Conclui em <b data-upgrade-clock="${id}">${countdown(building.readyAt - now)}</b>.</p>`
-        : `<span>${next.gold} ouro · ${next.supplies} prov. · ${next.seconds}s</span>
+        : `<span>${next.gold} créditos · ${next.supplies} prov. · ${next.seconds}s</span>
           <button class="small-button" data-action="improve" data-value="${id}" ${blocked ? 'disabled' : ''}>Melhorar</button>
           ${blocked ? `<p>${blocked}</p>` : ''}`}
     </div>` : '<p>Nível máximo.</p>'}
     ${id === 'barracks' ? `<div class="building-operation"><h3>Abominações Domadas</h3>${troopsPanel(profile)}</div>` : ''}
     ${id === 'farm' ? `<div class="building-operation">
-      <h3>Colheita</h3>
+      <h3>Produção de provisões</h3>
       <p data-farm-status>${farmStatus(profile, now)}</p>
       <button class="button primary" data-action="harvest" ${profile.city.farm.stored === 0 ? 'disabled' : ''}>Coletar provisões</button>
     </div>` : ''}
@@ -99,15 +99,15 @@ export function campView(saved: Profile, error: string, selected: BuildingId, no
   const gateCleared = profile.completed.includes('gate')
   return `<section class="view-width city" aria-labelledby="camp-title" data-building-levels="${JSON.stringify(buildingIds.map((key) => profile.city.buildings[key].level))}">
     <header class="city-head">
-      <div><div class="eyebrow"><span></span> CAMPOS DE ALVOR</div><h1 id="camp-title">Refúgio de Alvor</h1></div>
+      <div><div class="eyebrow"><span></span> DISTRITO INTERDITADO</div><h1 id="camp-title">${baseName}</h1></div>
       <div class="companion-stats" aria-label="Recursos da cidade">
-        <span><strong data-balance="gold">${profile.gold}</strong> Ouro <small>/ ${goldLimit(profile.city)}</small></span>
+        <span><strong data-balance="gold">${profile.gold}</strong> Créditos <small>/ ${goldLimit(profile.city)}</small></span>
         <span><strong data-balance="supplies">${profile.supplies}</strong> Provisões</span>
       </div>
     </header>
     <p class="form-error" role="status">${safe(error)}</p>
     <div class="city-layout">
-      <div class="panel city-map" aria-label="Edifícios do Refúgio">
+      <div class="panel city-map" aria-label="Instalações da Central de Contenção">
         <div class="city-hero-marker" aria-hidden="true">${styledHero(profile)}</div>
         ${buildingIds.map((id) => {
           const { name, icon, position } = buildings[id]
@@ -134,13 +134,13 @@ export function campView(saved: Profile, error: string, selected: BuildingId, no
       </section>
       <section class="panel management-panel city-route">
         <span class="eyebrow">${gateCleared ? 'ENCONTRO CONCLUÍDO' : 'PRÓXIMO ENCONTRO'}</span>
-        <h2>Portão Caído</h2>
-        <p>${gateCleared ? 'O Guardião caiu e o primeiro trecho da campanha está salvo.' : 'O Guardião bloqueia a passagem. Prepare sua formação antes de enfrentá-lo.'}</p>
-        ${gateCleared ? '' : '<button class="button primary" data-action="gate">Ir ao Portão <span aria-hidden="true">→</span></button>'}
-        <button class="button secondary" data-action="drill">Campo de Treino</button>
+        <h2>${encounters.gate.name}</h2>
+        <p>${gateCleared ? 'O Custódio foi contido. A Central liberou as expedições no distrito.' : 'A maldição fechou a Linha 7. Prepare sua formação antes de atravessar o bloqueio.'}</p>
+        ${gateCleared ? '' : '<button class="button primary" data-action="gate">Ir ao Bloqueio <span aria-hidden="true">→</span></button>'}
+        <button class="button secondary" data-action="drill">${encounters.drill.name}</button>
         <button class="button secondary" data-action="missions">Expedições</button>
         <button class="button secondary" data-action="events">Eventos</button>
-        <button class="button secondary" data-action="plaza">Praça de Alvor</button>
+        <button class="button secondary" data-action="plaza">${plazaName}</button>
       </section>
     </div>
     <button class="back" data-action="title">← &nbsp; Voltar ao título</button>

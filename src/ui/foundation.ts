@@ -9,7 +9,7 @@ export function titleView(profile: Profile | null, error: string): string {
       <div class="view-width title-content">
         <div class="eyebrow"><span></span> CRÔNICAS DO VÉU</div>
         <h1 id="main-title"><span>Reinos da</span> Aurora</h1>
-        <p class="title-copy">O Farol Celestial caiu. Reúna seus aliados, atravesse o Véu e reacenda a luz de Alvor.</p>
+        <p class="title-copy">À meia-noite, Alvor perdeu a luz e o Véu se abriu. Reúna sua equipe e atravesse a cidade interditada para conter as maldições.</p>
         <div class="title-actions">
           <button class="button primary" data-action="new">Novo jogo <span aria-hidden="true">→</span></button>
           ${profile ? '<button class="button secondary" data-action="continue">Continuar <span aria-hidden="true">→</span></button>' : ''}
@@ -21,7 +21,7 @@ export function titleView(profile: Profile | null, error: string): string {
         <div class="region-icon" aria-hidden="true">✧</div>
         <div>
           <span class="eyebrow">PRIMEIRA CAMPANHA</span>
-          <h2>Campos de Alvor</h2>
+          <h2>Distrito Interditado</h2>
         </div>
         <span class="region-mode"><span></span> Campanha local</span>
       </div>

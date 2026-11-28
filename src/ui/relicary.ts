@@ -1,3 +1,4 @@
+import { baseName } from '../content/city'
 import { skillsByClass, troops } from '../content/adventure'
 import { assetUrl } from '../assets'
 import { styledHero } from './events'
@@ -111,8 +112,8 @@ export function relicaryView(profile: Profile, state: { chosen: string; filter: 
   const strength = attr.power * 3 + attr.defense * 2 + attr.hp + attr.precision + attr.resistance
   const eligible = dismantleSelection(relicary)
   return `<section class="view-width base-screen" aria-labelledby="relic-title">
-    <button class="back" data-action="camp">← &nbsp; Refúgio de Alvor</button>
-    <div class="base-head"><div><div class="eyebrow"><span></span> RELÍQUIAS PROFANAS</div><h1 id="relic-title">Relicário</h1></div><span class="resource-chip">${used}/${relicary.capacity} espaços · ${profile.gold} ouro</span></div>
+    <button class="back" data-action="camp">← &nbsp; ${baseName}</button>
+    <div class="base-head"><div><div class="eyebrow"><span></span> RELÍQUIAS PROFANAS</div><h1 id="relic-title">Relicário</h1></div><span class="resource-chip">${used}/${relicary.capacity} espaços · ${profile.gold} créditos</span></div>
     <p class="form-error" role="status">${safe(error)}</p>
     <div class="relic-layout">
       <section class="panel relic-character" aria-label="Equipamentos do herói">
@@ -146,7 +147,7 @@ export function relicaryView(profile: Profile, state: { chosen: string; filter: 
           <button class="small-button" data-action="relic-organize">Organizar</button>
           <button class="small-button" data-action="relic-bulk">Expurgar / Desmontar em Massa</button>
           <button class="small-button" data-action="relic-forge" ${!entry ? 'disabled' : ''}>Forja / Enxerto Rápido</button>
-          <button class="small-button" data-action="relic-expand" ${relicary.capacity >= 120 ? 'disabled' : ''}>Expandir Espaço · 25 ouro</button>
+          <button class="small-button" data-action="relic-expand" ${relicary.capacity >= 120 ? 'disabled' : ''}>Expandir Espaço · 25 créditos</button>
         </div>
         ${bulk ? `<div class="bulk-confirm"><strong>Prévia do desmonte</strong>
           <p>${eligible.length ? eligible.map((item) => relicSpec(item.id).name).join(', ') : 'Nenhuma relíquia comum ou incomum elegível.'}</p>

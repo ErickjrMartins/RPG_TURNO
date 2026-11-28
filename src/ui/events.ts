@@ -1,3 +1,4 @@
+import { baseName } from '../content/city'
 import { coutureCost, loginRewards, packs, rechargeGoals, seasonCost, spinCost, spinPity, spinRate, threadCost } from '../content/events'
 import { stock, type StockId } from '../content/relics'
 import { appearance, appearanceIds, styleSets, styleSlots, styleSlotsIds, type StyleSlot } from '../content/wardrobe'
@@ -22,7 +23,7 @@ export function wardrobeView(profile: Profile, slot: StyleSlot, error: string): 
   const events = currentEvents(profile.events, Date.now())
   const bonus = styleBonuses(wardrobe)
   return `<section class="view-width base-screen">
-    <button class="back" data-action="camp">← &nbsp; Refúgio de Alvor</button>
+    <button class="back" data-action="camp">← &nbsp; ${baseName}</button>
     <div class="base-head"><div><div class="eyebrow"><span></span> APARÊNCIA</div><h1>Indumentárias de Clã</h1></div>
       <span class="resource-chip">${profile.relicary.stock['profaned-thread'] ?? 0} Fios Profanos · ${events.cash} Cash simulado</span></div>
     <p class="form-error" role="status">${safe(error)}</p>
@@ -44,7 +45,7 @@ export function wardrobeView(profile: Profile, slot: StyleSlot, error: string): 
           const stats = wardrobe.stats[slot] === id
           const paidWatch = item.set === 'watch' && (item.slot === 'projection' || item.slot === 'aura')
           const route = item.set === 'purge' ? `${threadCost} Fios Profanos`
-            : item.set === 'watch' ? `${paidWatch ? 'Trilha de temporada' : 'Trilha gratuita'} · Posto das Cinzas`
+            : item.set === 'watch' ? `${paidWatch ? 'Trilha de temporada' : 'Trilha gratuita'} · Posto da Quarentena`
             : item.slot === 'aura' ? 'Roleta do Altar Selado' : `${coutureCost} Cash simulado`
           return `<article class="style-card" style="--wardrobe-color:${item.color}">
             <div class="eyebrow">${styleSets[item.set].name} · ${setCount(wardrobe, item.set)}/4</div>
@@ -73,7 +74,7 @@ export function eventsView(profile: Profile, error: string, receiptChecked: bool
   const next = loginRewards[events.day]
   const brl = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' })
   return `<section class="view-width base-screen">
-    <button class="back" data-action="camp">← &nbsp; Refúgio de Alvor</button>
+    <button class="back" data-action="camp">← &nbsp; ${baseName}</button>
     <div class="base-head"><div><div class="eyebrow"><span></span> CICLO DE SETE DIAS</div><h1>Eventos</h1></div>
       <span class="resource-chip">${events.cash} Cash simulado · ${profile.relicary.stock['profaned-thread'] ?? 0} Fios Profanos</span></div>
     <p class="form-error" role="status">${safe(error)}</p>

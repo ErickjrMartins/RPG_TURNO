@@ -55,7 +55,7 @@ export function validMageRanks(value: unknown, xp: number, mage: boolean): value
 }
 
 export function mageBlocked(profile: Profile, id: MageNodeId): string | undefined {
-  if (profile.hero.classId !== 'mage' || profile.pending || !profile.completed.includes('ruins')) return 'Disponível para o Canalizador no Refúgio.'
+  if (profile.hero.classId !== 'mage' || profile.pending || !profile.completed.includes('ruins')) return 'Disponível para o Canalizador na Central de Contenção.'
   if ((profile.mageRanks[id] ?? 0) >= mageNodes[id].max) return 'Nível máximo.'
   const parents = mageNodes[id].parents.filter((parent) => !profile.mageRanks[parent])
   if (parents.length) return `Requer ${parents.map((parent) => mageNodes[parent].name).join(' e ')}.`
@@ -76,7 +76,7 @@ export function resetMageTree(profile: Profile): Profile {
 
 export function mageSlotBlocked(profile: Profile, id: MageNodeId): string | undefined {
   const loadout = profile.mageLoadout
-  if (!loadout || profile.pending || !profile.completed.includes('ruins')) return 'Prepare as habilidades no Refúgio.'
+  if (!loadout || profile.pending || !profile.completed.includes('ruins')) return 'Prepare as habilidades na Central de Contenção.'
   if (id === 'spark') return 'A Centelha sempre ocupa o primeiro espaço e gera Foco.'
   if (isMageActive(id)) {
     if (isMageSpell(id) && !profile.mageRanks[id]) return 'Aprenda a habilidade antes de equipá-la.'

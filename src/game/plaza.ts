@@ -54,7 +54,7 @@ export class Plaza {
   async join(hero: PlazaHero): Promise<void> {
     if (this.state.phase === 'online' || this.state.phase === 'connecting') return
     if (!['http:', 'https:'].includes(location.protocol)) {
-      this.show({ phase: 'offline', notice: 'Abra o jogo em um servidor com a Praça de Alvor para encontrar outros jogadores.' })
+      this.show({ phase: 'offline', notice: 'Abra o jogo em um servidor com a Pátio de Alvor para encontrar outros jogadores.' })
       return
     }
     const generation = ++this.generation

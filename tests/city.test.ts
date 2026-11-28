@@ -25,7 +25,7 @@ it('aplica os ritmos da fazenda antes e depois de cada melhoria e conserva o est
 
 it('respeita a sequência, mantém capacidade e treina tropas no quartel', () => {
   const profile = { ...rescuedCity(), gold: 200, supplies: 10 }
-  expect(() => improveBuilding(profile, 'treasury', epoch)).toThrow('Salão do Conselho')
+  expect(() => improveBuilding(profile, 'treasury', epoch)).toThrow('Sala de Comando')
   const council = improveBuilding(profile, 'council', epoch)
   expect(() => improveBuilding(council, 'council', epoch)).toThrow('andamento')
   let city = improveBuilding(improveBuilding(council, 'treasury', epoch + 12_000), 'barracks', epoch + 12_000)

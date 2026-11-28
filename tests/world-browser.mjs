@@ -25,7 +25,7 @@ async function newHero(page, name, profession) {
   await page.getByRole('button', { name: profession, exact: true }).click()
   await page.getByRole('textbox', { name: 'Nome do herói' }).fill(name)
   await page.getByRole('button', { name: 'Começar aventura' }).click()
-  await page.getByRole('heading', { name: 'Ruínas do Farol' }).waitFor()
+  await page.getByRole('heading', { name: 'Estação Aurora' }).waitFor()
   await page.locator('.hero-vitals [role=meter]').waitFor()
   await quickBattle(page)
   return problems
@@ -48,11 +48,11 @@ async function study(page) {
   await page.getByRole('button', { name: 'Continuar' }).click()
   await page.getByRole('button', { name: 'Árvore de Habilidades' }).click()
   assert.equal(await page.locator('.arcana-node[data-studied="true"]').count(), 2)
-  await page.getByRole('button', { name: /Refúgio de Alvor/ }).click()
+  await page.getByRole('button', { name: /Central de Contenção/ }).click()
 }
 
 async function join(page) {
-  await page.getByRole('button', { name: 'Praça de Alvor' }).click()
+  await page.getByRole('button', { name: 'Pátio de Alvor' }).click()
   await page.getByRole('button', { name: 'Entrar na praça online' }).click()
   await page.getByText('Sessão online ativa.').waitFor()
 }
@@ -91,11 +91,11 @@ async function chapterAccess(page) {
   await page.reload()
   await page.getByRole('button', { name: 'Continuar' }).click()
   await page.getByRole('button', { name: 'Expedições' }).click()
-  await page.getByRole('heading', { name: 'Pântanos do Véu' }).waitFor()
-  await page.getByRole('heading', { name: 'Cordilheira Cinzenta' }).waitFor()
+  await page.getByRole('heading', { name: 'Galerias Subterrâneas' }).waitFor()
+  await page.getByRole('heading', { name: 'Coberturas de Alvor' }).waitFor()
   await page.locator('[data-action="expedition"][data-value="frostpath"]').click()
   await page.locator('.arena-frame.terrain-ridge').waitFor()
-  await page.getByRole('heading', { name: 'Passo da Geada' }).waitFor()
+  await page.getByRole('heading', { name: 'Cobertura da Geada' }).waitFor()
   const amber = page.getByRole('button', { name: /Fio de Âmbar/ })
   await amber.waitFor()
   await page.locator('.arena-world strong').filter({ hasText: 'Lince de Geada' }).first().waitFor()
@@ -134,7 +134,7 @@ try {
   if (process.env.AURORA_SCREENSHOTS) await first.screenshot({ path: 'work/plaza-030.png', fullPage: true })
   await second.getByRole('button', { name: 'Sair da sessão online' }).click()
   await first.getByText('1 jogador na praça').waitFor()
-  await first.getByRole('button', { name: /Refúgio de Alvor/ }).click()
+  await first.getByRole('button', { name: /Central de Contenção/ }).click()
   await chapterAccess(first)
   assert.deepEqual(firstProblems, [])
   assert.deepEqual(secondProblems, [])

@@ -1,23 +1,26 @@
+export const baseName = 'Central de Contenção'
+export const plazaName = 'Pátio de Alvor'
+
 export const buildings = {
   council: {
-    name: 'Salão do Conselho', icon: '♜',
-    description: 'Amplia o nível máximo dos outros edifícios.',
-    position: [29, 36], upgrades: [{ gold: 18, supplies: 1, seconds: 12 }, { gold: 28, supplies: 2, seconds: 30 }],
+    name: 'Sala de Comando', icon: '⌖',
+    description: 'Coordena a quarentena e amplia o nível máximo das instalações.',
+    position: [27, 37], upgrades: [{ gold: 18, supplies: 1, seconds: 12 }, { gold: 28, supplies: 2, seconds: 30 }],
   },
   barracks: {
-    name: 'Quartel das Maldições', icon: '⚔︎',
-    description: 'Recruta tropas e define o nível máximo de treinamento.',
-    position: [72, 36], upgrades: [{ gold: 14, supplies: 1, seconds: 15 }, { gold: 23, supplies: 2, seconds: 35 }],
+    name: 'Quartel das Maldições', icon: '⛨',
+    description: 'Reúne agentes de campo e define o nível máximo do treinamento.',
+    position: [75, 36], upgrades: [{ gold: 14, supplies: 1, seconds: 15 }, { gold: 23, supplies: 2, seconds: 35 }],
   },
   farm: {
-    name: 'Fazenda do Vale', icon: '✿',
-    description: 'Acumula provisões para coletar e usar no Refúgio.',
-    position: [24, 74], upgrades: [{ gold: 12, supplies: 1, seconds: 12 }, { gold: 20, supplies: 2, seconds: 30 }],
+    name: 'Laboratório', icon: '⌬',
+    description: 'Prepara provisões para equipar as equipes antes do expurgo.',
+    position: [23, 68], upgrades: [{ gold: 12, supplies: 1, seconds: 12 }, { gold: 20, supplies: 2, seconds: 30 }],
   },
   treasury: {
-    name: 'Tesouraria', icon: '◇',
-    description: 'Aumenta o limite de ouro da campanha.',
-    position: [75, 73], upgrades: [{ gold: 16, supplies: 1, seconds: 16 }, { gold: 25, supplies: 2, seconds: 36 }],
+    name: 'Cofre de Contenção', icon: '◇',
+    description: 'Protege a reserva de créditos e aumenta o limite de armazenamento.',
+    position: [76, 69], upgrades: [{ gold: 16, supplies: 1, seconds: 16 }, { gold: 25, supplies: 2, seconds: 36 }],
   },
 } as const
 

@@ -94,7 +94,7 @@ export function earnAppearance(profile: Profile, id: AppearanceId, now: number):
   const item = appearance(id)
   if (item.set === 'purge') relicary = addStock(relicary, { 'profaned-thread': -threadCost })
   else if (item.set === 'watch') {
-    if (!profile.campaign.zones.watch?.clears) throw new Error('Conclua o Posto das Cinzas.')
+    if (!profile.campaign.zones.watch?.clears) throw new Error('Conclua o Posto da Quarentena.')
     if ((item.slot === 'projection' || item.slot === 'aura') && !events.season) throw new Error('Ative a trilha simulada da temporada.')
   } else {
     if (item.slot === 'aura') throw new Error('Manifeste esta Aura na Roleta do Altar Selado.')

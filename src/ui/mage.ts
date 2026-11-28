@@ -1,3 +1,4 @@
+import { baseName } from '../content/city'
 import { abyssSpecs, skillsByClass } from '../content/adventure'
 import { mageIcon, mageNodeIds, mageNodes, maxMageActives, maxMagePassives, type MageNodeId } from '../content/mage'
 import { configuredMageSpell, isMageActive, isMagePassive, isMageSpell, mageBlocked, mageLinks, magePoints, mageSlotBlocked } from '../domain/mage'
@@ -23,7 +24,7 @@ export function mageView(profile: Profile, selected: MageNodeId, error: string):
   const changeable = (isMageActive(selected) && selected !== 'spark') || isMagePassive(selected)
   const prepared = (id: MageNodeId) => `<button class="small-button" data-action="mage-node" data-value="${id}" aria-pressed="${id === selected}">${activeSkill(id, profile)?.name ?? mageNodes[id].name}</button>`
   return `<section class="view-width base-screen mage-screen" aria-labelledby="mage-title">
-    <button class="back" data-action="camp">← &nbsp; Refúgio de Alvor</button>
+    <button class="back" data-action="camp">← &nbsp; ${baseName}</button>
     <header class="base-head"><div><p class="eyebrow">MAGO · CANALIZADOR</p><h1 id="mage-title">Árvore de Habilidades</h1></div>
       <div class="arcana-budget"><span class="resource-chip">Pontos disponíveis <b>${points}</b></span>
       <button class="small-button" data-action="mage-reset" ${Object.keys(studied).length ? '' : 'disabled'}>Redistribuir pontos</button></div></header>

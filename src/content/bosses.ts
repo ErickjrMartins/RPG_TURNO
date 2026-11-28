@@ -25,7 +25,7 @@ export const bosses: Readonly<Record<BossId, BossSpec>> = {
     level: 2, layers: 4, rune: 'ᛟ', metal: '#a6856c', ornament: 'spines', particles: 'sparks', change: 'reinforced',
     portraitPosition: '50% 16%',
     phases: [
-      { name: 'Vigília do Portão', energy: ['#8345e6', '#74d8ff'] },
+      { name: 'Vigília do Bloqueio', energy: ['#8345e6', '#74d8ff'] },
       { name: 'Corte do Véu', energy: ['#c53065', '#ffb46d'] },
     ],
   },

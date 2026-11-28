@@ -1,11 +1,12 @@
+import { baseName, plazaName } from '../content/city'
 import { className, heroArt } from '../content/classes'
 import { levelFor, type Profile } from '../domain/profile'
 import type { PlazaState, Visitor } from '../game/plaza'
 
 export function plazaView(): string {
   return `<section class="view-width base-screen plaza-screen" aria-labelledby="plaza-title">
-    <button class="back" data-action="camp">← &nbsp; Refúgio de Alvor</button>
-    <header class="base-head"><div><span class="eyebrow">REFÚGIO DE ALVOR</span><h1 id="plaza-title">Praça de Alvor</h1></div>
+    <button class="back" data-action="camp">← &nbsp; ${baseName}</button>
+    <header class="base-head"><div><span class="eyebrow">${baseName}</span><h1 id="plaza-title">${plazaName}</h1></div>
       <span class="resource-chip" data-plaza-count>Visita local</span></header>
     <div class="plaza-layout">
       <div class="plaza-map panel">

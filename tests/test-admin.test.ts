@@ -19,7 +19,7 @@ describe('painel de testes', () => {
   it('recusa valores inválidos e perda de pontos investidos na árvore', () => {
     const mage = { ...newProfile('Canalizador', 'mage', 'masculine'), mageRanks: { focus: 3 } }
     expect(() => setTestProgress(mage, { level: 1, gold: 0, supplies: 0, troops: {} })).toThrow(/Reinicie a árvore/)
-    expect(() => setTestProgress(mage, { level: 2, gold: -1, supplies: 0, troops: {} })).toThrow(/Ouro/)
+    expect(() => setTestProgress(mage, { level: 2, gold: -1, supplies: 0, troops: {} })).toThrow(/Créditos/)
   })
 
   it('concede itens do catálogo, preserva outros slots e evita duplicar desbloqueios', () => {

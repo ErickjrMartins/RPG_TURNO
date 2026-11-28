@@ -55,7 +55,7 @@ async function verifySpark(form, isMobile = false) {
 
     const phases = await page.evaluate(() => new Promise((resolve) => {
       const target = document.querySelector('.target[data-value="crawler"]')
-      const meter = () => Number(document.querySelector('[aria-label="Vida de Rastejante de Pedra"]').getAttribute('aria-valuenow'))
+      const meter = () => Number(document.querySelector('[aria-label="Vida de Rastejante de Concreto"]').getAttribute('aria-valuenow'))
       const health = meter()
       target.click()
       const ctx = document.querySelector('.arena-canvas canvas').getContext('2d')
@@ -109,7 +109,7 @@ async function verifyRain(form, isMobile = false) {
     const phases = await page.evaluate(() => new Promise((resolve) => {
       const ctx = document.querySelector('.arena-canvas canvas').getContext('2d')
       const meter = (name) => Number(document.querySelector(`[aria-label="Vida de ${name}"]`).getAttribute('aria-valuenow'))
-      const health = meter('Rastejante de Pedra')
+      const health = meter('Rastejante de Concreto')
       const other = meter('Vulto do Véu')
       const count = (x, y, width, height) => ctx.getImageData(x, y, width, height).data.filter((value, i, data) =>
         i % 4 === 2 && value > 226 && data[i - 2] < 140 && data[i - 1] > 130 && data[i + 1] > 170).length
@@ -123,7 +123,7 @@ async function verifyRain(form, isMobile = false) {
       let firstImpact
       function scan() {
         state.otherUnchanged &&= other === meter('Vulto do Véu')
-        if (meter('Rastejante de Pedra') === health) {
+        if (meter('Rastejante de Concreto') === health) {
           state.above ||= count(...boxes[0]) > base[0] + 15
           state.falling ||= count(...boxes[1]) > base[1] + 15
         } else {
