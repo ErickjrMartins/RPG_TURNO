@@ -382,6 +382,19 @@ img { max-width: 100%; }
 .unit-label small { color: #e8d9c5; font-size: .9em; }
 .unit-label.fallen { opacity: .64; }
 .arena-frame.is-arriving .unit-label { visibility: hidden; }
+@media (prefers-reduced-motion: no-preference) {
+  .arena-frame::after {
+    content: '';
+    position: absolute;
+    z-index: 0;
+    inset: 0;
+    pointer-events: none;
+    background: radial-gradient(ellipse at 50% 60%, transparent 35%, #100d19a3 100%);
+    opacity: 0;
+    transition: opacity 320ms ease-out;
+  }
+  .arena-frame.is-arriving::after { opacity: 1; }
+}
 .unit-label.actionable { pointer-events: auto; border-color: #e7c48f; box-shadow: 0 0 12px #d6ae7755; }
 .unit-label.actionable::before { content: ""; position: absolute; inset: -38px 0 0; }
 .unit-label.actionable:hover { background: #382c22; border-color: #fbe0ab; }

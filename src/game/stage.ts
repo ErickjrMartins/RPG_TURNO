@@ -142,9 +142,9 @@ export class ArenaScene extends Phaser.Scene {
     actor.signature?.destroy()
     actor.signature = undefined
     this.restoreIdleBase(actor)
-    actor.sprite.setPosition(x, y).setRotation(0).setAlpha(actor.alive ? 1 : 0.24)
-    actor.shadow.setX(x).setAlpha(actor.alive ? 1 : 0.32)
-    actor.clothes?.setPosition(0, 0).setAlpha(actor.alive ? 1 : 0.25)
+    actor.sprite.setPosition(x, y).setRotation(0).setDepth(y).setAlpha(actor.alive ? 1 : 0.24)
+    actor.shadow.setPosition(x, y - 12).setScale(1).setDepth(y - 1).setAlpha(actor.alive ? 1 : 0.32)
+    actor.clothes?.setPosition(0, 0).setScale(1).setDepth(y + 1).setAlpha(actor.alive ? 1 : 0.25)
   }
 
   private poseEntry(actor: Actor, entry: ArenaEntry): void {
@@ -154,14 +154,19 @@ export class ArenaScene extends Phaser.Scene {
       return
     }
     if (pose.opacity > 0 && actor.stride) {
-      actor.sprite.setTexture(actor.stride, pose.frame).setDisplaySize(actor.width, actor.height)
+      if (actor.sprite.texture.key !== actor.stride) actor.sprite.setTexture(actor.stride, pose.frame)
+      else if (Number(actor.sprite.frame.name) !== pose.frame) actor.sprite.setFrame(pose.frame)
     }
-    actor.sprite.setPosition(pose.x, pose.y).setRotation(pose.tilt).setAlpha(pose.opacity)
-    actor.shadow.setX(pose.x).setAlpha(pose.opacity)
-    actor.clothes?.setPosition(pose.x - entry.home.x, pose.y - entry.home.y).setAlpha(pose.opacity)
-    if (entry.heroClass && pose.signature > 0) {
-      actor.signature ??= this.add.graphics().setDepth(entry.home.y + 2)
-      drawEntrySignature(actor.signature, entry.heroClass, pose.x, pose.y, actor.height, pose.signature)
+    actor.sprite.setPosition(pose.x, pose.y).setRotation(pose.tilt).setDepth(pose.groundY).setAlpha(pose.opacity)
+      .setDisplaySize(actor.width * pose.scale, actor.height * pose.scale)
+    actor.shadow.setPosition(pose.x, pose.groundY - 12 * pose.scale).setScale(pose.scale)
+      .setDepth(pose.groundY - 1).setAlpha(pose.opacity)
+    actor.clothes?.setPosition(pose.x - entry.home.x * pose.scale, pose.y - entry.home.y * pose.scale)
+      .setScale(pose.scale).setDepth(pose.groundY + 1).setAlpha(pose.opacity)
+    if ((entry.heroClass || entry.boss) && pose.signature > 0) {
+      actor.signature ??= this.add.graphics()
+      actor.signature.setDepth(pose.groundY + 2)
+      drawEntrySignature(actor.signature, entry.heroClass ?? 'boss', pose.x, pose.groundY, actor.height * pose.scale, pose.signature)
     }
     if (pose.step > entry.step && entry.audible && pose.x > 0 && pose.x < arenaWidth) this.game.events.emit('aurora:entry-step')
     entry.step = pose.step
@@ -226,7 +231,7 @@ export class ArenaScene extends Phaser.Scene {
           phase: ((unit.slot * 3 + (unit.team === 'allies' ? 0 : 7)) % 19) / 19, alive: unit.hp > 0, busyUntil: 0 }
         this.actors.set(unit.id, entry)
         if (animate && entry.alive && (initial || events.some((event) => event.kind === 'summon' && event.target === unit.id))) {
-          entry.entry = arenaEntry(unit, entry.width, initial, unit.id === 'hero' ? hero.classId : undefined)
+          entry.entry = arenaEntry(unit, initial, unit.id === 'hero' ? hero.classId : undefined)
           entry.stride = prepareEntryTexture(this, texture)
         }
       }
