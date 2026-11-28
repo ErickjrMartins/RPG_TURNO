@@ -40,7 +40,7 @@ function unitLabel(unit: Unit, actionable: boolean, affected: boolean, aura: boo
   const control = actionable ? `type="button" data-action="target" data-value="${unit.id}" aria-label="Selecionar alvo: ${safe(unit.name)}, ${unit.hp} de ${unit.maxHp} de vida"` : ''
   return `<${tag} ${control} class="unit-label ${unit.team} ${unit.hp === 0 ? 'fallen' : ''} ${actionable ? 'actionable' : ''} ${affected ? 'area-target' : ''} ${aura ? 'abyss-unit' : ''}"
       style="--lane:${(unit.slot % 3) - 1};--x:${point.x / arenaWidth * 100}%;--y:${point.y / arenaHeight * 100}%">
-    <strong>${safe(unit.name)}</strong>
+    <strong${unit.boss ? ' class="visually-hidden"' : ''}>${safe(unit.name)}</strong>
     ${healthBar(unit, shield)}
     <small>${unit.hp} / ${unit.maxHp}${shield > 0 ? ` · ${shield} escudo` : ''}</small>
     ${effects.length ? `<span class="condition">${effects.join(' · ')}</span>` : ''}
