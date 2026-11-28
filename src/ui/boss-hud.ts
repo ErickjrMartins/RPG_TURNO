@@ -29,27 +29,31 @@ const chain = `<span class="boss-chain" aria-hidden="true">${Array.from({ length
 
 function markup({ unit, spec }: HudState): string {
   return `<section class="boss-hud" data-boss="${unit.boss}" data-ornament="${spec.ornament}" data-particles="${spec.particles}" aria-label="Chefe: ${safe(unit.name)}">
-    <div class="boss-nameplate">
-      ${chain}
-      <h2>${safe(unit.name)}</h2>
-      <p class="boss-phase"></p>
-    </div>
-    <div class="boss-layer" aria-hidden="true"><i>${spec.rune}</i><strong data-boss-layers></strong><i>${spec.rune}</i></div>
-    <div class="boss-rail">
-      <img class="boss-thorns" src="${assetUrl('boss-thorns.webp')}" alt="">
-      <div class="boss-track" role="meter" aria-label="Vida de ${safe(unit.name)}" aria-valuemin="0" aria-valuemax="${unit.maxHp}" aria-valuenow="${unit.hp}">
-        <span class="boss-residual" aria-hidden="true"></span>
-        <span class="boss-energy" aria-hidden="true"><i></i><b></b></span>
-        <span class="boss-flash" aria-hidden="true"></span>
-        <strong class="boss-hp" aria-hidden="true"></strong>
+    <div class="boss-hud-main">
+      <div class="boss-layer" aria-hidden="true"><i>${spec.rune}</i><strong data-boss-layers></strong><i>${spec.rune}</i></div>
+      <div class="boss-rail">
+        <img class="boss-thorns" src="${assetUrl('boss-thorns.webp')}" alt="">
+        <div class="boss-track" role="meter" aria-label="Vida de ${safe(unit.name)}" aria-valuemin="0" aria-valuemax="${unit.maxHp}" aria-valuenow="${unit.hp}">
+          <span class="boss-residual" aria-hidden="true"></span>
+          <span class="boss-energy" aria-hidden="true"><i></i><b></b></span>
+          <span class="boss-flash" aria-hidden="true"></span>
+          <strong class="boss-hp" aria-hidden="true"></strong>
+        </div>
+      </div>
+      <div class="boss-portrait" style="--portrait-position:${spec.portraitPosition ?? 'center'}">
+        <img class="boss-face" src="${assetUrl(`${spec.portrait ?? unit.art}.webp`)}" alt="">
+        <img class="boss-rim" src="${assetUrl('boss-medallion.webp')}" alt="">
+        <span class="boss-level"><small aria-hidden="true">NV</small><span class="visually-hidden">Nível </span>${spec.level}</span>
       </div>
     </div>
-    <div class="boss-portrait" style="--portrait-position:${spec.portraitPosition ?? 'center'}">
-      <img class="boss-face" src="${assetUrl(`${spec.portrait ?? unit.art}.webp`)}" alt="">
-      <img class="boss-rim" src="${assetUrl('boss-medallion.webp')}" alt="">
-      <span class="boss-level"><small aria-hidden="true">NV</small><span class="visually-hidden">Nível </span>${spec.level}</span>
+    <div class="boss-hud-details">
+      <ul class="boss-effects" aria-label="Efeitos e habilidades do chefe" hidden></ul>
+      <div class="boss-nameplate">
+        ${chain}
+        <h2>${safe(unit.name)}</h2>
+        <p class="boss-phase"></p>
+      </div>
     </div>
-    <ul class="boss-effects" aria-label="Efeitos e habilidades do chefe" hidden></ul>
   </section>`
 }
 
