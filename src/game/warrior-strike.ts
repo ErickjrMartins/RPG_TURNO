@@ -1,36 +1,20 @@
 import type Phaser from 'phaser'
 import type { Presentation } from '../content/classes'
 import type { Unit } from '../domain/battle'
-import { attackCellSize, playAttack, poseScale } from './attack-playback'
+import { entryFrameCount, prepareEntryTexture } from './arena-entry'
+import { playAttack, type AttackPose } from './attack-playback'
 import { pointFor } from './layout'
 import { paintWarriorSword } from './warrior-sword'
 
 export type WarriorAttack = 'strike' | 'charge'
 export type WarriorCue = 'warrior-step' | 'warrior-cry'
 
-export const warriorCellHeight = 256
-export const warriorCellWidth: Record<WarriorAttack, number> = { strike: 256, charge: 384 }
 export const warriorTexture = (move: WarriorAttack, form: Presentation) => `warrior-${move}-${form}`
 const strike = {
   approachAt: 42, arriveAt: 565, impactAt: 690, retreatAt: 965, homeAt: 1285, duration: 1300,
-  poses: [
-    [0, 0], [42, 1], [80, 2], [117, 3], [164, 4], [210, 5], [257, 6],
-    [304, 7], [350, 8], [397, 9], [442, 10], [490, 11], [535, 12], [575, 13],
-    [662, 14], [890, 15], [935, 16], [965, 3], [1003, 4], [1040, 5], [1077, 6],
-    [1113, 7], [1150, 8], [1187, 9], [1223, 10], [1260, 2], [1285, 0],
-  ],
 } as const
 const charge = {
   approachAt: 40, arriveAt: 853, impactAt: 903, retreatAt: 1250, homeAt: 1555, duration: 1575,
-  originY: 340 / 384,
-  poses: [
-    [0, 0], [40, 1], [93, 2], [144, 3], [195, 4], [243, 5], [295, 6],
-    [347, 7], [397, 8], [446, 9], [493, 10], [540, 11], [581, 12],
-    [624, 13], [675, 14], [773, 15], [806, 16], [837, 17], [868, 18], [903, 19],
-    [935, 20], [969, 21], [1013, 22], [1061, 23], [1111, 24], [1153, 25],
-    [1186, 26], [1224, 27], [1250, 4], [1284, 5], [1318, 6], [1352, 7], [1386, 8],
-    [1420, 9], [1454, 10], [1488, 6], [1523, 2], [1555, 0],
-  ],
 } as const
 const chargeCues: readonly (readonly [at: number, cue: WarriorCue])[] = [
   [102, 'warrior-step'], [205, 'warrior-step'], [309, 'warrior-step'], [412, 'warrior-step'],
@@ -78,8 +62,9 @@ export function animateWarriorAttack(scene: Phaser.Scene, { sprite, shadow, clot
   const shade = { x: shadow.x, y: shadow.y, depth: shadow.depth }
   const outfit = clothes && { x: clothes.x, y: clothes.y, depth: clothes.depth, scaleX: clothes.scaleX }
   const enemy = pointFor(target)
-  const reach = (target.art === 'warden' ? 96 : 83) - (charging ? 18 : 0)
+  const reach = (target.boss ? 96 : 83) - (charging ? 18 : 0)
   const landing = { x: Math.max(home.x, enemy.x - reach), y: enemy.y + 1 }
+  const liftAt = 598
   let cueIndex = 0
 
   function place(progress: number, facingHome: boolean, lift = 0): void {
@@ -102,7 +87,7 @@ export function animateWarriorAttack(scene: Phaser.Scene, { sprite, shadow, clot
       }
     }
     if (time < retreatAt) {
-      const leap = charging ? Math.max(0, Math.min(1, (time - 598) / 267)) : 0
+      const leap = charging ? Math.max(0, Math.min(1, (time - liftAt) / 267)) : 0
       place(Math.max(0, Math.min(1, (time - approachAt) / (arriveAt - approachAt))), false, 33 * Math.sin(leap * Math.PI))
     } else place(Math.max(0, (homeAt - time) / (homeAt - retreatAt)), time < homeAt)
 
@@ -114,7 +99,7 @@ export function animateWarriorAttack(scene: Phaser.Scene, { sprite, shadow, clot
       return
     }
     const x = enemy.x - 14
-    const y = enemy.y - (target.art === 'warden' ? 96 : 72)
+    const y = enemy.y - (target.boss ? 96 : 72)
     const flash = Math.max(0, 1 - fade * 4)
     ink.fillStyle(0xffac43, flash * 0.33)
     ink.fillEllipse(x, y, 48 + fade * 26, 25)
@@ -130,8 +115,16 @@ export function animateWarriorAttack(scene: Phaser.Scene, { sprite, shadow, clot
     }
   }
 
-  const scale = poseScale * warriorCellHeight / attackCellSize
-  return playAttack(scene, sprite, warriorTexture(move, form), { ...motion, scale }, speed, paint, impact, () => {
+  const stride = prepareEntryTexture(scene, sprite.texture.key)
+  const run = (start: number, end: number): AttackPose[] => stride
+    ? Array.from({ length: Math.ceil((end - start) / 40) }, (_, index) => [start + index * 40, stride, index % entryFrameCount])
+    : [[start]]
+  const jump: AttackPose[] = charging ? [[liftAt, warriorTexture('charge', form), undefined, 0.58]] : []
+  const poses: readonly AttackPose[] = [
+    [0], ...run(approachAt, charging ? liftAt : arriveAt), ...jump,
+    [arriveAt, warriorTexture('strike', form), undefined, 0.39], ...run(retreatAt, homeAt), [homeAt],
+  ]
+  return playAttack(scene, sprite, { ...motion, poses }, speed, paint, impact, () => {
     place(0, false)
     finish()
   })

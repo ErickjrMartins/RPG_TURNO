@@ -1,15 +1,15 @@
 import type Phaser from 'phaser'
 import type { Presentation } from '../content/classes'
 import type { Unit } from '../domain/battle'
-import { playAttack, poseScale } from './attack-playback'
+import { playAttack, type AttackPose } from './attack-playback'
 import { pointFor } from './layout'
 
 export const sparkTexture = (form: Presentation) => `mage-spark-${form}`
+export const sparkAnchor = 0.52
 const aimAt = 205
 const releaseAt = 400
 const impactAt = 680
 export const sparkDuration = 925
-const poses = [[0, 0], [88, 1], [aimAt, 2], [714, 1], [817, 0]] as const
 const orbRadius = 31 // The previous glow stopped at radius 21.
 const cobalt = 0x2256ff
 const electric = 0x199fff
@@ -106,11 +106,12 @@ export function animateMageSpark(
   speed: number, impact: () => void, finish: () => void,
 ) {
   const staff = {
-    x: sprite.x + (form === 'masculine' ? 157 : 170) * sprite.scaleX / poseScale,
-    y: sprite.y - (form === 'masculine' ? 278 : 283) * sprite.scaleY / poseScale,
+    x: sprite.x + sprite.displayHeight * 0.4,
+    y: sprite.y - sprite.displayHeight * 0.93,
   }
   const targetPoint = pointFor(target)
   const hit = { x: targetPoint.x, y: targetPoint.y - 72 }
-  return playAttack(scene, sprite, sparkTexture(form), { duration: sparkDuration, impactAt, poses }, speed,
+  const poses: readonly AttackPose[] = [[0], [88, sparkTexture(form), undefined, sparkAnchor], [817]]
+  return playAttack(scene, sprite, { duration: sparkDuration, impactAt, poses }, speed,
     (ink, time) => paintSpark(ink, staff, hit, time), impact, finish)
 }

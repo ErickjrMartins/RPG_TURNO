@@ -7,3 +7,5 @@ export const monsters = {
 
 export type MonsterId = keyof typeof monsters
 export const monsterIds = Object.keys(monsters) as MonsterId[]
+export const coreArt = ['curse-watch', 'curse-hollow', 'curse-veil', 'curse-rupture'] as const
+export type CoreArt = typeof coreArt[number]

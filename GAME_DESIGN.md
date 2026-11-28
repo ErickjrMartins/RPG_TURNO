@@ -22,6 +22,8 @@ Criar herói → preparar cidade e formação → escolher uma missão no mapa �
 4. Visitar o quartel, recrutar uma tropa e melhorar o Sala de Comando, com custo, duração e efeito visíveis.
 5. Abrir o mapa e enfrentar um miniboss, com possibilidade de derrota e nova tentativa. Aprender a equipar um item e ter o progresso salvo automaticamente.
 
+A Vanguarda usa proteção tática e uma lâmina ritual. O Atirador veste um manto de patrulha e empunha um arco recurvo selado. O Canalizador usa um casaco ritual e um bastão de cristal. As duas aparências de cada classe mantêm sua silhueta e seu equipamento durante os ataques. As maldições ganham formas próprias por região, com máscaras, olhos, fibras, raízes ou placas de gelo. Cada chefe tem um retrato que corresponde à sua forma na arena.
+
 Na criação, cada retrato sobe e desce levemente em um ciclo de respiração. Apenas pontas de cabelo e tecido se deslocam dentro da imagem. O rosto, o tronco e o equipamento conservam as proporções, e a preferência de movimento reduzido exibe o retrato estático.
 
 ## Mecânicas
@@ -37,11 +39,11 @@ Na criação, cada retrato sobe e desce levemente em um ciclo de respiração. A
 
 O combate passa por preparação, início de rodada, entrada do jogador, resolução de ações, atualização de efeitos e fim de rodada. Ao fim, inicia outra rodada ou chega à vitória ou à derrota. Durante a resolução, a interface bloqueia novos comandos de ação. A lógica de batalha aplica dano, gasto de energia e recompensas uma única vez por evento válido. As animações exibem o resultado desses eventos.
 
-O Disparo básico do Atirador e da Atiradora mostra a preparação, a puxada do arco dourado, a soltura e a volta à guarda. A Vida do alvo muda quando a flecha chega. A animação acompanha a pausa e a velocidade de combate. Com **Pular efeitos** ou movimento reduzido, a ação resolve diretamente.
+O Disparo básico do Atirador e da Atiradora mostra a preparação, a puxada do arco selado, a soltura e a volta à guarda. A Vida do alvo muda quando a flecha chega. A animação acompanha a pausa e a velocidade de combate. Com **Pular efeitos** ou movimento reduzido, a ação resolve diretamente.
 
-No Golpe Firme, o Vanguarda corre até o adversário selecionado, desfere o corte com um arco de fogo, faíscas e som no impacto, e corre de volta à posição inicial antes da próxima ação. A arena desenha o arco inteiro e a ponta da espada depois de compor as poses recortadas do vídeo de referência. A aparência feminina reaproveita o rosto e o cabelo do retrato de jogo. O retorno usa os quadros de corrida espelhados.
+No Golpe Firme, o Vanguarda corre até o adversário selecionado, desfere o corte com um arco de fogo, faíscas e som no impacto, e corre de volta à posição inicial antes da próxima ação. A pose de corte de cada aparência preserva o rosto e o equipamento do retrato. A arena compõe o arco de fogo sobre a lâmina. O retorno reaproveita a passada com a direção invertida.
 
-Na Investida, o Vanguarda corre, salta e desce a espada junto do alvo. As poses vêm de SALTO GOLPE.mp4. Os sons marcam as pisadas durante a corrida, o grito antes do corte e a explosão no chão. A Vida do alvo muda no impacto da espada e a próxima ação começa depois que o Vanguarda retorna à formação.
+Na Investida, o Vanguarda corre, salta e desce a espada junto do alvo. Os sons marcam as pisadas durante a corrida, o grito antes do corte e a explosão no chão. A Vida do alvo muda no impacto da espada e a próxima ação começa depois que o Vanguarda retorna à formação.
 
 Na Centelha, o Canalizador carrega o cajado e dispara uma esfera azul de núcleo luminoso com descargas elétricas ao redor. Seu raio visível principal é de 31 unidades na escala da arena. A Vida do alvo muda quando a esfera explode no contato. Durante a espera na arena, heróis, tropas, inimigos e chefes vivos respiram em ciclos fora de fase, com os pés apoiados. Tecidos, cabelo, pelo, asas ou vinhas se movem conforme a criatura. A pausa congela o repouso, e **Pular efeitos** e a preferência de movimento reduzido mantêm os sprites estáticos.
 

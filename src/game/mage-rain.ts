@@ -3,7 +3,7 @@ import type { Presentation } from '../content/classes'
 import type { Unit } from '../domain/battle'
 import { playAttack } from './attack-playback'
 import { pointFor } from './layout'
-import { sparkTexture } from './mage-spark'
+import { sparkAnchor, sparkTexture } from './mage-spark'
 
 const landAt = 510
 const blastDuration = 304
@@ -17,7 +17,6 @@ const drops = [
   { offset: 34, start: 584, land: 982, size: 13, drift: 55 },
 ] as const
 export const rainDuration = 1360
-const timeline = { duration: rainDuration, impactAt: landAt, poses: [[0, 0], [85, 1], [200, 2], [705, 1], [820, 0]] } as const
 const flame = 0x275cff
 const ice = 0x64ddff
 const frost = 0xe1faff
@@ -102,5 +101,6 @@ export function animateMageRain(scene: Phaser.Scene, sprite: Phaser.GameObjects.
   speed: number, impact: () => void, finish: () => void,
 ) {
   const points = targets.map(pointFor)
-  return playAttack(scene, sprite, sparkTexture(form), timeline, speed, (ink, time) => paintAstralRain(ink, points, time), impact, finish)
+  return playAttack(scene, sprite, { duration: rainDuration, impactAt: landAt, poses: [[0], [85, sparkTexture(form), undefined, sparkAnchor], [820]] },
+    speed, (ink, time) => paintAstralRain(ink, points, time), impact, finish)
 }

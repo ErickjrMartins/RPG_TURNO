@@ -1,4 +1,4 @@
-import { assetUrl } from '../assets'
+import { assetUrl, combatantArt } from '../assets'
 import { effectNames, type EffectKind } from '../content/adventure'
 import { bosses } from '../content/bosses'
 import type { Battle, BattleEvent } from '../domain/battle'
@@ -44,8 +44,8 @@ function markup({ unit, spec }: HudState): string {
         <strong class="boss-hp" aria-hidden="true"></strong>
       </div>
     </div>
-    <div class="boss-portrait" style="--portrait-position:${spec.portraitPosition ?? 'center'}">
-      <img class="boss-face" src="${assetUrl(`${spec.portrait ?? unit.art}.webp`)}" alt="">
+    <div class="boss-portrait">
+      <img class="boss-face" src="${combatantArt(`portrait-${unit.art}`)}" alt="">
       <img class="boss-rim" src="${assetUrl('boss-medallion.webp')}" alt="">
       <span class="boss-level"><small aria-hidden="true">NV</small><span class="visually-hidden">Nível </span>${spec.level}</span>
     </div>

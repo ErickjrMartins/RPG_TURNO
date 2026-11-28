@@ -1,7 +1,7 @@
 import { abyssSpecs, effectNames, encounters, skillsByClass, troops, type EffectKind, type Skill, type Visual } from '../content/adventure'
 import { zone } from '../content/campaign'
 import type { BossId } from '../content/bosses'
-import { monsters, type MonsterId } from '../content/monsters'
+import { monsters, type CoreArt, type MonsterId } from '../content/monsters'
 import type { Attributes, ClassId } from '../content/classes'
 import { configuredMageSpell, isMageSpell, mageBonuses } from './mage'
 import { isZone } from './campaign'
@@ -11,7 +11,7 @@ import { attributesFor, levelFor, recruitAttributes, type Attempt, type Profile 
 
 export type Team = 'allies' | 'enemies'
 export type Phase = 'player' | 'resolution' | 'victory' | 'defeat'
-type Art = 'hero' | 'sentry' | 'bowman' | 'crawler' | 'wisp' | 'warden' | MonsterId
+type Art = 'hero' | 'sentry' | 'bowman' | 'crawler' | 'wisp' | 'warden' | MonsterId | CoreArt
 
 interface Effect {
   kind: EffectKind
@@ -301,7 +301,7 @@ function checkOutcome(state: Battle, events: BattleEvent[]): void {
       && state.units.every((entry) => entry.team === 'allies' || entry.hp === 0)) {
       const { core } = zone(state.attempt.encounter)
       state.units = state.units.filter((entry) => entry.team === 'allies')
-      state.units.push({ ...unit('nucleus', core.name, core.art ?? 'warden', 'enemies', 1, core.stats), boss: state.attempt.encounter })
+      state.units.push({ ...unit('nucleus', core.name, core.art, 'enemies', 1, core.stats), boss: state.attempt.encounter })
       state.nucleus = true
       state.sealed = state.attempt.encounter === 'nest'
       events.push({ kind: 'summon', target: 'nucleus', text: state.sealed ? 'Barreira erguida. Abra um Abismo para romper o selo.' : `${core.name} emergiu.` })

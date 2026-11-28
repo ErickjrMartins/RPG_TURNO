@@ -5,3 +5,7 @@ const embeddedAssets: Record<string, string> = import.meta.env.MODE === 'portabl
 export function assetUrl(filename: string): string {
   return embeddedAssets[filename] ?? `${import.meta.env.BASE_URL}assets/${filename}`
 }
+
+export function combatantArt(key: string): string {
+  return assetUrl(`urban-${key}.webp`)
+}

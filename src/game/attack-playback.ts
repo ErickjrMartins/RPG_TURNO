@@ -1,14 +1,11 @@
 import type Phaser from 'phaser'
 
-export const attackCellSize = 384
-export const poseScale = 320 / 512
+export type AttackPose = readonly [time: number, texture?: string, frame?: number, anchorX?: number]
 
 interface AttackTimeline {
   duration: number
   impactAt: number
-  poses: readonly (readonly [time: number, frame: number])[]
-  scale?: number
-  originY?: number
+  poses: readonly AttackPose[]
 }
 
 export interface AttackPlayback {
@@ -17,18 +14,22 @@ export interface AttackPlayback {
 }
 
 export function playAttack(
-  scene: Phaser.Scene, sprite: Phaser.GameObjects.Image, texture: string, timeline: AttackTimeline,
+  scene: Phaser.Scene, sprite: Phaser.GameObjects.Image, timeline: AttackTimeline,
   speed: number, paint: (ink: Phaser.GameObjects.Graphics, time: number) => void, impact: () => void, finish: () => void,
 ): AttackPlayback {
   const idle = sprite.texture.key
   const { scaleX, scaleY } = sprite
   const { originX, originY } = sprite
+  const height = sprite.displayHeight
   const ink = scene.add.graphics().setDepth(865)
   let pose = 0
   let arrived = false
-  const spriteScale = timeline.scale ?? poseScale
-  sprite.setTexture(texture, timeline.poses[0]![1]).setScale(scaleX / spriteScale, scaleY / spriteScale)
-  sprite.setOrigin(originX, timeline.originY ?? originY)
+  const changePose = () => {
+    const [, key, frame, anchorX] = timeline.poses[pose]!
+    sprite.setTexture(key ?? idle, frame)
+    sprite.setScale(key ? height / sprite.height : scaleX, key ? height / sprite.height : scaleY).setOrigin(anchorX ?? originX, originY)
+  }
+  changePose()
 
   const dispose = () => {
     ink.destroy()
@@ -46,7 +47,7 @@ export function playAttack(
       const time = tween.getValue() ?? timeline.duration
       const previous = pose
       while (timeline.poses[pose + 1] && time >= timeline.poses[pose + 1]![0]) pose++
-      if (pose !== previous) sprite.setFrame(timeline.poses[pose]![1])
+      if (pose !== previous) changePose()
       ink.clear()
       paint(ink, time)
       if (time >= timeline.impactAt) arrive()

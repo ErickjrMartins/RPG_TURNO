@@ -1,21 +1,21 @@
 import Phaser from 'phaser'
-import { assetUrl } from '../assets'
+import { combatantArt } from '../assets'
 import { appearance, type AppearanceId, type StyleSlot } from '../content/wardrobe'
 import { classIds, heroArt, type Presentation } from '../content/classes'
-import { monsterIds } from '../content/monsters'
+import { coreArt, monsterIds } from '../content/monsters'
 import type { BattleEvent, Unit } from '../domain/battle'
 import type { Hero } from '../domain/profile'
 import { animateArcherShot, shotTexture } from './archer-shot'
 import { arenaEntry, drawEntrySignature, entryPose, prepareEntryTexture, type ArenaEntry } from './arena-entry'
-import { attackCellSize, type AttackPlayback } from './attack-playback'
+import type { AttackPlayback } from './attack-playback'
 import { idleFrames, prepareIdleTexture } from './idle-motion'
 import { animateMageSpell } from './mage-effects'
 import { animateMageRain } from './mage-rain'
 import { animateMageSpark, sparkTexture } from './mage-spark'
-import { animateWarriorAttack, warriorCellHeight, warriorCellWidth, warriorTexture, type WarriorAttack, type WarriorCue } from './warrior-strike'
+import { animateWarriorAttack, warriorTexture, type WarriorAttack, type WarriorCue } from './warrior-strike'
 import { arenaCamera, arenaHeight, arenaWidth, pointFor } from './layout'
 
-const opponentTextures = ['crawler', 'wisp', 'warden', 'sentry', ...monsterIds] as const
+const opponentTextures = ['crawler', 'wisp', 'warden', 'sentry', ...monsterIds, ...coreArt] as const
 
 export class BootScene extends Phaser.Scene {
   constructor() {
@@ -29,15 +29,11 @@ export class BootScene extends Phaser.Scene {
       }
     }
     for (const key of opponentTextures) {
-      this.load.image(key, assetUrl(`${key}.webp`))
+      this.load.image(key, combatantArt(key))
     }
     for (const form of ['masculine', 'feminine'] as const) {
-      for (const key of [shotTexture(form), sparkTexture(form)]) {
-        this.load.spritesheet(key, assetUrl(`${key}.webp`), { frameWidth: attackCellSize, frameHeight: attackCellSize })
-      }
-      for (const move of ['strike', 'charge'] as const) {
-        const key = warriorTexture(move, form)
-        this.load.spritesheet(key, assetUrl(`${key}.webp`), { frameWidth: warriorCellWidth[move], frameHeight: warriorCellHeight })
+      for (const key of [shotTexture(form), sparkTexture(form), warriorTexture('strike', form), warriorTexture('charge', form)]) {
+        this.load.image(key, combatantArt(key))
       }
     }
   }
@@ -220,7 +216,7 @@ export class ArenaScene extends Phaser.Scene {
       let entry = this.actors.get(unit.id)
       if (!entry) {
         const texture = unit.art === 'hero' ? `${hero.classId}-${hero.presentation}` : unit.art === 'bowman' ? 'archer-masculine' : unit.art
-        const size = unit.art === 'warden' ? 223 : unit.art === 'hero' ? 195 : unit.art === 'crawler' ? 135 : front ? 160 : 148
+        const size = unit.boss ? 218 : unit.art === 'hero' ? 195 : unit.art === 'crawler' ? 135 : front ? 160 : 148
         const shadow = this.add.ellipse(point.x, point.y - 12, size * 0.49, 26, 0x151618, 0.54).setDepth(point.y - 1)
         const sprite = this.add.image(point.x, point.y, texture).setOrigin(0.5, 1).setDepth(point.y)
         const scale = size * arenaCamera.actorScale / sprite.height

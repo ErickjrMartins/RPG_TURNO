@@ -11,16 +11,13 @@ async function enterArena(page, form) {
   await page.getByRole('button', { name: form, exact: true }).click()
   await page.getByRole('textbox', { name: 'Nome do herói' }).fill('Nara de Alvor')
   await page.getByRole('button', { name: 'Começar aventura' }).click()
-  await page.waitForFunction(() => {
-    const canvas = document.querySelector('.arena-canvas canvas')
-    return canvas?.getContext('2d')?.getImageData(375, 200, 1, 1).data[3] > 0
-  })
+  await page.locator('.target[data-value="crawler"]').waitFor()
 }
 
 async function sampleIdle(page) {
   return page.evaluate(async () => {
     const ctx = document.querySelector('.arena-canvas canvas').getContext('2d')
-    const boxes = [[353, 170, 43, 89], [304, 118, 47, 82], [712, 204, 80, 61], [933, 180, 65, 74]]
+    const boxes = [[342, 178, 57, 99], [281, 102, 65, 96], [668, 182, 142, 86], [926, 149, 85, 111]]
     const sample = () => boxes.map((box) => ctx.getImageData(...box).data)
     await new Promise(requestAnimationFrame)
     await new Promise(requestAnimationFrame)
@@ -77,7 +74,7 @@ async function verifySpark(form, isMobile = false) {
       const deadline = performance.now() + 2400
       function scan() {
         if (meter() === health) {
-          state.crystal ||= blue(432, 123, 59, 59)
+          state.crystal ||= blue(412, 123, 53, 52)
           const span = electricSpan(506, 95, 166, 161)
           state.orb ||= span >= 59
           state.electric ||= span >= 67
