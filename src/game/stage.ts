@@ -231,7 +231,7 @@ export class ArenaScene extends Phaser.Scene {
           phase: ((unit.slot * 3 + (unit.team === 'allies' ? 0 : 7)) % 19) / 19, alive: unit.hp > 0, busyUntil: 0 }
         this.actors.set(unit.id, entry)
         if (animate && entry.alive && (initial || events.some((event) => event.kind === 'summon' && event.target === unit.id))) {
-          entry.entry = arenaEntry(unit, initial, unit.id === 'hero' ? hero.classId : undefined)
+          entry.entry = arenaEntry(unit, entry.width, initial, unit.id === 'hero' ? hero.classId : undefined)
           entry.stride = prepareEntryTexture(this, texture)
         }
       }
