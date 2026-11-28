@@ -1,7 +1,7 @@
 import type Phaser from 'phaser'
 import { classes, type ClassId } from '../content/classes'
 import type { Unit } from '../domain/battle'
-import { arenaWidth, pointFor } from './layout'
+import { arenaHeight, arenaWidth, pointFor } from './layout'
 
 const strideRigs: Readonly<Record<string, readonly [number, number]>> = {
   'warrior-masculine': [0.40, 0.68],
@@ -21,6 +21,7 @@ const strideRigs: Readonly<Record<string, readonly [number, number]>> = {
 const frames = 12
 const columns = 4
 const height = 160
+const entranceGround = arenaHeight * 0.56
 const heroStride = {
   warrior: { duration: 2300, cycles: 3, lift: 2.2, tilt: 0.009, finalLean: 0.022, finalDrop: 5 },
   archer: { duration: 2120, cycles: 3, lift: 4.1, tilt: 0.015, finalLean: -0.027, finalDrop: -2 },
@@ -42,19 +43,20 @@ export interface ArenaEntry {
   boss: boolean
 }
 
-export function arenaEntry(unit: Unit, initial: boolean, heroClass?: ClassId): ArenaEntry {
+export function arenaEntry(unit: Unit, width: number, initial: boolean, heroClass?: ClassId): ArenaEntry {
   const home = pointFor(unit)
   const direction = unit.team === 'allies' ? 1 : -1
-  // Each fighter comes forward along its own lane, with a small perspective convergence.
+  const margin = width / 2 + 6
+  const lane = unit.slot % 3 - 1
   const origin = {
-    x: home.x + (arenaWidth / 2 - home.x) * 0.05,
-    y: Math.max(104, home.y - (initial ? 119 : 86)),
+    x: direction === 1 ? -margin : arenaWidth + margin,
+    y: entranceGround + lane * 9 - (unit.slot >= 3 ? 6 : 0),
   }
   const floating = unit.art === 'wisp' || unit.art === 'moth'
   const stride = heroClass && heroStride[heroClass]
   return {
     origin, home, direction, floating,
-    delay: initial ? (unit.slot >= 3 ? 75 : 0) + (unit.slot % 3) * 63 + (direction === 1 ? 0 : 110) : 0,
+    delay: initial ? (unit.slot >= 3 ? 90 : 0) + (unit.slot % 3) * 110 + (direction === 1 ? 0 : 110) : 0,
     duration: stride ? stride.duration : initial ? (unit.boss ? 2470 : 2210) : unit.boss ? 1680 : 1290,
     cycles: stride ? stride.cycles : initial && unit.slot < 3 ? 3 : 2,
     audible: !floating && (unit.id === 'hero' || (!initial && !!unit.boss)),
@@ -76,12 +78,15 @@ export function entryPose(entry: ArenaEntry) {
   const landing = Math.sin(settle * Math.PI)
   const travel = walking + (walking - walking ** 3) * 0.42 - Math.sin(swing * 2) * 0.007 * strength
   const lift = entry.floating ? (1 - Math.cos(swing)) * 3.8 * strength : Math.sin(swing) ** 2 * (style ? style.lift : 3.1) * strength
-  const groundY = entry.origin.y + (entry.home.y - entry.origin.y) * travel
+  // Keep the approach on the side entrance's floor before easing into each lane.
+  const laneTravel = Math.max(0, (travel - 0.27) / 0.73)
+  const laneBlend = laneTravel * laneTravel * (3 - 2 * laneTravel)
+  const groundY = entry.origin.y + (entry.home.y - entry.origin.y) * laneBlend
   return {
     x: entry.origin.x + (entry.home.x - entry.origin.x) * travel,
     y: groundY - lift + landing * (style ? style.finalDrop : 0),
     groundY,
-    scale: 0.64 + travel * 0.36,
+    scale: 0.94 + travel * 0.06,
     tilt: entry.direction * (Math.sin(swing) * (style ? style.tilt : 0.010) * strength + landing * (style ? style.finalLean : 0.012)),
     frame: Math.floor((stride % 1) * frames),
     step: Math.floor(stride * 2 + 0.00001),
