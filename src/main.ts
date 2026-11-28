@@ -1,4 +1,8 @@
 import { Plaza } from './game/plaza'
+import { isBoundCurse } from './content/bindings'
+import { bindCurse } from './domain/bindings'
+import { skyGround } from './game/plaza-ground'
+import { paintSky, skyPortal, skyPortalNear, skySpawn, skyView, type SkyState } from './ui/sky'
 import { paintPlaza, plazaView } from './ui/plaza'
 import { type MageNodeId } from './content/mage'
 import { isMageNode, resetMageTree, toggleMageSlot, trainMageNode } from './domain/mage'
@@ -51,7 +55,7 @@ root.innerHTML = `
     </header>
     <main id="view" aria-busy="true"><p class="loading">Carregando Reinos da Aurora…</p></main>
     <div class="stage-storage" aria-hidden="true"><div id="phaser-stage"></div></div>
-    <footer class="game-footer"><div class="view-width footer-inner"><span>VERSÃO 0.5.2</span><span>SALVAMENTO NESTE NAVEGADOR</span></div></footer>
+    <footer class="game-footer"><div class="view-width footer-inner"><span>VERSÃO 0.6.0</span><span>SALVAMENTO NESTE NAVEGADOR</span></div></footer>
   </div>`
 
 const view = root.querySelector<HTMLElement>('#view')!
@@ -63,7 +67,7 @@ const stageHost = root.querySelector<HTMLElement>('#phaser-stage')!
 const audio = new GameAudio()
 const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)')
 const draft = { name: '', classId: 'warrior' as ClassId, presentation: 'masculine' as Presentation }
-type GameScreen = 'title' | 'create' | 'camp' | 'battle' | 'result' | 'relicary' | 'missions' | 'wardrobe' | 'events' | 'mage' | 'plaza' | 'test-admin'
+type GameScreen = 'title' | 'create' | 'camp' | 'battle' | 'result' | 'relicary' | 'missions' | 'wardrobe' | 'events' | 'mage' | 'plaza' | 'sky' | 'test-admin'
 let screen: GameScreen = 'title'
 let testAdminAllowed = false
 let testAdminChecking = false
@@ -101,6 +105,15 @@ const plaza = new Plaza((state) => {
 })
 window.addEventListener('pagehide', () => plaza.leave())
 const relicState = { filter: 'Tudo' as RelicFilter, chosen: '', bulk: false }
+let relicFromSky = false
+let sky: SkyState = { position: skySpawn, step: false, showBindings: false }
+
+function moveSky(x: number, y: number): void {
+  const destination = skyGround(x, y)
+  if (destination.x === sky.position.x && destination.y === sky.position.y) return
+  sky.position = destination
+  paintSky(view, sky, sky.step)
+}
 
 window.setInterval(() => {
   if (screen === 'camp' && profile && !busy && !updateCityView(view, profile, building, Date.now())) render()
@@ -193,6 +206,9 @@ function render(focusHeading = false, events: readonly BattleEvent[] = []): void
   } else if (screen === 'plaza' && profile) {
     view.innerHTML = plazaView()
     paintPlaza(view, profile, plaza.state)
+  } else if (screen === 'sky' && profile) {
+    view.innerHTML = skyView(profile, sky, error)
+    paintSky(view, sky)
   } else if (screen === 'mage' && profile) {
     view.innerHTML = mageView(profile, mageNode, error)
   } else if (screen === 'wardrobe' && profile) {
@@ -202,7 +218,7 @@ function render(focusHeading = false, events: readonly BattleEvent[] = []): void
   } else if (screen === 'missions' && profile) {
     view.innerHTML = missionsView(profile, challenge, partySize, error)
   } else if (screen === 'relicary' && profile) {
-    view.innerHTML = relicaryView(profile, relicState, error)
+    view.innerHTML = relicaryView(profile, relicState, error, relicFromSky)
   } else if (screen === 'camp' && profile) {
     view.innerHTML = campView(profile, error, building, Date.now())
   } else {
@@ -339,7 +355,10 @@ async function createHero(): Promise<void> {
   if (busy) return
   const next = newProfile(draft.name, draft.classId, draft.presentation)
   if (profile && !window.confirm('Iniciar uma nova campanha substitui o progresso atual. Continuar?')) return
-  await save(() => startAttempt(next, 'ruins', seed()), enterBattle)
+  await save(() => startAttempt(next, 'ruins', seed()), () => {
+    sky = { position: skySpawn, step: false, showBindings: false }
+    enterBattle()
+  })
 }
 
 function begin(encounter: EncounterId, options?: Parameters<typeof startAttempt>[3]): void {
@@ -494,7 +513,10 @@ function modifyRelicary(change: (bag: Relicary, owner: Profile) => Relicary, don
 function relicAction(action: string, value: string | undefined): boolean {
   const item = profile?.relicary.relics.find((entry) => entry.key === relicState.chosen) ?? profile?.relicary.relics[0]
   switch (action) {
-    case 'relicary': screen = 'relicary'; break
+    case 'relicary':
+      relicFromSky = screen === 'sky'
+      screen = 'relicary'
+      break
     case 'relic-filter': {
       const next = filters.find((id) => id === value)
       if (next) relicState.filter = next
@@ -616,6 +638,41 @@ root.addEventListener('click', (event) => {
       void campaign((current) => settleAttempt(current, attempt, 'defeat'), () => { screen = 'camp' })
       return
     }
+    case 'sky':
+    case 'sky-vinculos':
+      if (profile?.completed.includes('ruins')) {
+        if (action === 'sky-vinculos') sky.showBindings = true
+        screen = 'sky'
+      }
+      break
+    case 'sky-move':
+      if (screen === 'sky' && event.detail > 0) {
+        const box = button.getBoundingClientRect()
+        moveSky((event.clientX - box.left) / box.width, (event.clientY - box.top) / box.height)
+      }
+      return
+    case 'sky-step':
+      if (screen === 'sky') {
+        sky.step = !sky.step
+        paintSky(view, sky)
+        audio.play('select')
+      }
+      return
+    case 'sky-portal':
+      if (screen !== 'sky' || !profile) return
+      if (!skyPortalNear(sky.position)) {
+        moveSky(skyPortal.x, skyPortal.y)
+        return
+      }
+      if (!profile.completed.includes('gate')) { begin('gate'); return }
+      screen = 'missions'
+      break
+    case 'sky-bonds':
+      if (screen === 'sky') sky.showBindings = !sky.showBindings
+      break
+    case 'sky-bind':
+      if (screen === 'sky' && (value === 'release' || isBoundCurse(value))) void campaign((current) => bindCurse(current, value === 'release' ? null : value))
+      return
     case 'plaza': if (profile) screen = 'plaza'; break
     case 'plaza-join':
       if (profile) void plaza.join({ ...profile.hero, level: levelFor(profile.hero.xp) })
@@ -692,11 +749,31 @@ root.addEventListener('click', (event) => {
     default: return
   }
   audio.play('select')
-  const sameView = ['class', 'presentation', 'speed', 'skip', 'pause', 'building', 'jura', 'challenge', 'nest-size', 'style-slot', 'mage-node'].includes(action)
+  const sameView = ['class', 'presentation', 'speed', 'skip', 'pause', 'building', 'jura', 'challenge', 'nest-size', 'style-slot', 'mage-node', 'sky-bonds'].includes(action)
   render(!sameView)
+  if (screen === 'sky' && sky.showBindings && (action === 'sky-bonds' || action === 'sky-vinculos')) {
+    const heading = view.querySelector<HTMLElement>('#sky-bind-title')
+    heading?.setAttribute('tabindex', '-1')
+    heading?.focus({ preventScroll: true })
+    heading?.scrollIntoView({ block: 'nearest' })
+  }
 })
 
 document.addEventListener('keydown', (event) => {
+  if (screen === 'sky' && !busy && !event.altKey && !event.ctrlKey && !event.metaKey
+      && !document.activeElement?.matches('input, textarea, select, [contenteditable]')) {
+    const directions: Record<string, readonly [number, number]> = {
+      ArrowLeft: [-1, 0], ArrowRight: [1, 0], ArrowUp: [0, -1], ArrowDown: [0, 1],
+      a: [-1, 0], d: [1, 0], w: [0, -1], s: [0, 1],
+    }
+    const delta = directions[event.key] ?? directions[event.key.toLowerCase()]
+    if (delta) {
+      event.preventDefault()
+      const stride = sky.step ? 0.09 : 0.04
+      moveSky(sky.position.x + delta[0] * stride, sky.position.y + delta[1] * stride)
+    }
+    return
+  }
   if (screen === 'plaza' && document.activeElement?.classList.contains('plaza-ground')) {
     const delta = { ArrowLeft: [-0.05, 0], ArrowRight: [0.05, 0], ArrowUp: [0, -0.05], ArrowDown: [0, 0.05] }[event.key]
     if (delta) {

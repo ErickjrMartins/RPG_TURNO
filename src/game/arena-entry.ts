@@ -20,6 +20,8 @@ const strideRigs: Readonly<Record<string, readonly [number, number]>> = {
   'curse-hollow': [0.15, 0.76],
   'curse-veil': [0.29, 0.66],
   'curse-rupture': [0.23, 0.82],
+  'bound-cinder': [0.26, 0.77],
+  'bound-omen': [0.35, 0.62],
 }
 
 export const entryFrameCount = 12

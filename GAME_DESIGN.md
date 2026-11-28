@@ -51,6 +51,14 @@ Na Centelha, o Canalizador carrega o cajado e dispara uma esfera azul de núcleo
 
 As referências de balanceamento propostas são 20 pontos de recurso inicial, 12 gerados no ataque básico, recuperação de 5 por turno e custos de 20 e 35 para as duas habilidades. A duração desejada é de 3–6 rodadas para uma batalha comum e 5–9 para um miniboss. Os valores serão calibrados em testes.
 
+### Reino dos Céus e Vínculos de Mácula
+
+O Reino dos Céus é uma estação suspensa de Alvor acessível após a operação na Estação Aurora. Toque no piso ou use WASD e setas para caminhar. O Passo de Fenda é um modo de deslocamento que acelera os passos e percorre a mesma área pavimentada. O Portal de Caça leva primeiro ao Bloqueio da Linha 7 e depois às Expedições. O atalho Bolsa abre o Relicário existente.
+
+Uma única maldição pode ficar vinculada ao herói. O Braseiro fica disponível ao vencer a Estação Aurora e protege um aliado com escudo a cada três rodadas, a partir da primeira. O Vigia do Limiar fica disponível após o Bloqueio e marca um inimigo a cada duas rodadas, a partir da primeira. Nos outros turnos, cada vínculo usa seu ataque básico. A maldição segue o jogador no Reino dos Céus e entra na iniciativa com Vida, Poder e Defesa próprios. Ela ocupa uma vaga livre na formação, com prioridade sobre os aliados simulados nas expedições em grupo e no treino.
+
+Vitórias de campanha rendem 24 XP ao vínculo ativo. Cada 30 XP concede um nível, até o nível 5. Derrotas, treinos e varreduras ficam fora dessa progressão. Os vínculos e níveis são salvos junto à campanha, e o histórico de vitórias libera as maldições correspondentes em saves anteriores.
+
 ### Juras Profanas e Abismos Pessoais
 
 Depois da Estação Aurora, ações comuns alimentam o medidor de Mácula. Uma Jura Profana fortalece a habilidade escolhida em 30%, cobra Vida e acrescenta Corrosão Interna. Cada acúmulo de Corrosão causa 2 de dano ao fim da rodada, até três. Afinidades de relíquias e o Caminho da Jura podem reduzir o custo.

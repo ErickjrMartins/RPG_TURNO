@@ -1,6 +1,6 @@
 {
   "name": "reinos-da-aurora",
-  "version": "0.5.2",
+  "version": "0.6.0",
   "private": true,
   "type": "module",
   "scripts": {
@@ -21,7 +21,8 @@
     "test:offline": "node tests/offline-browser.mjs",
     "build:portable": "tsc --noEmit && vite build --mode portable && node scripts/portable.mjs",
     "start": "node server/start.mjs",
-    "test:world": "node tests/world-browser.mjs"
+    "test:world": "node tests/world-browser.mjs",
+    "test:sky": "node tests/sky-browser.mjs"
   },
   "dependencies": {
     "@fontsource-variable/cinzel": "5.3.0",
