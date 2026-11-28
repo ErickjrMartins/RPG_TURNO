@@ -34,7 +34,7 @@ function avatar(entry: Visitor): HTMLElement {
   image.alt = ''
   const name = document.createElement('strong')
   name.textContent = entry.name
-  node.append(image, name)
+  node.append(name, image)
   return node
 }
 

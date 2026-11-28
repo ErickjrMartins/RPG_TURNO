@@ -1,7 +1,7 @@
 import type Phaser from 'phaser'
 import { classes, type ClassId } from '../content/classes'
 import type { Unit } from '../domain/battle'
-import { arenaHeight, arenaWidth, pointFor } from './layout'
+import { arenaFloor, arenaWidth, pointFor } from './layout'
 
 const strideRigs: Readonly<Record<string, readonly [number, number]>> = {
   'warrior-masculine': [0.13, 0.56],
@@ -25,11 +25,11 @@ const strideRigs: Readonly<Record<string, readonly [number, number]>> = {
 export const entryFrameCount = 12
 const columns = 4
 const height = 160
-const entranceGround = arenaHeight * 0.56
+const entranceGround = arenaFloor + 16
 const heroStride = {
-  warrior: { duration: 2300, cycles: 3, lift: 2.2, tilt: 0.009, finalLean: 0.022, finalDrop: 5 },
-  archer: { duration: 2120, cycles: 3, lift: 4.1, tilt: 0.015, finalLean: -0.027, finalDrop: -2 },
-  mage: { duration: 2480, cycles: 2, lift: 1.2, tilt: 0.006, finalLean: 0.010, finalDrop: -4 },
+  warrior: { duration: 2300, cycles: 3, tilt: 0.009, finalLean: 0.022 },
+  archer: { duration: 2120, cycles: 3, tilt: 0.015, finalLean: -0.027 },
+  mage: { duration: 2480, cycles: 2, tilt: 0.006, finalLean: 0.010 },
 } as const
 
 export interface ArenaEntry {
@@ -56,7 +56,7 @@ export function arenaEntry(unit: Unit, width: number, initial: boolean, heroClas
     x: direction === 1 ? -margin : arenaWidth + margin,
     y: entranceGround + lane * 9 - (unit.slot >= 3 ? 6 : 0),
   }
-  const floating = unit.art === 'wisp' || unit.art === 'moth'
+  const floating = unit.team === 'enemies' && (unit.art === 'wisp' || unit.art === 'moth')
   const stride = heroClass && heroStride[heroClass]
   return {
     origin, home, direction, floating,
@@ -81,14 +81,14 @@ export function entryPose(entry: ArenaEntry) {
   const style = entry.heroClass && heroStride[entry.heroClass]
   const landing = Math.sin(settle * Math.PI)
   const travel = walking + (walking - walking ** 3) * 0.42 - Math.sin(swing * 2) * 0.007 * strength
-  const lift = entry.floating ? (1 - Math.cos(swing)) * 3.8 * strength : Math.sin(swing) ** 2 * (style ? style.lift : 3.1) * strength
+  const lift = entry.floating ? (1 - Math.cos(swing)) * 3.8 * strength : 0
   // Keep the approach on the side entrance's floor before easing into each lane.
   const laneTravel = Math.max(0, (travel - 0.27) / 0.73)
   const laneBlend = laneTravel * laneTravel * (3 - 2 * laneTravel)
   const groundY = entry.origin.y + (entry.home.y - entry.origin.y) * laneBlend
   return {
     x: entry.origin.x + (entry.home.x - entry.origin.x) * travel,
-    y: groundY - lift + landing * (style ? style.finalDrop : 0),
+    y: groundY - lift,
     groundY,
     scale: 0.94 + travel * 0.06,
     tilt: entry.direction * (Math.sin(swing) * (style ? style.tilt : 0.010) * strength + landing * (style ? style.finalLean : 0.012)),

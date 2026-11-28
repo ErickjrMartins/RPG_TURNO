@@ -1,6 +1,6 @@
 import { classIds, type ClassId, type Presentation } from '../content/classes'
+import { plazaGround, type Position } from './plaza-ground'
 
-export interface Position { x: number; y: number }
 export interface PlazaHero { name: string; classId: ClassId; presentation: Presentation; level: number }
 export type Visitor = PlazaHero & Position & { id: string }
 
@@ -23,6 +23,7 @@ function decodeVisitors(value: unknown): Visitor[] {
     && Number.isSafeInteger(entry.level) && entry.level > 0
     && Number.isFinite(entry.x) && entry.x >= 0.07 && entry.x <= 0.93
     && Number.isFinite(entry.y) && entry.y >= 0.15 && entry.y <= 0.84)
+    .map((entry) => ({ ...entry, ...plazaGround(entry.x, entry.y) }))
 }
 
 async function request(method: string, body: unknown, keepalive = false) {
@@ -78,7 +79,7 @@ export class Plaza {
   }
 
   move(x: number, y: number): void {
-    const position = { x: Math.max(0.07, Math.min(0.93, x)), y: Math.max(0.15, Math.min(0.84, y)) }
+    const position = plazaGround(x, y)
     this.show({ position })
     if (this.state.phase === 'online') void this.refresh()
   }

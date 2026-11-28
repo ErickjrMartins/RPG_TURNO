@@ -17,7 +17,7 @@ async function enterArena(page, form) {
 async function sampleIdle(page) {
   return page.evaluate(async () => {
     const ctx = document.querySelector('.arena-canvas canvas').getContext('2d')
-    const boxes = [[342, 178, 57, 99], [281, 102, 65, 96], [668, 182, 142, 86], [926, 149, 85, 111]]
+    const boxes = [[342, 211, 57, 99], [281, 154, 65, 96], [668, 215, 142, 86], [926, 193, 85, 111]]
     const sample = () => boxes.map((box) => ctx.getImageData(...box).data)
     await new Promise(requestAnimationFrame)
     await new Promise(requestAnimationFrame)
@@ -74,12 +74,12 @@ async function verifySpark(form, isMobile = false) {
       const deadline = performance.now() + 2400
       function scan() {
         if (meter() === health) {
-          state.crystal ||= blue(412, 123, 53, 52)
-          const span = electricSpan(506, 95, 166, 161)
+          state.crystal ||= blue(412, 156, 53, 52)
+          const span = electricSpan(506, 128, 166, 161)
           state.orb ||= span >= 59
           state.electric ||= span >= 67
         } else {
-          state.impact ||= electricSpan(653, 137, 185, 159) >= 86
+          state.impact ||= electricSpan(653, 170, 185, 159) >= 86
         }
         if (Object.values(state).every(Boolean) || performance.now() >= deadline) resolve(state)
         else requestAnimationFrame(scan)
@@ -110,7 +110,7 @@ async function verifyRain(form, isMobile = false) {
       const other = meter('Vulto do Véu')
       const count = (x, y, width, height) => ctx.getImageData(x, y, width, height).data.filter((value, i, data) =>
         i % 4 === 2 && value > 226 && data[i - 2] < 140 && data[i - 1] > 130 && data[i + 1] > 170).length
-      const flash = (x) => ctx.getImageData(x, 263, 23, 25).data.filter((r, i, data) =>
+      const flash = (x) => ctx.getImageData(x, 296, 23, 25).data.filter((r, i, data) =>
         i % 4 === 0 && r > 172 && data[i + 1] > r + 14 && data[i + 2] > 243 && data[i + 3] > 215).length
       const boxes = [[651, 28, 124, 69], [670, 102, 131, 93]]
       const base = boxes.map((box) => count(...box))

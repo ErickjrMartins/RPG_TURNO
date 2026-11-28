@@ -491,7 +491,7 @@ img { max-width: 100%; }
   .battle-brief { font-size: 13px; }
   .arena-badges { inset: 5px 5px auto; }
   .arena-badges span { font-size: 8px; letter-spacing: 0; padding: 3px 4px; }
-  .unit-label { width: clamp(52px, 16%, 95px); padding: 3px; transform: translate(-50%, calc(var(--lane) * 5px)); }
+  .unit-label { width: clamp(52px, 16%, 95px); }
   .unit-label small { display: none; }
   .health { height: 3px; }
   .combat-columns { grid-template-columns: 1fr; }
@@ -581,6 +581,7 @@ img { max-width: 100%; }
 .jura-controls button[aria-pressed="true"] { border-color: #e2baf5; background: #4f3365; }
 .city-route .button { margin: 2px 7px 4px 0; }
 @media (max-width: 680px) {
+  .arena-frame { width: 100%; min-height: 146px; }
   .arena-frame.full-formation { min-height: 156px; }
   .full-formation .unit-label { width: clamp(46px, 12%, 68px); font-size: 7px; }
   .abyss-banner { font-size: 8px; bottom: 3px; }
@@ -659,8 +660,8 @@ img { max-width: 100%; }
 .login-day small { color: var(--gold); }
 @media (max-width: 680px) { .login-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 
-.city-hero-marker { position: absolute; left: 50%; top: 57%; transform: translate(-50%, -50%); width: clamp(35px, 9%, 72px); pointer-events: none; }
-.city-hero-marker img { filter: drop-shadow(0 2px 5px #111); }
+.city-hero-marker { position: absolute; left: 50%; top: 66%; transform: translate(-50%, -100%); width: clamp(35px, 9%, 72px); pointer-events: none; }
+.city-hero-marker::before, .plaza-avatar::before { content: ""; position: absolute; bottom: -3px; left: 50%; width: 52%; height: 8px; transform: translateX(-50%); border-radius: 50%; background: #101115a8; filter: blur(1.5px); }
 .relic-delta { display: flex; flex-wrap: wrap; gap: 5px 10px; }
 .relic-delta .gain { color: #c7e097; }
 .relic-delta .loss { color: #fecbaf; }
@@ -745,16 +746,20 @@ img { max-width: 100%; }
 .vital-stats { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 4px 10px; font-size: 12px; margin-bottom: 4px; }
 .vital-stats strong { color: #f1d3a4; }
 .hero-vitals .health { height: 11px; }
-@media (max-width: 680px) { .unit-label .health { height: 6px; } }
+@media (max-width: 680px) {
+  .unit-label { padding: 2px 4px; gap: 2px; transform: translate(-50%, calc((var(--lane) - 1) * 7px)); }
+  .unit-label .health { height: 6px; }
+}
 
 .plaza-layout { display: grid; grid-template-columns: minmax(0, 3fr) minmax(220px, 1fr); gap: 14px; align-items: start; }
-.plaza-map { position: relative; isolation: isolate; aspect-ratio: 1.52; min-height: 300px; overflow: hidden; background: linear-gradient(0deg, #16212a7a, #1a2b340d), url('/assets/patio-alvor.webp') center / cover; }
+.plaza-map { position: relative; isolation: isolate; aspect-ratio: 3 / 2; overflow: hidden; background: linear-gradient(0deg, #16212a7a, #1a2b340d), url('/assets/patio-alvor.webp') center / cover; }
 .plaza-ground { position: absolute; inset: 0; width: 100%; height: 100%; background: transparent; border: 0; cursor: crosshair; }
 .plaza-ground:focus-visible { outline-offset: -4px; }
-.plaza-avatar { position: absolute; display: grid; justify-items: center; width: max-content; transform: translate(-50%, -88%); transition: top .42s ease, left .42s ease; pointer-events: none; }
-.plaza-avatar img { width: clamp(29px, 6.1vw, 76px); aspect-ratio: 1; object-fit: contain; filter: drop-shadow(0 3px 3px #0f1417); }
+.plaza-avatar { position: absolute; display: grid; justify-items: center; width: max-content; transform: translate(-50%, -100%); transition: top .42s ease, left .42s ease; pointer-events: none; }
+.plaza-avatar img { width: clamp(29px, 6.1vw, 76px); aspect-ratio: 1; object-fit: contain; object-position: center bottom; position: relative; }
 .plaza-avatar strong { border-radius: 2px; border: 1px solid #a28c66; color: #e7f1d0; background: #142226eb; font-size: clamp(9px, 1.1vw, 12px); padding: 2px 4px; white-space: nowrap; }
+.plaza-avatar::before { width: clamp(9px, 2.4vw, 29px); height: 5px; bottom: -1px; }
 .plaza-avatar.self strong { border-color: #f5c990; color: #ffdfaa; }
 .plaza-travelers { list-style: none; padding: 0; margin: 10px 0 0; max-height: 240px; overflow-y: auto; }
 .plaza-travelers li { padding: 6px 0; border-top: 1px solid var(--line); font-size: 13px; }
-@media (max-width: 705px) { .plaza-layout { grid-template-columns: 1fr; } .plaza-map { min-height: 240px; } }
+@media (max-width: 705px) { .plaza-layout { grid-template-columns: 1fr; } }

@@ -131,6 +131,18 @@ try {
   await first.locator('.plaza-ground').focus()
   await first.keyboard.press('ArrowLeft')
   await second.waitForFunction((left) => [...document.querySelectorAll('.plaza-avatar')].some((entry) => entry.textContent.includes('Runa de Alvor') && entry.style.left !== left), previous)
+  await first.locator('.plaza-ground').click({ position: { x: 5, y: 5 } })
+  await second.waitForFunction(() => {
+    const visitor = [...document.querySelectorAll('.plaza-avatar')].find((node) => node.textContent === 'Runa de Alvor')
+    return visitor?.style.top === '48%' && visitor.style.left === '20%'
+  })
+  await second.waitForFunction(() => {
+    const avatar = [...document.querySelectorAll('.plaza-avatar')].find((node) => node.textContent === 'Runa de Alvor')
+    const image = avatar?.querySelector('img')
+    if (!image?.complete || !image.naturalWidth) return false
+    const map = document.querySelector('.plaza-ground').getBoundingClientRect()
+    return Math.abs(image.getBoundingClientRect().bottom - (map.top + map.height * 0.48)) < 1
+  })
   if (process.env.AURORA_SCREENSHOTS) await first.screenshot({ path: 'work/plaza-030.png', fullPage: true })
   await second.getByRole('button', { name: 'Sair da sessão online' }).click()
   await first.getByText('1 jogador na praça').waitFor()
