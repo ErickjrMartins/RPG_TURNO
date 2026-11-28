@@ -37,7 +37,7 @@ async function verifyShot(presentation, name) {
       const drawing = canvas.getContext('2d', { willReadFrequently: true })
       const timeout = performance.now() + 2500
       const scan = () => {
-        const pixels = drawing.getImageData(490, 135, 190, 95).data
+        const pixels = drawing.getImageData(490, 168, 190, 95).data
         const arrows = pixels.some((value, index) => index % 4 === 0 && value > 220 && pixels[index + 1] > 150
           && pixels[index + 2] < 225 && pixels[index + 3] > 150)
         if (arrows || performance.now() >= timeout) resolve(arrows)

@@ -30,6 +30,10 @@ async function verifyAbyss(page, isTouch, heavyName) {
   await page.getByRole('heading', { name: 'Simulador de Combate' }).waitFor()
   await page.locator('.arena-canvas canvas').waitFor()
   assert.equal(await page.locator('.unit-label').count(), 12)
+  assert(await page.locator('.arena-frame').evaluate((arena) => {
+    const { left, right } = arena.getBoundingClientRect()
+    return left >= 0 && right <= innerWidth
+  }), 'Formação completa cabe na tela')
   await fast(page)
   for (let i = 0; i < 2; i++) {
     await page.locator('.target').first().waitFor()

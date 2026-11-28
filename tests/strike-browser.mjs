@@ -38,10 +38,10 @@ async function testStrike(form, mobile) {
       function scan() {
         const time = performance.now()
         start ??= time
-        const center = opaque(472, 179, 112, 96, 130)
-        const landing = opaque(601, 160, 52, 113, 330)
-        const inFormation = opaque(350, 159, 48, 111, 500)
-        const fire = ctx.getImageData(646, 175, 123, 81).data.filter((red, index, data) =>
+        const center = opaque(472, 212, 112, 96, 130)
+        const landing = opaque(601, 193, 52, 113, 330)
+        const inFormation = opaque(350, 192, 48, 111, 500)
+        const fire = ctx.getImageData(646, 208, 123, 81).data.filter((red, index, data) =>
           index % 4 === 0 && red > 221 && data[index + 1] > 78 && data[index + 1] < 240 && data[index + 2] < 145 && data[index + 3] > 185).length
         if (state.approach && fire > 82) state.fire = true
         if (life() === initial && center && !state.approach) {
@@ -57,12 +57,12 @@ async function testStrike(form, mobile) {
           secondCrossing = time
         }
         if (state.impact && !state.completeArc && time - hit < 190) {
-          const beyondSprite = ctx.getImageData(783, 158, 54, 84).data.filter((red, i, pixels) =>
+          const beyondSprite = ctx.getImageData(783, 191, 54, 84).data.filter((red, i, pixels) =>
             i % 4 === 0 && red > 235 && pixels[i + 1] > 99 && pixels[i + 2] < 165 && pixels[i + 3] > 180).length
           state.completeArc ||= beyondSprite > 84
         }
         if (state.impact && time - hit < 80) {
-          const column = ctx.getImageData(723, 185, 1, 74).data
+          const column = ctx.getImageData(723, 218, 1, 74).data
           let last = -20
           let bands = 0
           let total = 0

@@ -15,6 +15,7 @@ import { animateMageSpark, sparkTexture } from './mage-spark'
 import { animateWarriorAttack, warriorTexture, type WarriorAttack, type WarriorCue } from './warrior-strike'
 import { arenaCamera, arenaHeight, arenaWidth, pointFor } from './layout'
 
+const contactShadowOffset = 2
 const opponentTextures = ['crawler', 'wisp', 'warden', 'sentry', ...monsterIds, ...coreArt] as const
 
 export class BootScene extends Phaser.Scene {
@@ -139,7 +140,7 @@ export class ArenaScene extends Phaser.Scene {
     actor.signature = undefined
     this.restoreIdleBase(actor)
     actor.sprite.setPosition(x, y).setRotation(0).setDepth(y).setAlpha(actor.alive ? 1 : 0.24)
-    actor.shadow.setPosition(x, y - 12).setScale(1).setDepth(y - 1).setAlpha(actor.alive ? 1 : 0.32)
+    actor.shadow.setPosition(x, y - contactShadowOffset).setScale(1).setDepth(y - 1).setAlpha(actor.alive ? 1 : 0.32)
     actor.clothes?.setPosition(0, 0).setScale(1).setDepth(y + 1).setAlpha(actor.alive ? 1 : 0.25)
   }
 
@@ -155,7 +156,7 @@ export class ArenaScene extends Phaser.Scene {
     }
     actor.sprite.setPosition(pose.x, pose.y).setRotation(pose.tilt).setDepth(pose.groundY).setAlpha(pose.opacity)
       .setDisplaySize(actor.width * pose.scale, actor.height * pose.scale)
-    actor.shadow.setPosition(pose.x, pose.groundY - 12 * pose.scale).setScale(pose.scale)
+    actor.shadow.setPosition(pose.x, pose.groundY - contactShadowOffset * pose.scale).setScale(pose.scale)
       .setDepth(pose.groundY - 1).setAlpha(pose.opacity)
     actor.clothes?.setPosition(pose.x - entry.home.x * pose.scale, pose.y - entry.home.y * pose.scale)
       .setScale(pose.scale).setDepth(pose.groundY + 1).setAlpha(pose.opacity)
@@ -217,10 +218,11 @@ export class ArenaScene extends Phaser.Scene {
       if (!entry) {
         const texture = unit.art === 'hero' ? `${hero.classId}-${hero.presentation}` : unit.art === 'bowman' ? 'archer-masculine' : unit.art
         const size = unit.boss ? 218 : unit.art === 'hero' ? 195 : unit.art === 'crawler' ? 135 : front ? 160 : 148
-        const shadow = this.add.ellipse(point.x, point.y - 12, size * 0.49, 26, 0x151618, 0.54).setDepth(point.y - 1)
         const sprite = this.add.image(point.x, point.y, texture).setOrigin(0.5, 1).setDepth(point.y)
         const scale = size * arenaCamera.actorScale / sprite.height
         sprite.setScale(scale)
+        const shadow = this.add.ellipse(point.x, point.y - contactShadowOffset,
+          Math.min(size * 0.52, sprite.displayWidth), size * 0.10, 0x101115, 0.64).setDepth(point.y - 1)
         if (unit.art === 'sentry') sprite.setTint(0xe4e8e1)
         const clothes = unit.id === 'hero' ? this.heroLook(point.x, point.y, looks) : undefined
         entry = { sprite, shadow, clothes, art: texture, scale, width: sprite.displayWidth, height: sprite.displayHeight,
@@ -264,7 +266,8 @@ export class ArenaScene extends Phaser.Scene {
           const direction = actor.team === 'allies' ? 1 : -1
           this.tweens.killTweensOf(entry.sprite)
           entry.sprite.setX(home.x)
-          this.tweens.add({ targets: entry.sprite, x: home.x + 22 * direction, duration: 104 / speed, yoyo: true, ease: 'Sine.Out' })
+          entry.shadow.setX(home.x)
+          this.tweens.add({ targets: [entry.sprite, entry.shadow], x: home.x + 22 * direction, duration: 104 / speed, yoyo: true, ease: 'Sine.Out' })
         }
       }
       if (target && (event.kind === 'damage' || event.kind === 'heal')) {

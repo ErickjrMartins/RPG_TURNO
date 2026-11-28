@@ -37,6 +37,8 @@ Na criação, cada retrato sobe e desce levemente em um ciclo de respiração. A
 - Os efeitos previstos incluem escudo, sangramento, queimadura, regeneração, atordoamento com limite de duração e modificadores de ataque, defesa e velocidade. O dano considera poder, defesa, crítico, variação controlada e barreiras. O HP mínimo é zero.
 - A vitória concede XP, créditos, itens fixos ou ponderados e progresso de missão. Cada tentativa concluída concede sua recompensa uma única vez. Na derrota, **Tentar novamente** permite repetir o encontro sem perda irreversível no MVP.
 
+As seis posições e as entradas laterais dos combatentes ficam na faixa de piso contínuo dos cenários. Os pés dos aliados permanecem ancorados nessa faixa durante a caminhada e o repouso, com a sombra na mesma posição. Novos cenários da arena reservam a área abaixo de 64% da altura da imagem ao piso. No Pátio de Alvor, a área caminhável segue o contorno pavimentado, e a posição do jogador corresponde aos pés do avatar.
+
 O combate passa por preparação, início de rodada, entrada do jogador, resolução de ações, atualização de efeitos e fim de rodada. Ao fim, inicia outra rodada ou chega à vitória ou à derrota. Durante a resolução, a interface bloqueia novos comandos de ação. A lógica de batalha aplica dano, gasto de energia e recompensas uma única vez por evento válido. As animações exibem o resultado desses eventos.
 
 O Disparo básico do Atirador e da Atiradora mostra a preparação, a puxada do arco selado, a soltura e a volta à guarda. A Vida do alvo muda quando a flecha chega. A animação acompanha a pausa e a velocidade de combate. Com **Pular efeitos** ou movimento reduzido, a ação resolve diretamente.
