@@ -22,6 +22,7 @@ export interface BattleDisplay {
   overcharge: boolean
   opening: boolean
   arriving: boolean
+  heroArriving: boolean
 }
 
 function healthBar(unit: Unit, shield: number): string {
@@ -47,7 +48,7 @@ function unitLabel(unit: Unit, actionable: boolean, affected: boolean, aura: boo
 }
 
 export function battleView(display: BattleDisplay) {
-  const { battle, profile, selected, speed, skip, paused, saving, error, history, overcharge, opening, arriving } = display
+  const { battle, profile, selected, speed, skip, paused, saving, error, history, overcharge, opening, arriving, heroArriving } = display
   const location = encounters[battle.attempt.encounter]
   const region = isZone(battle.attempt.encounter) ? zone(battle.attempt.encounter).region : 'fields'
   const canAct = battle.phase === 'player' && !paused && !saving && !arriving
@@ -82,7 +83,7 @@ export function battleView(display: BattleDisplay) {
           <button class="small-button" data-action="pause" aria-pressed="${paused}">${paused ? 'Retomar' : 'Pausar'}</button>
         </div>
       </header>
-      <p class="battle-brief">${paused ? 'Batalha pausada.' : battle.sealed ? 'Barreira do Núcleo ativa. Abra um Abismo Pessoal agora para quebrá-la.' : isGate && battle.reinforced ? 'O Guardião entrou na segunda fase. Atenção ao Corte do Véu.' : location.intro}</p>`
+      <p class="battle-brief" style="--choice:${ownClass.color}">${paused ? 'Batalha pausada.' : battle.sealed ? 'Barreira do Núcleo ativa. Abra um Abismo Pessoal agora para quebrá-la.' : heroArriving ? `<q>${ownClass.entranceLine}</q>` : isGate && battle.reinforced ? 'O Guardião entrou na segunda fase. Atenção ao Corte do Véu.' : location.intro}</p>`
   const arenaClass = `arena-frame terrain-${region} ${isGate ? 'gate-arena' : ''} ${active ? `is-abyss abyss-${active.classId}` : ''} ${battle.units.length > 8 ? 'full-formation' : ''} ${arriving ? 'is-arriving' : ''}`
   const arenaStyle = `--abyss-tint:${spec.tint};--activation-zoom:${arenaCamera.activationZoom};--activation-duration:${360 / speed}ms`
   const arena = `

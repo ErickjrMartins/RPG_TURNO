@@ -6,7 +6,7 @@ import { monsterIds } from '../content/monsters'
 import type { BattleEvent, Unit } from '../domain/battle'
 import type { Hero } from '../domain/profile'
 import { animateArcherShot, shotTexture } from './archer-shot'
-import { arenaEntry, entryPose, prepareEntryTexture, type ArenaEntry } from './arena-entry'
+import { arenaEntry, drawEntrySignature, entryPose, prepareEntryTexture, type ArenaEntry } from './arena-entry'
 import { attackCellSize, type AttackPlayback } from './attack-playback'
 import { idleFrames, prepareIdleTexture } from './idle-motion'
 import { animateMageSpell } from './mage-effects'
@@ -61,6 +61,7 @@ interface Actor {
   idle?: string | null
   entry?: ArenaEntry
   stride?: string
+  signature?: Phaser.GameObjects.Graphics
 }
 
 export type AnimatedAttack = WarriorAttack | 'shot' | 'spark' | 'rain'
@@ -91,6 +92,10 @@ export class ArenaScene extends Phaser.Scene {
   get entering(): boolean {
     for (const actor of this.actors.values()) if (actor.entry) return true
     return false
+  }
+
+  get heroEntering(): boolean {
+    return !!this.actors.get('hero')?.entry
   }
 
   clear(): void {
@@ -134,6 +139,8 @@ export class ArenaScene extends Phaser.Scene {
     const { x, y } = entry.home
     actor.entry = undefined
     actor.stride = undefined
+    actor.signature?.destroy()
+    actor.signature = undefined
     this.restoreIdleBase(actor)
     actor.sprite.setPosition(x, y).setRotation(0).setAlpha(actor.alive ? 1 : 0.24)
     actor.shadow.setX(x).setAlpha(actor.alive ? 1 : 0.32)
@@ -152,6 +159,10 @@ export class ArenaScene extends Phaser.Scene {
     actor.sprite.setPosition(pose.x, pose.y).setRotation(pose.tilt).setAlpha(pose.opacity)
     actor.shadow.setX(pose.x).setAlpha(pose.opacity)
     actor.clothes?.setPosition(pose.x - entry.home.x, pose.y - entry.home.y).setAlpha(pose.opacity)
+    if (entry.heroClass && pose.signature > 0) {
+      actor.signature ??= this.add.graphics().setDepth(entry.home.y + 2)
+      drawEntrySignature(actor.signature, entry.heroClass, pose.x, pose.y, actor.height, pose.signature)
+    }
     if (pose.step > entry.step && entry.audible && pose.x > 0 && pose.x < arenaWidth) this.game.events.emit('aurora:entry-step')
     entry.step = pose.step
   }
@@ -195,6 +206,7 @@ export class ArenaScene extends Phaser.Scene {
       entry.sprite.destroy()
       entry.shadow.destroy()
       entry.clothes?.destroy()
+      entry.signature?.destroy()
       this.actors.delete(id)
     }
     for (const unit of units) {
@@ -214,7 +226,7 @@ export class ArenaScene extends Phaser.Scene {
           phase: ((unit.slot * 3 + (unit.team === 'allies' ? 0 : 7)) % 19) / 19, alive: unit.hp > 0, busyUntil: 0 }
         this.actors.set(unit.id, entry)
         if (animate && entry.alive && (initial || events.some((event) => event.kind === 'summon' && event.target === unit.id))) {
-          entry.entry = arenaEntry(unit, entry.width, initial)
+          entry.entry = arenaEntry(unit, entry.width, initial, unit.id === 'hero' ? hero.classId : undefined)
           entry.stride = prepareEntryTexture(this, texture)
         }
       }

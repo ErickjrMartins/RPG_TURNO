@@ -69,6 +69,8 @@ Na arena, a vida atual e máxima aparece junto à unidade e no painel do herói.
 
 Cada encontro começa com uma entrada pela lateral da arena. Combatentes terrestres caminham até as posições da formação, e seres voadores entram flutuando. Núcleos e reforços recebem uma entrada própria quando aparecem. Pausa, velocidade, movimento reduzido e Pular efeitos se aplicam à chegada, que termina antes de liberar o próximo comando de combate.
 
+Cada classe tem uma fala de entrada e um gesto próprio. O Vanguarda firma a postura para proteger a formação. O Atirador provoca o adversário e recua levemente o corpo antes de mirar. O Canalizador avança com passadas contidas e traça um selo no chão ao chegar. A criação de herói apresenta a personalidade junto às informações de combate.
+
 ### Exploração
 
 O jogador seleciona um nó do mapa e abre um encontro que pode conter diálogo, baú, combate ou escolha, conforme o conteúdo. A interface indica o objetivo, os requisitos, o progresso da etapa e a recompensa. Cada encontro oferece um fluxo para continuar a jornada ou voltar à cidade.

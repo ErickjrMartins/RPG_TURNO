@@ -1,4 +1,5 @@
 import type Phaser from 'phaser'
+import { classes, type ClassId } from '../content/classes'
 import type { Unit } from '../domain/battle'
 import { arenaWidth, pointFor } from './layout'
 
@@ -20,6 +21,11 @@ const strideRigs: Readonly<Record<string, readonly [number, number]>> = {
 const frames = 12
 const columns = 4
 const height = 160
+const heroStride = {
+  warrior: { duration: 2250, cycles: 3, lift: 2.2, tilt: 0.026, finalLean: 0.058, finalDrop: 4 },
+  archer: { duration: 2110, cycles: 3, lift: 4.1, tilt: 0.041, finalLean: -0.063, finalDrop: -2 },
+  mage: { duration: 2470, cycles: 2, lift: 1.1, tilt: 0.014, finalLean: 0.018, finalDrop: -4 },
+} as const
 
 export interface ArenaEntry {
   fromX: number
@@ -32,23 +38,26 @@ export interface ArenaEntry {
   audible: boolean
   elapsed: number
   step: number
+  heroClass?: ClassId
 }
 
-export function arenaEntry(unit: Unit, width: number, initial: boolean): ArenaEntry {
+export function arenaEntry(unit: Unit, width: number, initial: boolean, heroClass?: ClassId): ArenaEntry {
   const home = pointFor(unit)
   const direction = unit.team === 'allies' ? 1 : -1
   const edge = direction === 1 ? -width / 2 : arenaWidth + width / 2
   // Reinforcements join from the near wings so they do not hold up the next turn.
   const fromX = initial ? edge : home.x - direction * Math.min(Math.abs(edge - home.x), unit.boss ? 246 : 170)
   const floating = unit.art === 'wisp' || unit.art === 'moth'
+  const stride = heroClass && heroStride[heroClass]
   return {
     fromX, home, direction, floating,
     delay: initial ? (unit.slot >= 3 ? 112 : 0) + (unit.slot % 3) * 52 + (direction === 1 ? 0 : 88) : 0,
-    duration: initial ? (unit.boss ? 2470 : 2210) : unit.boss ? 1680 : 1290,
-    cycles: initial ? (unit.slot >= 3 ? 2 : 3) : 2,
+    duration: stride ? stride.duration : initial ? (unit.boss ? 2470 : 2210) : unit.boss ? 1680 : 1290,
+    cycles: stride ? stride.cycles : initial && unit.slot < 3 ? 3 : 2,
     audible: !floating && (unit.id === 'hero' || (!initial && !!unit.boss)),
     elapsed: 0,
     step: 0,
+    heroClass,
   }
 }
 
@@ -59,16 +68,59 @@ export function entryPose(entry: ArenaEntry) {
   const stride = walking * entry.cycles
   const swing = stride * Math.PI * 2
   const strength = Math.min(1, walking * 7, (1 - walking) * 8)
+  const style = entry.heroClass && heroStride[entry.heroClass]
+  const landing = Math.sin(settle * Math.PI)
   const travel = walking + (walking - walking ** 3) * 0.42 - Math.sin(swing * 2) * 0.007 * strength
-  const lift = entry.floating ? (1 - Math.cos(swing)) * 3.8 * strength : Math.sin(swing) ** 2 * 3.1 * strength
+  const lift = entry.floating ? (1 - Math.cos(swing)) * 3.8 * strength : Math.sin(swing) ** 2 * (style ? style.lift : 3.1) * strength
   return {
     x: entry.fromX + (entry.home.x - entry.fromX) * travel,
-    y: entry.home.y - lift,
-    tilt: entry.direction * (Math.sin(swing) * 0.026 * strength - Math.sin(settle * Math.PI) * 0.018),
+    y: entry.home.y - lift + landing * (style ? style.finalDrop : 0),
+    tilt: entry.direction * (Math.sin(swing) * (style ? style.tilt : 0.026) * strength + landing * (style ? style.finalLean : -0.018)),
     frame: Math.floor((stride % 1) * frames),
     step: Math.floor(stride * 2 + 0.00001),
     opacity: Math.min(1, progress * 12),
+    signature: Math.max(0, (progress - 0.79) / 0.21),
     complete: progress === 1,
+  }
+}
+
+export function drawEntrySignature(
+  ink: Phaser.GameObjects.Graphics, classId: ClassId, x: number, y: number, height: number, progress: number,
+): void {
+  const tint = Number.parseInt(classes[classId].color.slice(1), 16)
+  const alpha = Math.min(1, progress * 6) * (1 - progress)
+  ink.clear()
+  switch (classId) {
+    case 'warrior': {
+      const reach = 17 + 35 * progress
+      ink.lineStyle(2, tint, alpha)
+      for (const direction of [-1, 1]) {
+        ink.lineBetween(x + direction * 12, y - 2, x + reach * direction, y - 8 * progress)
+        ink.fillStyle(tint, alpha)
+        ink.fillCircle(x + direction * (reach + 5), y - 9 - 16 * progress, 2)
+      }
+      break
+    }
+    case 'archer': {
+      const bow = x + 29
+      const sight = y - height * 0.63
+      const glint = 4 + 12 * progress
+      ink.lineStyle(1.5, tint, alpha)
+      ink.strokeCircle(bow, sight, glint)
+      ink.lineBetween(bow - glint * 1.5, sight, bow + glint * 1.5, sight)
+      ink.lineBetween(bow, sight - glint * 1.5, bow, sight + glint * 1.5)
+      break
+    }
+    case 'mage':
+      ink.lineStyle(1.5, tint, alpha)
+      ink.strokeEllipse(x, y - 7, 44 + progress * 48, 14 + progress * 14)
+      ink.strokeEllipse(x, y - 7, 30 + progress * 33, 9 + progress * 9)
+      for (const direction of [-1, 1]) {
+        const rune = x + direction * (18 + progress * 22)
+        ink.lineBetween(rune - 3, y - 13, rune + 3, y - 19)
+        ink.lineBetween(rune + 3, y - 19, rune - 3, y - 22)
+      }
+      break
   }
 }
 
