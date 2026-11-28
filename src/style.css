@@ -763,3 +763,54 @@ img { max-width: 100%; }
 .plaza-travelers { list-style: none; padding: 0; margin: 10px 0 0; max-height: 240px; overflow-y: auto; }
 .plaza-travelers li { padding: 6px 0; border-top: 1px solid var(--line); font-size: 13px; }
 @media (max-width: 705px) { .plaza-layout { grid-template-columns: 1fr; } }
+
+.sky-screen { max-width: 1050px; }
+.sky-map { min-height: 230px; background-image: linear-gradient(0deg, #14152875, #15253610), var(--sky-art); }
+.sky-map.sky-step-on .sky-actor { transition-duration: .15s; }
+.sky-hero strong { color: #ffe4b9; }
+.sky-step-on .sky-hero strong { border-color: #c7a3ff; background: #291949; }
+.sky-familiar img { width: clamp(28px, 5vw, 59px); height: clamp(25px, 4.5vw, 54px); }
+.sky-familiar strong { color: #e1caff; border-color: #8f6da8; }
+.sky-portal {
+  position: absolute; left: var(--portal-x); top: var(--portal-y); z-index: 90;
+  transform: translate(-50%, 2px); min-height: 38px;
+  border-color: #a78abe; background: #211b35ec; color: #efe1ff; white-space: nowrap;
+}
+.sky-portal-close { background: #4a2d64; border-color: #d4a5f8; }
+.sky-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; padding-block: 12px 7px; }
+.sky-actions .button { display: inline-flex; align-items: center; gap: 8px; padding: 5px 12px; min-height: 45px; }
+.sky-actions .button[aria-pressed="true"], .sky-actions .button[aria-expanded="true"] { border-color: #bb92e1; background: #342448; }
+.sky-actions img { width: 29px; height: 29px; border-radius: 3px; object-fit: cover; }
+.sky-hint { text-align: center; color: var(--muted); font-size: 13px; margin: 2px 0 16px; }
+.sky-binds { padding: clamp(12px, 3vw, 24px); }
+.sky-binds > p { color: var(--muted); margin: 6px 0; }
+.binding-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-top: 12px; }
+.binding-card {
+  display: grid; grid-template-columns: minmax(85px, .65fr) minmax(0, 1fr); gap: 10px; align-items: center;
+  padding: 13px; border: 1px solid #696077; background: #161923;
+}
+.binding-active { border-color: #c39ce5; box-shadow: inset 0 0 22px #512d5c46; }
+.binding-art { display: grid; place-items: center; min-height: 110px; background: radial-gradient(ellipse, #62416962, transparent 70%); }
+.binding-art img { max-height: 176px; object-fit: contain; }
+.binding-info h3 { margin: 3px 0; font-size: 20px; }
+.binding-info p { font-size: 13px; color: var(--muted); margin: 4px 0; }
+.binding-info p strong { color: #f2dfc8; }
+.binding-stats { display: flex; flex-wrap: wrap; gap: 8px; margin: 9px 0 6px; text-align: center; font-size: 12px; }
+.binding-stats div { background: #212938; padding: 3px 7px; }
+.binding-stats dt { color: var(--muted); }
+.binding-stats dd { margin: 0; color: #ebd4ff; }
+.binding-progress { display: flex; gap: 5px 8px; align-items: center; flex-wrap: wrap; font-size: 12px; margin: 7px 0 12px; }
+.binding-progress progress { max-width: 75px; accent-color: #c195f0; }
+.binding-info .binding-locked { color: #ebbf92; }
+@media (max-width: 750px) {
+  .binding-grid { grid-template-columns: 1fr; }
+  .sky-map { min-height: 190px; }
+}
+@media (max-width: 470px) {
+  .sky-actions .button { padding-inline: 7px; gap: 4px; font-size: 12px; }
+  .sky-actions img { width: 22px; height: 22px; }
+  .sky-portal { font-size: 10px; padding: 3px 5px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .sky-map .sky-actor, .sky-map.sky-step-on .sky-actor { transition: none; }
+}

@@ -97,7 +97,7 @@ function systems(profile: Profile): string {
   </section>`
 }
 
-export function relicaryView(profile: Profile, state: { chosen: string; filter: RelicFilter; bulk: boolean }, error: string): string {
+export function relicaryView(profile: Profile, state: { chosen: string; filter: RelicFilter; bulk: boolean }, error: string, fromSky = false): string {
   const { relicary, hero } = profile
   const attr = attributesFor(profile)
   const { filter, chosen, bulk } = state
@@ -112,7 +112,7 @@ export function relicaryView(profile: Profile, state: { chosen: string; filter: 
   const strength = attr.power * 3 + attr.defense * 2 + attr.hp + attr.precision + attr.resistance
   const eligible = dismantleSelection(relicary)
   return `<section class="view-width base-screen" aria-labelledby="relic-title">
-    <button class="back" data-action="camp">← &nbsp; ${baseName}</button>
+    <button class="back" data-action="${fromSky ? 'sky' : 'camp'}">← &nbsp; ${fromSky ? 'Reino dos Céus' : baseName}</button>
     <div class="base-head"><div><div class="eyebrow"><span></span> RELÍQUIAS PROFANAS</div><h1 id="relic-title">Relicário</h1></div><span class="resource-chip">${used}/${relicary.capacity} espaços · ${profile.gold} créditos</span></div>
     <p class="form-error" role="status">${safe(error)}</p>
     <div class="relic-layout">

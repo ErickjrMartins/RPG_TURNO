@@ -141,6 +141,7 @@ export function campView(saved: Profile, error: string, selected: BuildingId, no
         <button class="button secondary" data-action="missions">Expedições</button>
         <button class="button secondary" data-action="events">Eventos</button>
         <button class="button secondary" data-action="plaza">${plazaName}</button>
+        <button class="button secondary" data-action="sky">Reino dos Céus</button>
       </section>
     </div>
     <button class="back" data-action="title">← &nbsp; Voltar ao título</button>

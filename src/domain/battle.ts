@@ -2,6 +2,8 @@ import { abyssSpecs, effectNames, encounters, skillsByClass, troops, type Effect
 import { zone } from '../content/campaign'
 import type { BossId } from '../content/bosses'
 import { monsters, type CoreArt, type MonsterId } from '../content/monsters'
+import { boundCurses, isBoundCurse, type BoundCurseId } from '../content/bindings'
+import { bindingAttributes, bindingRank } from './bindings'
 import type { Attributes, ClassId } from '../content/classes'
 import { configuredMageSpell, isMageSpell, mageBonuses } from './mage'
 import { isZone } from './campaign'
@@ -11,7 +13,7 @@ import { attributesFor, levelFor, recruitAttributes, type Attempt, type Profile 
 
 export type Team = 'allies' | 'enemies'
 export type Phase = 'player' | 'resolution' | 'victory' | 'defeat'
-type Art = 'hero' | 'sentry' | 'bowman' | 'crawler' | 'wisp' | 'warden' | MonsterId | CoreArt
+type Art = 'hero' | 'sentry' | 'bowman' | 'crawler' | 'wisp' | 'warden' | MonsterId | CoreArt | BoundCurseId
 
 interface Effect {
   kind: EffectKind
@@ -30,6 +32,7 @@ export interface Unit extends Attributes {
   precision: number
   resistance: number
   boss?: BossId
+  bindingRank?: number
 }
 
 export interface Abyss {
@@ -104,11 +107,13 @@ export function startBattle(profile: Profile): Battle {
       unit('wisp', 'Vulto do Véu', 'wisp', 'enemies', 4, { hp: 37, power: 14, defense: 3, speed: 9 }),
     )
   } else if (attempt.encounter === 'drill') {
-    drillFormation(units);
+    addBinding(units, profile)
+    drillFormation(units)
   } else {
     for (const recruit of profile.recruits) {
       units.push(unit(recruit.id, troops[recruit.id].name, recruit.id, 'allies', recruit.slot, recruitAttributes(recruit, profile.relicary)))
     }
+    addBinding(units, profile)
     if (isZone(attempt.encounter)) {
       const stage = zone(attempt.encounter)
       for (let slot = 0; slot < stage.focus; slot++) {
@@ -123,7 +128,8 @@ export function startBattle(profile: Profile): Battle {
         }
       }
       for (let seat = 2; seat <= (attempt.teamSize ?? 1); seat++) {
-        const slot = [0, 2, 3, 4, 5].find((spot) => !units.some((entry) => entry.team === 'allies' && entry.slot === spot))!
+        const slot = [0, 2, 3, 4, 5].find((spot) => !units.some((entry) => entry.team === 'allies' && entry.slot === spot))
+        if (slot === undefined) break
         units.push(unit(`local-${seat}`, `Aliado local ${seat}`, seat % 2 ? 'bowman' : 'sentry', 'allies', slot,
           { hp: 73, power: 13, defense: 6, speed: 7 + seat }))
       }
@@ -174,8 +180,18 @@ export function startBattle(profile: Profile): Battle {
   }
 }
 
+function addBinding(units: Unit[], profile: Profile): void {
+  const id = profile.bindings.active
+  if (!id) return
+  const slot = [4, 3, 5, 2, 0].find((position) => units.every((entry) => entry.slot !== position))
+  if (slot === undefined) return
+  const rank = bindingRank(profile.bindings, id)
+  units.push({ ...unit('bound-curse', boundCurses[id].name, id, 'allies', slot, bindingAttributes(id, rank)), bindingRank: rank })
+}
+
 function drillFormation(units: Unit[]): void {
   for (const slot of [0, 2, 3, 4, 5]) {
+    if (units.some((entry) => entry.slot === slot)) continue
     const type = slot < 3 ? 'sentry' : 'bowman'
     units.push(unit(`drill-ally-${slot}`, `${troops[type].name} ${slot + 1}`, type, 'allies', slot,
       { hp: 65, power: 10, defense: 5, speed: slot < 3 ? 6 : 10 }))
@@ -413,6 +429,22 @@ function targetsForNpc(state: Battle, actor: Unit): Unit[] {
   return preferred.sort((first, second) => first.hp - second.hp || first.slot - second.slot)
 }
 
+function applyBindingTurn(state: Battle, actor: Unit, id: BoundCurseId, enemies: Unit[], events: BattleEvent[]): void {
+  const curse = boundCurses[id]
+  const ready = (state.round - 1) % curse.cadence === 0
+  if (ready && curse.protects) {
+    const ally = state.units.filter((entry) => entry.team === actor.team && entry.hp > 0 && entry.id !== actor.id && !shieldOf(entry))
+      .sort((first, second) => first.hp / first.maxHp - second.hp / second.maxHp || first.slot - second.slot)[0]
+    if (ally) {
+      const strength = curse.technique.effect.strength + 2 * ((actor.bindingRank ?? 1) - 1)
+      applySkill(state, actor, [ally], { ...curse.technique, effect: { ...curse.technique.effect, strength } }, events)
+      return
+    }
+  }
+  const skill = ready && !curse.protects ? curse.technique : curse.attack
+  applySkill(state, actor, enemies.slice(0, 1), skill, events)
+}
+
 export function advanceBattle(previous: Battle): Transition {
   if (previous.phase !== 'resolution') throw new Error('A batalha não está em resolução.')
   const state = clone(previous)
@@ -423,7 +455,9 @@ export function advanceBattle(previous: Battle): Transition {
     if (actor && actor.hp > 0) {
       const targets = targetsForNpc(state, actor)
       const wounded = state.units.find((entry) => entry.team === actor.team && entry.id !== actor.id && entry.hp > 0 && entry.hp < entry.maxHp * 0.33)
-      if (actor.art === 'rootbound' && state.round % 2 === 0) {
+      if (isBoundCurse(actor.art)) {
+        applyBindingTurn(state, actor, actor.art, targets, events)
+      } else if (actor.art === 'rootbound' && state.round % 2 === 0) {
         applySkill(state, actor, targets.slice(0, 1), { ...basicNpcSkill, name: 'Raízes Afogadas', visual: 'hex',
           damage: 0.85, effect: { kind: 'weakened', strength: 0.26, rounds: 2 } }, events)
       } else if (actor.art === 'moth' && state.round % 2 === 1) {

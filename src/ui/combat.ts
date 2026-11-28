@@ -1,4 +1,5 @@
 import { abyssSpecs, effectNames, encounters, items, type EncounterId, type Skill } from '../content/adventure'
+import { boundCurses, boundCurseIds } from '../content/bindings'
 import { regions, zone } from '../content/campaign'
 import { mageIcon } from '../content/mage'
 import { isZone } from '../domain/campaign'
@@ -42,7 +43,7 @@ function unitLabel(unit: Unit, actionable: boolean, affected: boolean, aura: boo
       style="--lane:${(unit.slot % 3) - 1};--x:${point.x / arenaWidth * 100}%;--y:${point.y / arenaHeight * 100}%">
     <strong${unit.boss ? ' class="visually-hidden"' : ''}>${safe(unit.name)}</strong>
     ${healthBar(unit, shield)}
-    <small>${unit.hp} / ${unit.maxHp}${shield > 0 ? ` · ${shield} escudo` : ''}</small>
+    <small>${unit.bindingRank ? `Nv. ${unit.bindingRank} · ` : ''}${unit.hp} / ${unit.maxHp}${shield > 0 ? ` · ${shield} escudo` : ''}</small>
     ${effects.length ? `<span class="condition">${effects.join(' · ')}</span>` : ''}
   </${tag}>`
 }
@@ -141,6 +142,7 @@ export function battleView(display: BattleDisplay) {
 export function resultView(encounter: EncounterId, victory: boolean, profile: Profile, earnedGold: number, attemptId: number): string {
   const reward = encounters[encounter].reward
   const drill = encounter === 'drill'
+  const discovered = victory ? boundCurseIds.find((id) => boundCurses[id].unlock === encounter) : undefined
   const last = victory && profile.campaign.last?.attempt === attemptId ? profile.campaign.last : null
   return `
     <section class="view-width camp result">
@@ -155,8 +157,10 @@ export function resultView(encounter: EncounterId, victory: boolean, profile: Pr
           if (entry.relic) material.push(relicSpec(entry.relic).name)
           return `<li><b>${entry.seat === 1 ? 'Seu espólio' : `Aliado local ${entry.seat}`}</b><span>${material.join(' · ')}</span></li>`
         }).join('')}</ul>` : ''}
+        ${discovered ? `<p><strong>${boundCurses[discovered].name}</strong> disponível para vínculo no Reino dos Céus.</p>` : ''}
         <div class="title-actions">
           <button class="button primary" data-action="${victory ? 'camp' : 'retry'}">${victory ? 'Seguir para Alvor' : 'Tentar novamente'} <span aria-hidden="true">→</span></button>
+          ${discovered ? '<button class="button secondary" data-action="sky-vinculos">Ver Maldições</button>' : ''}
           ${drill && victory ? '<button class="button secondary" data-action="retry">Treinar novamente</button>' : victory ? '' : '<button class="button secondary" data-action="return-from-defeat">Recuar</button>'}
         </div>
       </div>

@@ -2,6 +2,7 @@ import Phaser from 'phaser'
 import { combatantArt } from '../assets'
 import { appearance, type AppearanceId, type StyleSlot } from '../content/wardrobe'
 import { classIds, heroArt, type Presentation } from '../content/classes'
+import { boundCurseIds } from '../content/bindings'
 import { coreArt, monsterIds } from '../content/monsters'
 import type { BattleEvent, Unit } from '../domain/battle'
 import type { Hero } from '../domain/profile'
@@ -16,7 +17,7 @@ import { animateWarriorAttack, warriorTexture, type WarriorAttack, type WarriorC
 import { arenaCamera, arenaHeight, arenaWidth, pointFor } from './layout'
 
 const contactShadowOffset = 2
-const opponentTextures = ['crawler', 'wisp', 'warden', 'sentry', ...monsterIds, ...coreArt] as const
+const opponentTextures = ['crawler', 'wisp', 'warden', 'sentry', ...monsterIds, ...coreArt, ...boundCurseIds] as const
 
 export class BootScene extends Phaser.Scene {
   constructor() {
@@ -217,7 +218,7 @@ export class ArenaScene extends Phaser.Scene {
       let entry = this.actors.get(unit.id)
       if (!entry) {
         const texture = unit.art === 'hero' ? `${hero.classId}-${hero.presentation}` : unit.art === 'bowman' ? 'archer-masculine' : unit.art
-        const size = unit.boss ? 218 : unit.art === 'hero' ? 195 : unit.art === 'crawler' ? 135 : front ? 160 : 148
+        const size = unit.boss ? 218 : unit.art === 'hero' ? 195 : unit.art === 'crawler' ? 135 : unit.bindingRank ? 112 : front ? 160 : 148
         const sprite = this.add.image(point.x, point.y, texture).setOrigin(0.5, 1).setDepth(point.y)
         const scale = size * arenaCamera.actorScale / sprite.height
         sprite.setScale(scale)

@@ -11,7 +11,9 @@ import { addRelic, addStock, equipRelic, gearBonuses, isRelicary, isRelicId, new
 
 import { startingMageLoadout, validMageLoadout, validMageRanks, type MageLoadout, type MageRanks } from './mage'
 
-export const schemaVersion = 8
+import { isBindings, newBindings, rewardBinding, type Bindings } from './bindings'
+
+export const schemaVersion = 9
 export const xpPerLevel = 100
 
 export interface Hero {
@@ -50,6 +52,7 @@ export interface Profile {
   campaign: Campaign
   wardrobe: Wardrobe
   events: Events
+  bindings: Bindings
   mageRanks: MageRanks
   mageLoadout: MageLoadout | null
 }
@@ -96,6 +99,7 @@ export function newProfile(name: string, classId: ClassId, presentation: Present
     campaign: newCampaign(),
     wardrobe: newWardrobe(),
     events: newEvents(),
+    bindings: newBindings(),
     mageRanks: {},
     mageLoadout: classId === 'mage' ? startingMageLoadout() : null,
   }
@@ -150,6 +154,7 @@ export function isProfile(value: unknown): value is Profile {
     && isCity(value.city) && isRelicary(value.relicary) && isCampaign(value.campaign) && isWardrobe(value.wardrobe) && isEvents(value.events) && typeof value.revision === 'string' && isCount(value.gold) && isCount(value.supplies)
     && isCount(nextAttempt) && nextAttempt > 0
     && Array.isArray(completed) && completed.every(isEncounter) && new Set(completed).size === completed.length
+    && isBindings(value.bindings, completed)
     && Array.isArray(recruits) && recruits.every(isRecruit) && new Set(recruits.map((unit) => unit.id)).size === recruits.length
     && new Set(recruits.map((unit) => unit.slot)).size === recruits.length
     && (pending === null || (isAttempt(pending) && pending.id < nextAttempt && !completed.includes(pending.encounter)))
@@ -157,13 +162,18 @@ export function isProfile(value: unknown): value is Profile {
 
 export function decodeProfile(value: unknown): Profile | null {
   if (isProfile(value)) return value
+  const bindings = newBindings()
+  if (isRecord(value) && value.schemaVersion === 8) {
+    const migrated = { ...value, schemaVersion, bindings }
+    return isProfile(migrated) ? migrated : null
+  }
   const mageLoadout = isRecord(value) && isHero(value.hero) && value.hero.classId === 'mage' ? startingMageLoadout() : null
   if (isRecord(value) && value.schemaVersion === 7) {
-    const migrated = { ...value, schemaVersion, mageLoadout }
+    const migrated = { ...value, schemaVersion, bindings, mageLoadout }
     return isProfile(migrated) ? migrated : null
   }
   if (isRecord(value) && (value.schemaVersion === 4 || value.schemaVersion === 5 || value.schemaVersion === 6)) {
-    const migrated = { ...value, schemaVersion, campaign: value.schemaVersion === 4 ? newCampaign() : value.campaign,
+    const migrated = { ...value, schemaVersion, bindings, campaign: value.schemaVersion === 4 ? newCampaign() : value.campaign,
       wardrobe: value.schemaVersion === 6 ? value.wardrobe : newWardrobe(), events: value.schemaVersion === 6 ? value.events : newEvents(), mageRanks: {}, mageLoadout }
     return isProfile(migrated) ? migrated : null
   }
@@ -177,6 +187,7 @@ export function decodeProfile(value: unknown): Profile | null {
     const migrated = {
       ...legacy,
       schemaVersion,
+      bindings,
       relicary,
       campaign: newCampaign(),
       wardrobe: newWardrobe(),
@@ -226,6 +237,7 @@ export function settleAttempt(profile: Profile, attempt: Attempt, result: 'victo
   }
   profile = updateCity(profile, now)
   if (result === 'defeat' || attempt.encounter === 'drill') return { ...profile, pending: null }
+  profile = { ...profile, bindings: rewardBinding(profile.bindings) }
   const reward = encounters[attempt.encounter].reward
   const gold = Math.max(profile.gold, Math.min(goldLimit(profile.city), profile.gold + reward.gold))
   if (isZone(attempt.encounter)) {
