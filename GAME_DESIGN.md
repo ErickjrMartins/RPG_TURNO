@@ -4,11 +4,11 @@ Documento de design inicial. **Reinos da Aurora** é o codinome provisório.
 
 ## Visão do jogo
 
-RPG estratégico de fantasia para navegador desktop e celular, com combate tático por turnos, exploração por nós, gestão de cidade e progressão persistente. Cada batalha combina decisões de habilidade, alvo, energia, efeitos e formação. Suas recompensas permitem fortalecer o herói, as tropas e o assentamento.
+RPG estratégico sobrenatural urbano para navegador desktop e celular, com combate tático por turnos, exploração por nós, gestão de cidade e progressão persistente. Cada batalha combina decisões de habilidade, alvo, energia, efeitos e formação. Suas recompensas permitem fortalecer o herói, as tropas e a Central de Contenção.
 
-Após a queda do Farol Celestial, o jogador lidera um herói, recruta guardiões e reconstrói um assentamento enquanto restaura portais antigos e enfrenta criaturas do Véu. Cenários, personagens, nomes, interface, áudio e demais assets são originais.
+À meia-noite, um apagão rompeu o Véu sobre Alvor. A Central de Contenção recruta agentes para mapear a Mácula, neutralizar maldições e reabrir o metrô. A campanha segue do distrito interditado para as galerias de drenagem e as coberturas da cidade. Técnicas e armas rituais convivem com a infraestrutura contemporânea. Cenários, personagens, nomes, interface, áudio e demais assets são originais.
 
-A campanha PvE pode ser concluída offline. A Praça de Alvor é a área social para encontrar jogadores conectados à mesma instância do jogo. O idioma inicial é português brasileiro, com preparação para localização. Android fica para uma etapa posterior. Steam depende de adaptação e validação.
+A campanha PvE pode ser concluída offline. A Pátio de Alvor é a área social para encontrar jogadores conectados à mesma instância do jogo. O idioma inicial é português brasileiro, com preparação para localização. Android fica para uma etapa posterior. Steam depende de adaptação e validação.
 
 ### Ciclo de jogo
 
@@ -17,9 +17,9 @@ Criar herói → preparar cidade e formação → escolher uma missão no mapa �
 ### Primeiros 15 minutos
 
 1. Na tela de título, escolher **Novo jogo** ou **Continuar**. Em um novo jogo, nomear o herói, escolher Vanguarda, Atirador ou Canalizador e selecionar aparência masculina ou feminina. A criação exibe a arte e dois atributos de destaque.
-2. Jogar o tutorial com um herói, um guarda aliado e dois inimigos. Aprender a usar o ataque básico, uma habilidade e a seleção de alvos.
-3. Receber XP, ouro e um item na tela de vitória e selecionar **Continuar** para entrar na cidade.
-4. Visitar o quartel, recrutar uma tropa e melhorar o Salão do Conselho, com custo, duração e efeito visíveis.
+2. Jogar o tutorial com um herói, um agente aliado e dois inimigos. Aprender a usar o ataque básico, uma habilidade e a seleção de alvos.
+3. Receber XP, créditos e um item na tela de vitória e selecionar **Continuar** para entrar na cidade.
+4. Visitar o quartel, recrutar uma tropa e melhorar o Sala de Comando, com custo, duração e efeito visíveis.
 5. Abrir o mapa e enfrentar um miniboss, com possibilidade de derrota e nova tentativa. Aprender a equipar um item e ter o progresso salvo automaticamente.
 
 Na criação, cada retrato sobe e desce levemente em um ciclo de respiração. Apenas pontas de cabelo e tecido se deslocam dentro da imagem. O rosto, o tronco e o equipamento conservam as proporções, e a preferência de movimento reduzido exibe o retrato estático.
@@ -33,7 +33,7 @@ Na criação, cada retrato sobe e desce levemente em um ciclo de respiração. A
 - Cada classe começa com um ataque básico gratuito e duas habilidades. Custos, geração de recurso e cooldowns em turnos são configuráveis. A interface indica o motivo de indisponibilidade.
 - O herói abre cada rodada. Em seguida, os aliados e inimigos atuam em uma fila única por velocidade, com desempate pelo identificador da unidade. Efeitos periódicos são resolvidos ao fim da rodada. A resolução é reproduzível com a mesma configuração, sequência de ações e seed.
 - Os efeitos previstos incluem escudo, sangramento, queimadura, regeneração, atordoamento com limite de duração e modificadores de ataque, defesa e velocidade. O dano considera poder, defesa, crítico, variação controlada e barreiras. O HP mínimo é zero.
-- A vitória concede XP, ouro, itens fixos ou ponderados e progresso de missão. Cada tentativa concluída concede sua recompensa uma única vez. Na derrota, **Tentar novamente** permite repetir o encontro sem perda irreversível no MVP.
+- A vitória concede XP, créditos, itens fixos ou ponderados e progresso de missão. Cada tentativa concluída concede sua recompensa uma única vez. Na derrota, **Tentar novamente** permite repetir o encontro sem perda irreversível no MVP.
 
 O combate passa por preparação, início de rodada, entrada do jogador, resolução de ações, atualização de efeitos e fim de rodada. Ao fim, inicia outra rodada ou chega à vitória ou à derrota. Durante a resolução, a interface bloqueia novos comandos de ação. A lógica de batalha aplica dano, gasto de energia e recompensas uma única vez por evento válido. As animações exibem o resultado desses eventos.
 
@@ -49,9 +49,9 @@ As referências de balanceamento propostas são 20 pontos de recurso inicial, 12
 
 ### Juras Profanas e Abismos Pessoais
 
-Depois das Ruínas do Farol, ações comuns alimentam o medidor de Mácula. Uma Jura Profana fortalece a habilidade escolhida em 30%, cobra Vida e acrescenta Corrosão Interna. Cada acúmulo de Corrosão causa 2 de dano ao fim da rodada, até três. Afinidades de relíquias e o Caminho da Jura podem reduzir o custo.
+Depois da Estação Aurora, ações comuns alimentam o medidor de Mácula. Uma Jura Profana fortalece a habilidade escolhida em 30%, cobra Vida e acrescenta Corrosão Interna. Cada acúmulo de Corrosão causa 2 de dano ao fim da rodada, até três. Afinidades de relíquias e o Caminho da Jura podem reduzir o custo.
 
-Cada Abismo tem custo-base de 60 de Mácula. Vanguarda e Atirador começam com duas rodadas e passam a três no nível 2 do Abismo. O Canalizador tem três rodadas nos dois níveis, com pulsos mais fortes no nível 2. O nível 2 do Abismo exige herói no nível 2 e Conselho no nível 2 ou vitória no Portão Caído.
+Cada Abismo tem custo-base de 60 de Mácula. Vanguarda e Atirador começam com duas rodadas e passam a três no nível 2 do Abismo. O Canalizador tem três rodadas nos dois níveis, com pulsos mais fortes no nível 2. O nível 2 do Abismo exige herói no nível 2 e Sala de Comando no nível 2 ou vitória no Bloqueio da Linha 7.
 
 | Classe | Abismo | Efeito |
 | --- | --- | --- |
@@ -59,11 +59,11 @@ Cada Abismo tem custo-base de 60 de Mácula. Vanguarda e Atirador começam com d
 | Canalizador | Círculo do Vazio | Reduz a iniciativa de uma fileira inimiga, pulsa no fim de cada rodada e amplifica em 20% o dano direto do Canalizador nessa fileira. |
 | Atirador | Firmamento da Caça | Amplifica o dano contra a presa. Se ela cair, a marca passa ao inimigo vivo de maior Ataque. |
 
-A câmera parte de uma escala mais aberta e pulsa durante a abertura. Traçados, círculos, ícones de estado e cores separam disparo, dano em área, cura, proteção, penalidade e efeito persistente. O Campo de Treino do Refúgio oferece as duas formações completas, com saída imediata e sem espólio.
+A câmera parte de uma escala mais aberta e pulsa durante a abertura. Traçados, círculos, ícones de estado e cores separam disparo, dano em área, cura, proteção, penalidade e efeito persistente. O Simulador de Combate da Central oferece as duas formações completas, com saída imediata e sem espólio.
 
 ### Árvore do Mago e leitura de combate
 
-O Canalizador acessa a árvore após as Ruínas do Farol. Recebe dois pontos no nível inicial e dois por nível de herói. Cada nível de nó custa um ponto e verifica os pré-requisitos. O Refúgio permite redistribuir pontos e preparar até seis ativas, três passivas e o Círculo do Vazio. A Centelha fica no primeiro espaço para recuperar Foco. O Núcleo de Foco funciona como fundamento da árvore. Os quatro feitiços iniciais e as três passivas existentes preservam a configuração inicial ao migrar da versão 0.3.0.
+O Canalizador acessa a árvore após a missão na Estação Aurora. Recebe dois pontos no nível inicial e dois por nível de herói. Cada nível de nó custa um ponto e verifica os pré-requisitos. A Central permite redistribuir pontos e preparar até seis ativas, três passivas e o Círculo do Vazio. A Centelha fica no primeiro espaço para recuperar Foco. O Núcleo de Foco funciona como fundamento da árvore. Os quatro feitiços iniciais e as três passivas existentes preservam a configuração inicial ao migrar da versão 0.3.0.
 
 Na arena, a vida atual e máxima aparece junto à unidade e no painel do herói. Aliados usam verde, inimigos usam vermelho e escudos têm contorno azul. A Centelha viaja até um alvo. A Chuva Astral lança meteoros de gelo com caudas de fogo azul sobre a fileira atingida. Eles caem em sequência e explodem individualmente ao tocar o chão. O dano da habilidade é resolvido na primeira explosão e a próxima ação começa após a sequência. A Renovação envolve o aliado em luz ascendente, o Coro Vital pulsa sobre toda a formação e o Círculo do Vazio forma fendas e sigilos sobre a área. Cada feitiço tem ícone e som próprios e a opção de pular efeitos preserva a resolução do combate.
 
@@ -81,22 +81,22 @@ O jogador seleciona um nó do mapa e abre um encontro que pode conter diálogo, 
 
 | Edifício do MVP | Função |
 | --- | --- |
-| Salão do Conselho | Define o limite de nível dos demais edifícios e participa dos desbloqueios de regiões. |
+| Sala de Comando | Define o limite de nível dos demais edifícios e participa dos desbloqueios de regiões. |
 | Quartel das Maldições | Recruta e melhora tropas. |
-| Fazenda do Vale | Produz provisões periodicamente, com coleta e limite de armazenamento. |
-| Tesouraria | Define a capacidade de ouro. |
+| Laboratório | Produz provisões periodicamente, com coleta e limite de armazenamento. |
+| Cofre de Contenção | Define a capacidade de créditos. |
 
 O painel de cada prédio mostra nível, ação disponível, pré-requisitos, custo, duração e comparação entre o nível atual e o próximo. Produção e melhorias em andamento conservam seus tempos após o recarregamento. Compras, recrutamento e melhorias validam saldo e requisitos antes de debitar recursos e conceder o resultado uma única vez.
 
-No Refúgio de Alvor, todos os quatro edifícios começam no nível 1. O Conselho deve completar o próximo nível antes de permitir melhorias dos demais. A Tesouraria comporta 500, 750 e 1.000 de ouro, respectivamente. A Fazenda produz uma provisão a cada 12, 9 ou 6 segundos e armazena até 8, 13 ou 20. A colheita transfere o estoque para a carteira. O Quartel permite treinar as tropas até seu nível. Cada nível de tropa acrescenta 10 Vida, 3 Ataque e 1 Defesa. Custos e tempos são parâmetros de balanceamento.
+Na Central de Contenção, todos os quatro edifícios começam no nível 1. A Sala de Comando deve completar o próximo nível antes de permitir melhorias dos demais. O Cofre de Contenção comporta 500, 750 e 1.000 créditos, respectivamente. O Laboratório produz uma provisão a cada 12, 9 ou 6 segundos e armazena até 8, 13 ou 20. A coleta transfere o estoque para a carteira. O Quartel permite treinar as tropas até seu nível. Cada nível de tropa acrescenta 10 Vida, 3 Ataque e 1 Defesa. Custos e tempos são parâmetros de balanceamento.
 
-O ouro financia construções, compras e parte do recrutamento. As provisões complementam o custo de tropas. O XP progride o herói. Os cristais são previstos para pesquisa na Academia dos Ecos. Seu uso no MVP depende do escopo dessa construção. Portal dos Caminhos, Forja e Mercado fazem parte da cidade proposta. O acesso ao mapa é obrigatório no MVP, com o painel próprio do Portal ainda a definir. A campanha do MVP é concluível sem compras reais.
+Os créditos financiam construções, compras e parte do recrutamento. As provisões complementam o custo de tropas. O XP progride o herói. Os cristais são previstos para pesquisa na Academia dos Ecos. Seu uso no MVP depende do escopo dessa construção. Portal dos Caminhos, Forja e Mercado fazem parte da cidade proposta. O acesso ao mapa é obrigatório no MVP, com o painel próprio do Portal ainda a definir. A campanha do MVP é concluível sem compras reais.
 
 ### Interface de chefes
 
-O Guardião do Portão e os oito núcleos de expedição usam o mesmo HUD, no canto superior direito da arena. O núcleo recebe a interface quando emerge após a queda dos focos. Cada chefe tem nível de exibição, retrato, runa, paleta e ornamentação próprios. A barra mostra a camada atual, o número de camadas restantes e a Vida total real. As camadas são divisões visuais da Vida máxima e a perda de uma camada não altera as regras de dano.
+O Custódio da Linha 7 e os oito núcleos de expedição usam o mesmo HUD, no canto superior direito da arena. O núcleo recebe a interface quando emerge após a queda dos focos. Cada chefe tem nível de exibição, retrato, runa, paleta e ornamentação próprios. A barra mostra a camada atual, o número de camadas restantes e a Vida total real. As camadas são divisões visuais da Vida máxima e a perda de uma camada não altera as regras de dano.
 
-A paleta acompanha a invocação do reforço do Guardião e a quebra da barreira da Sentinela da Ruptura. Os demais núcleos mudam de apresentação na última camada. Os ícones mostram efeitos que estão ativos e habilidades especiais quando executadas. A interface respeita a preferência por movimento reduzido e a opção Pular efeitos.
+A paleta acompanha a invocação do reforço do Custódio e a quebra da barreira da Sentinela da Ruptura. Os demais núcleos mudam de apresentação na última camada. Os ícones mostram efeitos que estão ativos e habilidades especiais quando executadas. A interface respeita a preferência por movimento reduzido e a opção Pular efeitos.
 
 ### Inventário e equipamentos
 
@@ -126,13 +126,13 @@ Os atributos previstos incluem nível, XP, HP máximo e atual, ataques e defesas
 
 **Abominações Domadas.** Sentinela (tanque), Besteiro (alvo único), Adepta (apoio) e Lanceiro (dano) compõem o elenco proposto. Pelo menos três tipos ficam disponíveis no MVP, com dois recrutáveis no início. Cada tropa tem custo, nível, atributos e comportamento próprios. Nível, composição e posição persistem entre sessões.
 
-**Inimigos.** A IA usa regras por situação. Um inimigo de apoio pode curar um aliado com HP baixo, e a fileira frontal é priorizada salvo exceções de alcance. O **Guardião do Portão Caído** tem duas fases. Abaixo de 50% de HP, invoca reforço e muda o padrão de ataque. Os ataques do chefe sinalizam sua intenção ao jogador.
+**Inimigos.** A IA usa regras por situação. Um inimigo de apoio pode curar um aliado com HP baixo, e a fileira frontal é priorizada salvo exceções de alcance. O **Custódio da Linha 7** tem duas fases. Abaixo de 50% de HP, invoca reforço e muda o padrão de ataque. Os ataques do chefe sinalizam sua intenção ao jogador.
 
 **Visual e animação.** Personagens 2D de corpo inteiro têm silhuetas distintas. A arena lateral apresenta profundidade 2.5D com aliados à esquerda e inimigos à direita, sobre fundos pintados em camadas com parallax sutil. As animações previstas incluem espera, ataque ou conjuração, impacto sofrido, derrota, vitória e caminhada onde houver exploração. A música acompanha o contexto da cidade, da aventura e das batalhas.
 
 ## Indumentárias e eventos
 
-As Indumentárias oferecem Traje, Máscara, Projeção de Arma e Manifestação. Aparência e atributos podem ser equipados separadamente e aparecem no Refúgio e na arena. Cada quatro desbloqueios do Grimório concedem +2 Vida e um conjunto completo concede +3 recurso inicial. Os bônus por slot são iguais nas coleções Expurgo, Vigília e Noturno. A Colheita de Mácula recompensa expedições com Fios e giros gratuitos. Há trilhas de temporada, alta costura e Roleta do Altar Selado, com chance de 12% e garantia no oitavo giro sem Manifestação no ciclo.
+As Indumentárias oferecem Traje, Máscara, Projeção de Arma e Manifestação. Aparência e atributos podem ser equipados separadamente e aparecem na Central e na arena. Cada quatro desbloqueios do Grimório concedem +2 Vida e um conjunto completo concede +3 recurso inicial. Os bônus por slot são iguais nas coleções Expurgo, Vigília e Noturno. A Colheita de Mácula recompensa expedições com Fios e giros gratuitos. Há trilhas de temporada, alta costura e Roleta do Altar Selado, com chance de 12% e garantia no oitavo giro sem Manifestação no ciclo.
 
 O calendário semanal libera uma recompensa por dia local, incluindo uma Manifestação no sétimo dia. Cash, pacotes e metas de recarga são simulados localmente. Cada recibo é contabilizado uma vez e cada meta é resgatada uma vez no ciclo. A futura integração real precisa de provedor e confirmação de recibo pelo servidor.
 
@@ -140,16 +140,16 @@ O calendário semanal libera uma recompensa por dia local, incluindo uma Manifes
 
 | Região | Conteúdo previsto |
 | --- | --- |
-| **Campos de Alvor** | Ruínas do Farol, Refúgio de Alvor, Portão Caído e as Zonas de Quarentena Posto das Cinzas, Brejo do Silêncio e Coração do Véu. |
-| **Pântanos do Véu** | Sinos Submersos e Cisterna das Mariposas. Retorcidos enfraquecem alvos e Mariposas marcam aliados frágeis. |
-| **Cordilheira Cinzenta** | Passo da Geada e Observatório das Cinzas. Linces atacam a retaguarda e Colossos erguem escudos periódicos. |
+| **Distrito Interditado** | Estação Aurora, Central de Contenção, Bloqueio da Linha 7 e as Zonas de Quarentena Posto da Quarentena, Túnel do Silêncio e Subestação do Véu. |
+| **Galerias Subterrâneas** | Galeria Submersa e Cisterna das Mariposas. Retorcidos enfraquecem alvos e Mariposas marcam aliados frágeis. |
+| **Coberturas de Alvor** | Cobertura da Geada e Torre das Cinzas. Linces atacam a retaguarda e Colossos erguem escudos periódicos. |
 | **Desfiladeiro das Cinzas** | Expansão com fogo e ondas de inimigos. |
 
-O Portão Caído libera o Posto das Cinzas. Os capítulos solo têm focos e um núcleo final, classificação de até três estrelas e Primeira Purificação única. A nota máxima libera a Varredura de Área por energia diária. Romper Selo aumenta o dano inimigo em 35%, dobra as Marcas de Expurgo e melhora a chance de núcleos completos.
+O Bloqueio da Linha 7 libera o Posto da Quarentena. Os capítulos solo têm focos e um núcleo final, classificação de até três estrelas e Primeira Purificação única. A nota máxima libera a Varredura de Área por energia diária. Romper Selo aumenta o dano inimigo em 35%, dobra as Marcas de Expurgo e melhora a chance de núcleos completos.
 
 O Ninho da Ruptura é o protótipo local de Ninhos de Calamidade para dois a quatro participantes, com o jogador e companheiros controlados pelo jogo. A barreira do núcleo exige um Abismo, o espólio é calculado individualmente e o herói recebe a própria parte. A conclusão abre o Altar de Trocas. A sincronização entre jogadores depende do servidor autoritativo previsto.
 
-O Coração do Véu libera os Pântanos. A Cisterna das Mariposas libera a Cordilheira. Cada um dos quatro capítulos tem flora ou arquitetura própria, focos, chefe, recompensas e Varredura por nota máxima. Os termos de nível ou missão e o fluxo de recompensas continuam registrados no save.
+A Subestação do Véu libera as Galerias Subterrâneas. A Cisterna das Mariposas libera as Coberturas de Alvor. Cada um dos quatro capítulos tem arquitetura própria, focos, chefe, recompensas e Varredura por nota máxima. Os termos de nível ou missão e o fluxo de recompensas continuam registrados no save.
 
 Regiões posteriores podem exigir missão ou nível para acesso. O plano de expansão prevê de três a seis nós por região, com miniboss, chefe, itens e cenário próprio.
 
@@ -164,20 +164,20 @@ Regiões posteriores podem exigir missão ou nível para acesso. O plano de expa
 
 Mouse, teclado e toque devem permitir concluir o fluxo principal. A interface mantém textos legíveis e controles acessíveis em desktop e celular. O feedback inclui seleção visível de alvo, atualização de barras, impacto, números de dano, efeitos sonoros distintos, explicação de bloqueios, controles de áudio e redução de movimento.
 
-## Praça de Alvor
+## Pátio de Alvor
 
-A praça comum fica dentro do Refúgio. O jogador pode visitar e se movimentar localmente ou entrar na sessão online da instância. Quando online, o servidor registra nome, classe, aparência, nível e posição do avatar para os demais visitantes. O servidor valida posições e encerra sessões inativas. Compra, campanha e salvamento do personagem continuam locais. A sessão da praça depende de um servidor ativo e guarda presença apenas enquanto os jogadores estão conectados.
+A praça comum fica dentro da Central. O jogador pode visitar e se movimentar localmente ou entrar na sessão online da instância. Quando online, o servidor registra nome, classe, aparência, nível e posição do avatar para os demais visitantes. O servidor valida posições e encerra sessões inativas. Compra, campanha e salvamento do personagem continuam locais. A sessão da praça depende de um servidor ativo e guarda presença apenas enquanto os jogadores estão conectados.
 
 ## Progressão
 
-Batalhas e missões concedem XP, ouro e itens. O XP sobe o nível do herói e desbloqueia habilidades. Equipamentos alteram atributos, melhorias do Conselho liberam avanços na cidade e requisitos de missão ou nível controlam a abertura de novas regiões. A dificuldade cresce com padrões de ataque, composição inimiga e efeitos de combate.
+Batalhas e missões concedem XP, créditos e itens. O XP sobe o nível do herói e desbloqueia habilidades. Equipamentos alteram atributos, melhorias da Sala de Comando liberam avanços na cidade e requisitos de missão ou nível controlam a abertura de novas regiões. A dificuldade cresce com padrões de ataque, composição inimiga e efeitos de combate.
 
-A expansão PvE prevê novas regiões, pesquisa, forja ampliada, talentos, gemas, masmorras, montaria, criatura auxiliar, desafios locais e conquistas. Um QTE acessível é uma possibilidade para experimento futuro. Conta, PvP, guildas, combate cooperativo, chat e eventos online constituem uma fase posterior independente da presença na Praça de Alvor.
+A expansão PvE prevê novas regiões, pesquisa, forja ampliada, talentos, gemas, masmorras, montaria, criatura auxiliar, desafios locais e conquistas. Um QTE acessível é uma possibilidade para experimento futuro. Conta, PvP, guildas, combate cooperativo, chat e eventos online constituem uma fase posterior independente da presença na Pátio de Alvor.
 
 ## Critérios de aceitação do MVP
 
 1. Criar e concluir o tutorial com Vanguarda, Atirador e Canalizador. Verificar as aparências masculina e feminina de cada classe. As três classes conseguem completar a campanha.
-2. Completar três encontros e o chefe de Campos de Alvor. Verificar vitória, derrota e nova tentativa, sem duplicação de gasto, dano ou recompensa.
+2. Completar três encontros e o chefe de Distrito Interditado. Verificar vitória, derrota e nova tentativa, sem duplicação de gasto, dano ou recompensa.
 3. Usar os quatro edifícios do MVP, coletar recursos e confirmar custo e efeito das melhorias. Recrutar dois tipos no início, acessar pelo menos três no MVP e confirmar que a formação persiste.
 4. Progredir em missões ligadas a ações reais, receber saque e XP, subir de nível e equipar itens de um conjunto de pelo menos seis equipamentos com bônus efetivos.
 5. Salvar, fechar, reabrir e continuar com o progresso íntegro, inclusive temporizadores e recompensas, sem duplicar itens nem moeda. Verificar a campanha local offline e a recuperação de uma gravação inválida.
@@ -187,13 +187,13 @@ O plano técnico prevê verificar a entrega com `npm run dev`, `npm run build`, 
 
 ## Jornada jogável
 
-A jornada inicial passa por Ruínas do Farol, Refúgio de Alvor e Portão Caído. Nas ruínas, o guarda do tutorial acompanha o herói contra um Rastejante de Pedra e um Vulto do Véu. No Refúgio, o jogador pode recrutar Sentinela e Besteiro, reposicioná-los e equipar o Broche do Alvorecer para o segundo encontro. As duas primeiras vitórias concedem moedas, provisões, XP, um acessório e materiais. As Expedições ampliam o ciclo de combate, preparação na base e progressão.
+A jornada inicial passa por Estação Aurora, Central de Contenção e Bloqueio da Linha 7. Na estação, o agente do tutorial acompanha o herói contra um Rastejante de Concreto e um Vulto do Véu. Na Central, o jogador pode recrutar Sentinela e Besteiro, reposicioná-los e equipar o Broche do Alvorecer para o segundo encontro. As duas primeiras vitórias concedem créditos, provisões, XP, um acessório e materiais. As Expedições ampliam o ciclo de combate, preparação na base e progressão.
 
 O salvamento v8 registra a tentativa ativa e seu resultado de forma transacional e conserva a preparação do Canalizador. A migração preserva os IDs das classes, acessórios, inventário anterior, tropas, formação, recursos e progresso. Ao retomar um combate interrompido, o encontro reinicia com a mesma formação e seed. A build de produção pode ser reaberta offline após carregar e preparar o cache em HTTPS ou localhost.
 
 ## Expansão ritual
 
-A direção visual usa nanquim, placas de carvão, branco de sal e fitas carmesim. Vermelho, azul-elétrico e violeta identificam Vanguarda, Atirador de Precisão e Canalizador. Símbolos e texto acompanham as cores nos controles de combate. O Refúgio e a Praça de Alvor são a entrada para a futura expansão do Enclave. As ilustrações conceituais orientam o trabalho de arte, navegação e leitura em combate.
+A direção visual usa concreto molhado, iluminação de emergência, índigo e violeta nas manifestações do Véu. Vermelho, azul-elétrico e violeta identificam Vanguarda, Atirador de Precisão e Canalizador. Símbolos e texto acompanham as cores nos controles de combate. A Central e o Pátio de Alvor são a entrada para a futura expansão do Enclave. As ilustrações conceituais orientam o trabalho de arte, navegação e leitura em combate.
 
 ### Canalizador na versão 0.4.0
 
@@ -238,7 +238,7 @@ Os testes determinísticos verificam o custo da Alvorada, os três pulsos do Orv
 
 | Enclave | Recurso e progressão propostas |
 | --- | --- |
-| Santuário Central | Cinzas e marcos da campanha liberam os níveis e o teto das outras estruturas. Reaproveitar o papel atual do Conselho. |
+| Santuário Central | Cinzas e marcos da campanha liberam os níveis e o teto das outras estruturas. Reaproveitar o papel atual da Sala de Comando. |
 | Câmara de Contenção | Talismãs selam candidatos enfraquecidos nas Zonas ou Ninhos. Icor e fragmentos evoluem graus Inferior, Médio, Superior e Calamidade. Prever um selo garantido na introdução e dois lugares na formação ativa. |
 | Forja de Selamento | Cinzas refinam Relíquias. Pregos e Selos de Enxerto aproveitam as regras já existentes do Relicário sem duplicar carteiras. Melhorias liberam capacidades com o teto do Santuário. |
 | Obelisco de Coleta | Produz Cinzas e Estilhaços de Obsidiana ao longo do tempo. Definir taxa e estoque por nível depois de medir a receita das campanhas. Teto inicial de referência de 12 horas para permitir duas coletas diárias. |

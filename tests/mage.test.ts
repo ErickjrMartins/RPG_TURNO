@@ -46,7 +46,7 @@ it('valida espaços, pré-requisitos, equipamentos e o bloqueio durante o encont
   const passive = toggleMageSlot(toggleMageSlot(profile, 'seal'), 'restoration')
   const full = toggleMageSlot(toggleMageSlot(passive, 'tear'), 'thread')
   expect(() => toggleMageSlot(full, 'dew')).toThrow('espaço ativo')
-  expect(() => toggleMageSlot(startAttempt(full, 'drill', 1), 'tear')).toThrow('Refúgio')
+  expect(() => toggleMageSlot(startAttempt(full, 'drill', 1), 'tear')).toThrow('Central de Contenção')
   expect(decodeProfile(full)?.mageLoadout?.active).toEqual(['spark', 'rain', 'renew', 'chorus', 'tear', 'thread'])
   expect(rehearsal(full).skills.at(-1)?.id).toBe('void-circle')
   expect(rehearsal(full).mageHealing).toBe(1.08)

@@ -51,7 +51,7 @@ root.innerHTML = `
     </header>
     <main id="view" aria-busy="true"><p class="loading">Carregando Reinos da Aurora…</p></main>
     <div class="stage-storage" aria-hidden="true"><div id="phaser-stage"></div></div>
-    <footer class="game-footer"><div class="view-width footer-inner"><span>VERSÃO 0.4.15</span><span>SALVAMENTO NESTE NAVEGADOR</span></div></footer>
+    <footer class="game-footer"><div class="view-width footer-inner"><span>VERSÃO 0.5.0</span><span>SALVAMENTO NESTE NAVEGADOR</span></div></footer>
   </div>`
 
 const view = root.querySelector<HTMLElement>('#view')!
@@ -510,7 +510,7 @@ function relicAction(action: string, value: string | undefined): boolean {
     case 'relic-dismantle': modifyRelicary(dismantleRelics, () => { relicState.bulk = false }); return true
     case 'relic-expand':
       void campaign((current) => {
-        if (current.gold < 25 || current.relicary.capacity >= 120) throw new Error('Espaço ou ouro insuficiente.')
+        if (current.gold < 25 || current.relicary.capacity >= 120) throw new Error('Espaço ou créditos insuficientes.')
         return { ...current, gold: current.gold - 25, relicary: { ...current.relicary, capacity: current.relicary.capacity + 6 } }
       })
       return true

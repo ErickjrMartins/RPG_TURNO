@@ -24,10 +24,10 @@ export function setTestProgress(profile: Profile, changes: TestProgress): Profil
   const currentLevel = levelFor(profile.hero.xp)
   const level = whole(changes.level, 1, Math.max(testLimits.hero, currentLevel), 'Nível do herói')
   const xp = level === currentLevel ? profile.hero.xp : (level - 1) * xpPerLevel
-  const gold = whole(changes.gold, 0, Math.max(testLimits.balance, profile.gold), 'Ouro')
+  const gold = whole(changes.gold, 0, Math.max(testLimits.balance, profile.gold), 'Créditos')
   const supplies = whole(changes.supplies, 0, Math.max(testLimits.balance, profile.supplies), 'Provisões')
   if (!validMageRanks(profile.mageRanks, xp, profile.hero.classId === 'mage')) {
-    throw new Error('Reinicie a árvore de habilidades no Refúgio antes de baixar para esse nível.')
+    throw new Error('Reinicie a árvore de habilidades na Central de Contenção antes de baixar para esse nível.')
   }
   const recruits = profile.recruits.map((recruit) => ({
     ...recruit, level: whole(changes.troops[recruit.id] ?? recruit.level, 1, maxBuildingLevel, 'Nível da tropa'),

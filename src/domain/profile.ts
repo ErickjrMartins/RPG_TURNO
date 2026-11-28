@@ -208,7 +208,7 @@ export function startAttempt(profile: Profile, encounter: EncounterId, seed: num
   }
   if (isZone(encounter) && !zoneUnlocked(profile, encounter)) throw new Error('Conclua o encontro anterior.')
   if (profile.completed.includes(encounter)) throw new Error('Este encontro já foi concluído.')
-  if (encounter !== 'ruins' && !profile.completed.includes('ruins')) throw new Error('Conclua as Ruínas do Farol primeiro.')
+  if (encounter !== 'ruins' && !profile.completed.includes('ruins')) throw new Error(`Conclua a operação na ${encounters.ruins.name} primeiro.`)
   return {
     ...profile,
     pending: { id: profile.nextAttempt, encounter, seed,

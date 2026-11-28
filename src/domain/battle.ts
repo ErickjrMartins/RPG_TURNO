@@ -1,4 +1,4 @@
-import { abyssSpecs, effectNames, skillsByClass, troops, type EffectKind, type Skill, type Visual } from '../content/adventure'
+import { abyssSpecs, effectNames, encounters, skillsByClass, troops, type EffectKind, type Skill, type Visual } from '../content/adventure'
 import { zone } from '../content/campaign'
 import type { BossId } from '../content/bosses'
 import { monsters, type MonsterId } from '../content/monsters'
@@ -99,8 +99,8 @@ export function startBattle(profile: Profile): Battle {
   const units = [hero]
   if (attempt.encounter === 'ruins') {
     units.push(
-      unit('guide', 'Guarda de Alvor', 'sentry', 'allies', 0, { hp: 72, power: 15, defense: 7, speed: 8 }),
-      unit('crawler', 'Rastejante de Pedra', 'crawler', 'enemies', 1, { hp: 50, power: 14, defense: 5, speed: 6 }),
+      unit('guide', 'Agente de Alvor', 'sentry', 'allies', 0, { hp: 72, power: 15, defense: 7, speed: 8 }),
+      unit('crawler', 'Rastejante de Concreto', 'crawler', 'enemies', 1, { hp: 50, power: 14, defense: 5, speed: 6 }),
       unit('wisp', 'Vulto do Véu', 'wisp', 'enemies', 4, { hp: 37, power: 14, defense: 3, speed: 9 }),
     )
   } else if (attempt.encounter === 'drill') {
@@ -128,7 +128,7 @@ export function startBattle(profile: Profile): Battle {
           { hp: 73, power: 13, defense: 6, speed: 7 + seat }))
       }
     } else {
-      units.push({ ...unit('warden', 'Guardião do Portão', 'warden', 'enemies', 1, { hp: 120, power: 21, defense: 9, speed: 9 }), boss: 'gate' })
+      units.push({ ...unit('warden', encounters.gate.boss, 'warden', 'enemies', 1, { hp: 120, power: 21, defense: 9, speed: 9 }), boss: 'gate' })
     }
   }
   const classId = profile.hero.classId
@@ -316,7 +316,7 @@ function checkOutcome(state: Battle, events: BattleEvent[]): void {
     if (boss && boss.hp > 0 && boss.hp < boss.maxHp / 2 && !state.reinforced) {
       state.reinforced = true
       state.units.push(unit('reinforcement', 'Vulto Invocado', 'wisp', 'enemies', 4, { hp: 33, power: 14, defense: 3, speed: 10 }))
-      events.push({ kind: 'summon', target: 'reinforcement', text: 'O Guardião invocou um vulto. Prepare-se para o Corte do Véu!' })
+      events.push({ kind: 'summon', target: 'reinforcement', text: 'O Custódio invocou um vulto. Prepare-se para o Corte do Véu!' })
     }
   }
 }

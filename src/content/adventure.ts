@@ -77,25 +77,26 @@ export const encounters = {
   observatory: { ...zones.observatory, reward: { xp: 65, gold: 50, supplies: 4, itemId: null } },
   nest: { ...zones.nest, reward: { xp: 60, gold: 40, supplies: 3, itemId: null } },
   ruins: {
-    name: 'Ruínas do Farol',
-    intro: 'Ninguém atravessa o Véu sozinho. Escolha uma habilidade e indique o alvo.',
+    name: 'Estação Aurora',
+    intro: 'A estação está interditada. Escolha uma habilidade e indique o alvo para conter a primeira maldição.',
     reward: { xp: 60, gold: 60, supplies: 5, itemId: 'dawn-brooch' },
   },
   gate: {
-    name: 'Portão Caído',
-    intro: 'O antigo Guardião do Portão despertou. Ele chama um reforço e muda de ataque abaixo de metade da vida.',
+    name: 'Bloqueio da Linha 7',
+    boss: 'Custódio da Linha 7',
+    intro: 'Um trem parou atrás da barreira. O Custódio invoca reforço e muda de ataque abaixo de metade da vida.',
     reward: { xp: 80, gold: 85, supplies: 3, itemId: 'gate-insignia' },
   },
   drill: {
-    name: 'Campo de Treino',
-    intro: 'Exercício com doze posições. Teste Juras e Abismos com uma formação completa.',
+    name: 'Simulador de Combate',
+    intro: 'A Central montou um exercício com doze posições. Teste Juras e Abismos com uma formação completa.',
     reward: { xp: 0, gold: 0, supplies: 0, itemId: null },
   },
 } as const
 
 export const items = {
   'dawn-brooch': { name: 'Broche do Alvorecer', power: 3, defense: 2 },
-  'gate-insignia': { name: 'Insígnia do Portão', power: 5, defense: 3 },
+  'gate-insignia': { name: 'Credencial da Linha 7', power: 5, defense: 3 },
 } as const
 
 export type ItemId = keyof typeof items

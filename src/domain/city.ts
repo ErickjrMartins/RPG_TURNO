@@ -104,7 +104,7 @@ export function upgradeBlocked(profile: Profile, id: BuildingId): string | null 
   if (building.readyAt !== null) return 'Melhoria em andamento.'
   if (!cost) return 'Nível máximo.'
   if (id !== 'council' && building.level >= profile.city.buildings.council.level) {
-    return `Requer Salão do Conselho nível ${building.level + 1}.`
+    return `Requer ${buildings.council.name} nível ${building.level + 1}.`
   }
   if (profile.gold < cost.gold || profile.supplies < cost.supplies) return 'Recursos insuficientes.'
   return null

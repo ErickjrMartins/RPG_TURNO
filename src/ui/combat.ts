@@ -83,7 +83,7 @@ export function battleView(display: BattleDisplay) {
           <button class="small-button" data-action="pause" aria-pressed="${paused}">${paused ? 'Retomar' : 'Pausar'}</button>
         </div>
       </header>
-      <p class="battle-brief" style="--choice:${ownClass.color}">${paused ? 'Batalha pausada.' : battle.sealed ? 'Barreira do Núcleo ativa. Abra um Abismo Pessoal agora para quebrá-la.' : heroArriving ? `<q>${ownClass.entranceLine}</q>` : isGate && battle.reinforced ? 'O Guardião entrou na segunda fase. Atenção ao Corte do Véu.' : location.intro}</p>`
+      <p class="battle-brief" style="--choice:${ownClass.color}">${paused ? 'Batalha pausada.' : battle.sealed ? 'Barreira do Núcleo ativa. Abra um Abismo Pessoal agora para quebrá-la.' : heroArriving ? `<q>${ownClass.entranceLine}</q>` : isGate && battle.reinforced ? 'O Custódio entrou na segunda fase. Atenção ao Corte do Véu.' : location.intro}</p>`
   const arenaClass = `arena-frame terrain-${region} ${isGate ? 'gate-arena' : ''} ${active ? `is-abyss abyss-${active.classId}` : ''} ${battle.units.length > 8 ? 'full-formation' : ''} ${arriving ? 'is-arriving' : ''}`
   const arenaStyle = `--abyss-tint:${spec.tint};--activation-zoom:${arenaCamera.activationZoom};--activation-duration:${360 / speed}ms`
   const arena = `
@@ -91,7 +91,7 @@ export function battleView(display: BattleDisplay) {
           <div class="arena-canvas" data-stage-slot aria-hidden="true"></div>
           ${battle.units.map((unit) => unitLabel(unit, targets.some((target) => target.id === unit.id), area.has(unit.id), Boolean(affectedByAbyss(unit)))).join('')}
         </div>
-        <div class="arena-badges"><span>ALIANÇA DE ALVOR</span><span>RODADA ${battle.round}</span><span class="arena-enemy-badge">FORÇAS DO VÉU</span></div>
+        <div class="arena-badges"><span>CONTENÇÃO DE ALVOR</span><span>RODADA ${battle.round}</span><span class="arena-enemy-badge">MALDIÇÕES DO VÉU</span></div>
         ${active ? `<div class="abyss-banner" role="status"><b>${spec.name}</b><span>${active.rounds} ${active.rounds === 1 ? 'rodada restante' : 'rodadas restantes'}</span></div>` : ''}`
   const body = `
       <div class="combat-columns">
@@ -149,7 +149,7 @@ export function resultView(encounter: EncounterId, victory: boolean, profile: Pr
         <div class="eyebrow">${encounters[encounter].name}</div>
         <h1>${victory ? 'Vitória' : 'Derrota'}</h1>
         <p>${drill ? 'Exercício concluído. O treinamento está disponível para repetir.' : victory ? `A passagem está livre, ${safe(profile.hero.name)}. Seu progresso foi salvo.` : 'Sua formação recuou. Reagrupe-se e tente o encontro novamente.'}</p>
-        ${victory && !drill ? `<ul class="rewards"><li><strong>+${reward.xp}</strong> XP</li><li><strong>+${earnedGold}</strong> Ouro</li><li><strong>+${reward.supplies}</strong> Provisões</li>${reward.itemId ? `<li><strong>${items[reward.itemId].name}</strong></li>` : ''}</ul>` : ''}
+        ${victory && !drill ? `<ul class="rewards"><li><strong>+${reward.xp}</strong> XP</li><li><strong>+${earnedGold}</strong> Créditos</li><li><strong>+${reward.supplies}</strong> Provisões</li>${reward.itemId ? `<li><strong>${items[reward.itemId].name}</strong></li>` : ''}</ul>` : ''}
         ${last ? `<p>${last.stars}/3 estrelas${last.first && last.zone !== 'nest' ? ' · Primeira Purificação' : ''}</p><ul class="expedition-loot">${last.spoils.map((entry) => {
           const material = (Object.keys(entry.rewards) as StockId[]).map((id) => `${entry.rewards[id]} ${stock[id].name}`)
           if (entry.relic) material.push(relicSpec(entry.relic).name)

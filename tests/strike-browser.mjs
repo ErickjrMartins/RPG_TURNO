@@ -32,7 +32,7 @@ async function testStrike(form, mobile) {
         }
         return false
       }
-      const life = () => Number(document.querySelector('[aria-label="Vida de Rastejante de Pedra"]').getAttribute('aria-valuenow'))
+      const life = () => Number(document.querySelector('[aria-label="Vida de Rastejante de Concreto"]').getAttribute('aria-valuenow'))
       const initial = life()
       const deadline = performance.now() + 3800
       const state = { approach: false, fire: false, completeArc: false, singleArc: false, impact: false, retreat: false, home: false, fasterReturn: false }
@@ -133,7 +133,7 @@ async function testCharge(form, mobile) {
       const victory = page.getByRole('button', { name: 'Seguir para Alvor' })
       if (await victory.count()) {
         await victory.click()
-        await page.getByRole('button', { name: 'Campo de Treino' }).click()
+        await page.getByRole('button', { name: 'Simulador de Combate' }).click()
       } else {
         await page.locator('[data-action="skill"][data-value="strike"]').click()
         await page.locator('.target').first().click()

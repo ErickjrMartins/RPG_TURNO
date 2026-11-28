@@ -1,3 +1,5 @@
+import { encounters } from '../content/adventure'
+import { baseName } from '../content/city'
 import { coreExchange, dailyEnergy, regions, zones, zonesIds, type Region } from '../content/campaign'
 import { stock } from '../content/relics'
 import { energyLeft, zoneUnlocked } from '../domain/campaign'
@@ -8,8 +10,8 @@ export function missionsView(profile: Profile, challenge: boolean, size: number,
   const energy = energyLeft(profile.campaign, Date.now())
   const { stock: bag } = profile.relicary
   return `<section class="view-width base-screen" aria-labelledby="mission-title">
-    <button class="back" data-action="camp">← &nbsp; Refúgio de Alvor</button>
-    <div class="base-head"><div><div class="eyebrow"><span></span> CAMPOS DE ALVOR</div><h1 id="mission-title">Expedições</h1></div>
+    <button class="back" data-action="camp">← &nbsp; ${baseName}</button>
+    <div class="base-head"><div><div class="eyebrow"><span></span> DISTRITO INTERDITADO</div><h1 id="mission-title">Expedições</h1></div>
       <span class="resource-chip">Energia diária ${energy}/${dailyEnergy} · ${bag.marks ?? 0} Marcas de Expurgo</span></div>
     <p class="form-error" role="status">${safe(error)}</p>
     <section class="panel detail-panel">
@@ -22,7 +24,7 @@ export function missionsView(profile: Profile, challenge: boolean, size: number,
         const spec = zones[id]
         const current = profile.campaign.zones[id]
         const open = zoneUnlocked(profile, id)
-        const next = spec.prerequisite === 'gate' ? 'Portão Caído' : zones[spec.prerequisite].name
+        const next = encounters[spec.prerequisite].name
         return `<article class="chapter">
           <div class="eyebrow">${current ? `${current.stars}/3 estrelas · ${current.clears} conclusões` : 'SOLO'}</div>
           <h4>${spec.name}</h4><p>${spec.intro}</p>
@@ -40,7 +42,7 @@ export function missionsView(profile: Profile, challenge: boolean, size: number,
         <div class="eyebrow">PROTÓTIPO LOCAL</div><h2>Ninhos de Calamidade</h2>
         <p>O herói lidera aliados controlados pelo jogo em uma equipe de 2 a 4 participantes. Cada posição tem seu próprio espólio. O núcleo anuncia quando um Abismo pode partir sua barreira.</p>
         <div class="detail-actions" aria-label="Tamanho da equipe">${[2, 3, 4].map((number) => `<button class="small-button" data-action="nest-size" data-value="${number}" aria-pressed="${size === number}">${number} participantes</button>`).join('')}</div>
-        <button class="button primary" data-action="expedition" data-value="nest" ${zoneUnlocked(profile, 'nest') ? '' : 'disabled'}>${zoneUnlocked(profile, 'nest') ? 'Entrar no Ninho da Ruptura' : 'Requer Posto das Cinzas'}</button>
+        <button class="button primary" data-action="expedition" data-value="nest" ${zoneUnlocked(profile, 'nest') ? '' : 'disabled'}>${zoneUnlocked(profile, 'nest') ? `Entrar no ${zones.nest.name}` : `Requer ${zones.watch.name}`}</button>
       </section>
       <section class="panel detail-panel">
         <h2>Altar de Trocas</h2>

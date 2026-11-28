@@ -27,7 +27,7 @@ describe('HUD de chefes', () => {
   it('acompanha o reforço e recebe o nome do ataque especial do Guardião', () => {
     const battle = encounter('gate')
     battle.units.find((unit) => unit.boss)!.hp = 59
-    expect(bossHudState(battle)?.phase.name).toBe('Vigília do Portão')
+    expect(bossHudState(battle)?.phase.name).toBe('Vigília do Bloqueio')
     const next = advanceBattle({ ...battle, phase: 'resolution' }).state
     expect(next.reinforced).toBe(true)
     expect(bossHudState(next)?.phase.name).toBe('Corte do Véu')

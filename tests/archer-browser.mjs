@@ -22,7 +22,7 @@ async function verifyShot(presentation, name) {
       return canvas?.getContext('2d')?.getImageData(375, 200, 1, 1).data[3] > 0
     })
 
-    const enemy = page.getByRole('meter', { name: 'Vida de Rastejante de Pedra' })
+    const enemy = page.getByRole('meter', { name: 'Vida de Rastejante de Concreto' })
     const before = Number(await enemy.getAttribute('aria-valuenow'))
     await page.evaluate(() => {
       document.querySelector('.target[data-value="crawler"]').click()

@@ -26,8 +26,8 @@ async function fast(page) {
 }
 
 async function verifyAbyss(page, isTouch, heavyName) {
-  await page.getByRole('button', { name: 'Campo de Treino' }).click()
-  await page.getByRole('heading', { name: 'Campo de Treino' }).waitFor()
+  await page.getByRole('button', { name: 'Simulador de Combate' }).click()
+  await page.getByRole('heading', { name: 'Simulador de Combate' }).waitFor()
   await page.locator('.arena-canvas canvas').waitFor()
   assert.equal(await page.locator('.unit-label').count(), 12)
   await fast(page)
@@ -55,7 +55,7 @@ async function verifyAbyss(page, isTouch, heavyName) {
   }
   await page.locator('.abyss-banner').waitFor({ state: 'detached' })
   await page.getByRole('button', { name: 'Encerrar treino' }).click()
-  await page.getByRole('heading', { name: 'Refúgio de Alvor' }).waitFor()
+  await page.getByRole('heading', { name: 'Central de Contenção' }).waitFor()
 }
 
 async function finish(page, heavyName, isTouch) {
@@ -79,7 +79,7 @@ async function finish(page, heavyName, isTouch) {
 }
 
 async function verifyProgression(page, heavy) {
-  const camp = () => page.getByRole('button', { name: /Refúgio de Alvor/ }).click()
+  const camp = () => page.getByRole('button', { name: /Central de Contenção/ }).click()
   const relic = (id) => page.locator(`.relic-cell[data-value="${id}"]`).click()
   await page.getByRole('button', { name: 'Abrir Relicário' }).click()
   await relic('dawn-brooch')
@@ -97,7 +97,7 @@ async function verifyProgression(page, heavy) {
   await missionMenu()
   for (let i = 0; i < 3; i++) {
     await watch.click()
-    await page.getByRole('heading', { name: 'Posto das Cinzas', exact: true }).waitFor()
+    await page.getByRole('heading', { name: 'Posto da Quarentena', exact: true }).waitFor()
     await fast(page)
     await finish(page, heavy, false)
     assert.equal(await page.getByText(/estrelas · Primeira Purificação/).count(), i === 0 ? 1 : 0)
@@ -201,7 +201,7 @@ async function testCampaign(browser, setup) {
     }
     await page.locator('.character-art').evaluate(image => image.decode())
     await page.getByRole('button', { name: 'Começar aventura' }).click()
-    await page.getByRole('heading', { name: 'Ruínas do Farol' }).waitFor()
+    await page.getByRole('heading', { name: 'Estação Aurora' }).waitFor()
     await page.locator('.arena-canvas canvas').waitFor()
     await page.waitForFunction(() => {
       const canvas = document.querySelector('.arena-canvas canvas')
@@ -220,7 +220,7 @@ async function testCampaign(browser, setup) {
     }
     await finish(page, heavy, isMobile)
     await page.getByRole('button', { name: 'Seguir para Alvor' }).click()
-    await page.getByRole('heading', { name: 'Refúgio de Alvor' }).waitFor()
+    await page.getByRole('heading', { name: 'Central de Contenção' }).waitFor()
     await page.getByRole('button', { name: 'Equipar', exact: true }).click()
     await page.getByText('Equipado', { exact: true }).waitFor()
     await recruit(page, 'sentry')
@@ -229,11 +229,11 @@ async function testCampaign(browser, setup) {
     await page.waitForFunction(() => document.querySelector('#view')?.getAttribute('aria-busy') === 'false')
     await page.reload()
     await page.getByRole('button', { name: 'Continuar' }).click()
-    await page.getByRole('heading', { name: 'Refúgio de Alvor' }).waitFor()
+    await page.getByRole('heading', { name: 'Central de Contenção' }).waitFor()
     assert.equal(await page.locator('#formation-bowman').inputValue(), '5')
     await page.getByText('Equipado', { exact: true }).waitFor()
-    await page.getByRole('button', { name: 'Ir ao Portão' }).click()
-    await page.getByRole('heading', { name: 'Portão Caído' }).waitFor()
+    await page.getByRole('button', { name: 'Ir ao Bloqueio' }).click()
+    await page.getByRole('heading', { name: 'Bloqueio da Linha 7' }).waitFor()
     await page.getByRole('button', { name: 'Pular efeitos' }).click()
     await finish(page, heavy, isMobile)
     await page.getByRole('button', { name: 'Seguir para Alvor' }).click()
@@ -242,7 +242,7 @@ async function testCampaign(browser, setup) {
     await page.reload()
     await page.getByRole('button', { name: 'Continuar' }).click()
     await page.getByText('Nível 2 · 140 XP', { exact: false }).waitFor()
-    assert.equal(await page.getByRole('button', { name: 'Ir ao Portão' }).count(), 0)
+    assert.equal(await page.getByRole('button', { name: 'Ir ao Bloqueio' }).count(), 0)
     assert.equal(await page.locator('[data-balance=gold]').textContent(), '94')
     await verifyAbyss(page, isMobile, heavy)
     if (className === 'Vanguarda') {
@@ -276,7 +276,7 @@ async function testCampaign(browser, setup) {
       await upgrade.click()
       await page.getByText('Melhoria em andamento', { exact: true }).waitFor()
       await page.clock.fastForward(17000)
-      await page.getByText('Capacidade de 750 ouro', { exact: true }).waitFor()
+      await page.getByText('Capacidade de 750 créditos', { exact: true }).waitFor()
       await choose('farm')
       const storedBeforeTraining = Number(await page.locator('[data-balance=supplies]').textContent())
       await page.getByRole('button', { name: 'Coletar provisões' }).click()

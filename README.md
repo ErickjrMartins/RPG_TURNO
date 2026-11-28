@@ -1,10 +1,10 @@
 # Reinos da Aurora
 
-RPG estratégico de fantasia para navegador. A jornada começa com a criação de um Vanguarda, Atirador ou Canalizador, cada um com aparência masculina e feminina. Lute nas Ruínas do Farol, equipe o prêmio, recrute tropas no Refúgio de Alvor e enfrente o Guardião do Portão.
+RPG tático sobrenatural para navegador. Após um apagão, maldições tomam a cidade contemporânea de Alvor. Escolha Vanguarda, Atirador ou Canalizador, contenha a Estação Aurora, forme sua equipe na Central de Contenção e enfrente o Custódio da Linha 7.
 
 ## Prévia hospedada
 
-Use a prévia privada no Sites para testar as atualizações pelo navegador. Entre com a conta do ChatGPT que recebeu acesso e use o mesmo navegador e perfil para retomar seu save. [Abrir a prévia de Reinos da Aurora](https://reinos-da-aurora-previa.erickmartins1.chatgpt.site)
+Use a prévia privada no Sites para testar as atualizações pelo navegador. Entre com a conta do ChatGPT que recebeu acesso e use o mesmo navegador e perfil para retomar seu save. [Abrir a prévia de Reinos da Aurora](https://reinos-da-aurora-jogar.miniaturechina3.chatgpt.site)
 
 ## Painel de testes
 
@@ -65,13 +65,13 @@ A build em `dist/` pode ser servida por um host estático em HTTPS. A abertura c
 
 ## Jornada da versão 0.4.0
 
-- **Refúgio de Alvor** permite administrar Conselho, Quartel, Fazenda e Tesouraria. A Fazenda acumula provisões e o Conselho define o limite de nível dos demais edifícios.
-- **Campo de Treino** permite praticar Juras e Abismos com duas formações de seis unidades.
-- **Expedições** se expandem após o Portão Caído. Os capítulos solo têm nota, Primeira Purificação e Varredura. O Ninho é uma simulação local com companheiros controlados pelo jogo.
+- **Central de Contenção** reúne Sala de Comando, Quartel das Maldições, Laboratório e Cofre de Contenção. O Laboratório produz provisões e a Sala de Comando define o limite de nível das instalações.
+- **Simulador de Combate** permite praticar Juras e Abismos com duas formações de seis unidades.
+- **Expedições** se expandem após o Bloqueio da Linha 7. Os capítulos solo têm nota, Primeira Purificação e Varredura. O Ninho é uma simulação local com companheiros controlados pelo jogo.
 - **Relicário** reúne equipamento, Forja, Enxerto, Pregos, Glifos, linhagens e maestria, com atalhos para Indumentárias.
 - **Eventos** inclui login, recompensas de expedição, roleta e recargas simuladas.
-- **Árvore de Habilidades** fica no Refúgio do Canalizador após as Ruínas do Farol. Aprenda com pontos, depois equipe a habilidade na preparação. A Centelha sempre fica no primeiro espaço. Seis ativas, três passivas e o Círculo do Vazio podem entrar em combate. Os Pântanos e a Cordilheira aparecem nas Expedições depois de Alvor.
-- **Praça de Alvor** exibe os avatares de quem entrar no mesmo servidor. Clique numa posição da praça ou use as setas com o mapa focado.
+- **Árvore de Habilidades** fica na Central de Contenção do Canalizador após a missão na Estação Aurora. Aprenda com pontos, depois equipe a habilidade na preparação. A Centelha sempre fica no primeiro espaço. Seis ativas, três passivas e o Círculo do Vazio podem entrar em combate. As Galerias Subterrâneas e as Coberturas de Alvor aparecem nas Expedições depois de liberar o distrito.
+- **Pátio de Alvor** exibe os avatares de quem entrar no mesmo servidor. Clique numa posição da praça ou use as setas com o mapa focado.
 
 ## Jogar na mesma praça
 
