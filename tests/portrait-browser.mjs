@@ -11,10 +11,9 @@ async function measureMotion(page) {
     const portrait = document.querySelector('.character-portrait')
     const canvas = portrait.querySelector('canvas')
     const brush = canvas.getContext('2d')
-    const size = canvas.height
-    const sample = (x, y, width, height) => brush.getImageData(Math.floor(x * size), Math.floor(y * size),
-      Math.floor(width * size), Math.floor(height * size)).data
-    const readPixels = () => [sample(0.19, 0, 0.37, 0.36), sample(0.08, 0.50, 0.66, 0.42), sample(0.485, 0.22, 0.12, 0.22)]
+    const sample = (x, y, width, height) => brush.getImageData(Math.floor(x * canvas.width), Math.floor(y * canvas.height),
+      Math.floor(width * canvas.width), Math.floor(height * canvas.height)).data
+    const readPixels = () => [sample(0, 0, 0.60, 0.36), sample(0, 0.50, 0.62, 0.42), sample(0.38, 0.32, 0.17, 0.17)]
     const before = readPixels()
     const changed = [false, false, false]
     const vertical = []

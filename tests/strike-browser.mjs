@@ -18,10 +18,7 @@ async function testStrike(form, mobile) {
   page.on('pageerror', (error) => errors.push(error.message))
   try {
     await startWarrior(page, form)
-    await page.waitForFunction(() => {
-      const ctx = document.querySelector('.arena-canvas canvas')?.getContext('2d')
-      return ctx?.getImageData(365, 165, 36, 96).data.some((value, index) => index % 4 === 3 && value > 230)
-    })
+    await page.locator('.target[data-value="crawler"]').waitFor()
     const phases = await page.evaluate(() => new Promise((resolve) => {
       const ctx = document.querySelector('.arena-canvas canvas').getContext('2d')
       const opaque = (x, y, width, height, threshold) => {
@@ -42,7 +39,7 @@ async function testStrike(form, mobile) {
         const time = performance.now()
         start ??= time
         const center = opaque(472, 179, 112, 96, 130)
-        const landing = opaque(630, 163, 80, 106, 550)
+        const landing = opaque(601, 160, 52, 113, 330)
         const inFormation = opaque(350, 159, 48, 111, 500)
         const fire = ctx.getImageData(646, 175, 123, 81).data.filter((red, index, data) =>
           index % 4 === 0 && red > 221 && data[index + 1] > 78 && data[index + 1] < 240 && data[index + 2] < 145 && data[index + 3] > 185).length

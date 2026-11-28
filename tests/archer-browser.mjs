@@ -17,10 +17,7 @@ async function verifyShot(presentation, name) {
     await page.getByRole('button', { name: presentation, exact: true }).click()
     await page.getByRole('textbox', { name: 'Nome do herói' }).fill(name)
     await page.getByRole('button', { name: 'Começar aventura' }).click()
-    await page.waitForFunction(() => {
-      const canvas = document.querySelector('.arena-canvas canvas')
-      return canvas?.getContext('2d')?.getImageData(375, 200, 1, 1).data[3] > 0
-    })
+    await page.locator('.target[data-value="crawler"]').waitFor()
 
     const enemy = page.getByRole('meter', { name: 'Vida de Rastejante de Concreto' })
     const before = Number(await enemy.getAttribute('aria-valuenow'))

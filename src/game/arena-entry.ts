@@ -4,21 +4,25 @@ import type { Unit } from '../domain/battle'
 import { arenaHeight, arenaWidth, pointFor } from './layout'
 
 const strideRigs: Readonly<Record<string, readonly [number, number]>> = {
-  'warrior-masculine': [0.40, 0.68],
-  'warrior-feminine': [0.39, 0.69],
-  'archer-masculine': [0.35, 0.62],
-  'archer-feminine': [0.35, 0.60],
-  'mage-masculine': [0.38, 0.61],
-  'mage-feminine': [0.34, 0.60],
-  sentry: [0.27, 0.62],
-  warden: [0.39, 0.77],
-  crawler: [0.23, 0.78],
-  rootbound: [0.34, 0.69],
-  frostcat: [0.16, 0.82],
-  glacier: [0.36, 0.75],
+  'warrior-masculine': [0.13, 0.56],
+  'warrior-feminine': [0.12, 0.55],
+  'archer-masculine': [0.27, 0.62],
+  'archer-feminine': [0.25, 0.61],
+  'mage-masculine': [0.26, 0.65],
+  'mage-feminine': [0.30, 0.62],
+  sentry: [0.22, 0.55],
+  warden: [0.20, 0.63],
+  crawler: [0.12, 0.45],
+  rootbound: [0.19, 0.82],
+  frostcat: [0.16, 0.74],
+  glacier: [0.23, 0.70],
+  'curse-watch': [0.32, 0.68],
+  'curse-hollow': [0.15, 0.76],
+  'curse-veil': [0.29, 0.66],
+  'curse-rupture': [0.23, 0.82],
 }
 
-const frames = 12
+export const entryFrameCount = 12
 const columns = 4
 const height = 160
 const entranceGround = arenaHeight * 0.56
@@ -88,7 +92,7 @@ export function entryPose(entry: ArenaEntry) {
     groundY,
     scale: 0.94 + travel * 0.06,
     tilt: entry.direction * (Math.sin(swing) * (style ? style.tilt : 0.010) * strength + landing * (style ? style.finalLean : 0.012)),
-    frame: Math.floor((stride % 1) * frames),
+    frame: Math.floor((stride % 1) * entryFrameCount),
     step: Math.floor(stride * 2 + 0.00001),
     opacity: Math.min(1, progress * 12),
     signature: Math.max(0, (progress - 0.78) / 0.22),
@@ -172,7 +176,7 @@ export function prepareEntryTexture(scene: Phaser.Scene, art: string): string | 
 
   const sheet = document.createElement('canvas')
   sheet.width = width * columns
-  sheet.height = height * frames / columns
+  sheet.height = height * entryFrameCount / columns
   const context = sheet.getContext('2d')
   if (!context) return
   const frame = context.createImageData(width, height)
@@ -188,9 +192,9 @@ export function prepareEntryTexture(scene: Phaser.Scene, art: string): string | 
     }
   }
 
-  for (let index = 0; index < frames; index++) {
+  for (let index = 0; index < entryFrameCount; index++) {
     frame.data.set(original)
-    const swing = Math.sin(index * Math.PI * 2 / frames)
+    const swing = Math.sin(index * Math.PI * 2 / entryFrameCount)
     for (const { x, y, offset, left, right } of pixels) {
       const sourceX = boundPixel(x - (left - right) * swing * width * 0.042, width - 1)
       const sourceY = boundPixel(y + (swing >= 0 ? left : right) * Math.abs(swing) * 9, height - 1)
@@ -221,7 +225,7 @@ export function prepareEntryTexture(scene: Phaser.Scene, art: string): string | 
 
   const texture = scene.textures.addCanvas(key, sheet)
   if (!texture) return
-  for (let index = 0; index < frames; index++) {
+  for (let index = 0; index < entryFrameCount; index++) {
     texture.add(index, 0, index % columns * width, Math.floor(index / columns) * height, width, height)
   }
   return key

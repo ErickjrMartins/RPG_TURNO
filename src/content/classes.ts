@@ -1,4 +1,4 @@
-import { assetUrl } from '../assets'
+import { combatantArt } from '../assets'
 
 export interface Attributes {
   hp: number
@@ -12,7 +12,7 @@ export const classes = {
     name: 'Vanguarda',
     feminineName: 'Vanguarda',
     role: 'Defesa e controle',
-    description: 'Protege a formação com escudos e rompe a defesa inimiga.',
+    description: 'Empunha uma lâmina ritual e usa proteção tática para segurar a linha de frente.',
     personality: 'Protege os seus com firmeza e encara a ameaça de frente.',
     entranceLine: 'Fiquem atrás de mim. Quero ver ele tentar.',
     resource: 'Ímpeto',
@@ -24,7 +24,7 @@ export const classes = {
     name: 'Atirador',
     feminineName: 'Atiradora',
     role: 'Precisão e dano',
-    description: 'Atinge alvos distantes e marca pontos fracos para o próximo disparo.',
+    description: 'Rastreia a Mácula com um arco recurvo selado e marca pontos fracos da maldição.',
     personality: 'Provoca com humor seco enquanto calcula o próximo disparo.',
     entranceLine: 'Já escolheu onde vai cair?',
     resource: 'Concentração',
@@ -36,7 +36,7 @@ export const classes = {
     name: 'Canalizador',
     feminineName: 'Canalizadora',
     role: 'Magia e suporte',
-    description: 'Conjura ataques em área e mantém os aliados de pé com cura.',
+    description: 'Conduz a energia do Véu por um bastão ritual para atacar em área e curar aliados.',
     personality: 'Fala pouco e mantém a calma quando o Véu se agita.',
     entranceLine: 'O Véu já ouviu o seu nome.',
     resource: 'Foco',
@@ -57,5 +57,5 @@ export function className(classId: ClassId, presentation: Presentation): string 
 }
 
 export function heroArt(classId: ClassId, presentation: Presentation): string {
-  return assetUrl(`${classId}-${presentation}.webp`)
+  return combatantArt(`${classId}-${presentation}`)
 }

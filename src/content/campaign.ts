@@ -1,5 +1,5 @@
 import type { Attributes } from './classes'
-import type { MonsterId } from './monsters'
+import type { CoreArt, MonsterId } from './monsters'
 import type { RelicId, StockId } from './relics'
 
 export const regions = { fields: 'Distrito Interditado', marsh: 'Galerias Subterrâneas', ridge: 'Coberturas de Alvor' } as const
@@ -12,7 +12,7 @@ interface Zone {
   region: Region
   monsters?: readonly MonsterId[]
   focus: number
-  core: { name: string; stats: Attributes; art?: MonsterId }
+  core: { name: string; stats: Attributes; art: MonsterId | CoreArt }
   ratingRounds: number
   marks: number
   rate: number
@@ -24,19 +24,19 @@ export const zones = {
   watch: {
     region: 'fields',
     name: 'Posto da Quarentena', intro: 'Dois focos mantêm o posto isolado. Desfaça os dois para revelar o núcleo.', prerequisite: 'gate',
-    focus: 2, core: { name: 'Núcleo da Vigília', stats: { hp: 82, power: 17, defense: 7, speed: 8 } },
+    focus: 2, core: { name: 'Núcleo da Vigília', art: 'curse-watch', stats: { hp: 82, power: 17, defense: 7, speed: 8 } },
     ratingRounds: 8, marks: 2, rate: 0.15, loot: { ash: 9, ichor: 2, 'glyph-pest': 1, 'pin-life': 1, graft: 1 }, relic: 'veil-edge',
   },
   hollow: {
     region: 'fields',
     name: 'Túnel do Silêncio', intro: 'O rádio emudece no túnel de serviço. Desfaça os três focos que isolam a passagem.', prerequisite: 'watch',
-    focus: 3, core: { name: 'Núcleo do Silêncio', stats: { hp: 100, power: 18, defense: 7, speed: 11 } },
+    focus: 3, core: { name: 'Núcleo do Silêncio', art: 'curse-hollow', stats: { hp: 100, power: 18, defense: 7, speed: 11 } },
     ratingRounds: 10, marks: 3, rate: 0.20, loot: { ash: 12, ichor: 3, 'glyph-void': 1, 'pin-aim': 1, graft: 1 }, relic: 'ash-mantle',
   },
   core: {
     region: 'fields',
     name: 'Subestação do Véu', intro: 'A subestação espalha Mácula pela rede elétrica. Expurgue os focos e destrua o núcleo.', prerequisite: 'hollow',
-    focus: 3, core: { name: 'Calamidade do Véu', stats: { hp: 142, power: 22, defense: 9, speed: 12 } },
+    focus: 3, core: { name: 'Calamidade do Véu', art: 'curse-veil', stats: { hp: 142, power: 22, defense: 9, speed: 12 } },
     ratingRounds: 11, marks: 4, rate: 0.25, loot: { ash: 15, ichor: 4, 'glyph-void': 1, 'pin-resist': 1, graft: 1 }, relic: 'veil-rosary',
   },
   drowned: {
@@ -66,7 +66,7 @@ export const zones = {
   nest: {
     region: 'fields',
     name: 'Ninho da Ruptura', intro: 'Uma fenda tomou a plataforma. Após os focos, use um Abismo Pessoal para romper a barreira do núcleo.', prerequisite: 'watch',
-    focus: 3, core: { name: 'Sentinela da Ruptura', stats: { hp: 151, power: 18, defense: 9, speed: 13 } },
+    focus: 3, core: { name: 'Sentinela da Ruptura', art: 'curse-rupture', stats: { hp: 151, power: 18, defense: 9, speed: 13 } },
     ratingRounds: 12, marks: 5, rate: 0.35, loot: { ash: 15, ichor: 4, 'pin-oath': 1, awakening: 1 }, relic: 'abyss-heart',
   },
 } as const satisfies Record<string, Zone>

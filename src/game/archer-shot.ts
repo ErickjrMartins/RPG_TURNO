@@ -1,7 +1,7 @@
 import type Phaser from 'phaser'
 import type { Presentation } from '../content/classes'
 import type { Unit } from '../domain/battle'
-import { playAttack, poseScale, type AttackPlayback } from './attack-playback'
+import { playAttack, type AttackPlayback, type AttackPose } from './attack-playback'
 import { pointFor } from './layout'
 
 export const shotTexture = (form: Presentation) => `archer-shot-${form}`
@@ -9,19 +9,14 @@ export const shotTexture = (form: Presentation) => `archer-shot-${form}`
 const releaseAt = 355
 const impactAt = 525
 const endAt = 660
-const poseTimes: Record<Presentation, readonly number[]> = {
-  masculine: [0, 31, 60, 90, 123, 158, 195, 233, 267, 300, 331, releaseAt, 407, 457, 548, 613],
-  feminine: [0, 55, 152, 260, releaseAt, 555],
-}
 
 export function animateArcherShot(
   scene: Phaser.Scene, sprite: Phaser.GameObjects.Image, form: Presentation, target: Unit,
   speed: number, onImpact: () => void, onFinish: () => void,
 ): AttackPlayback {
-  const { scaleX, scaleY } = sprite
   const destination = pointFor(target)
-  const fromX = sprite.x + 73 * scaleX / poseScale
-  const fromY = sprite.y - (form === 'masculine' ? 260 : 237) * scaleY / poseScale
+  const fromX = sprite.x + sprite.displayHeight * 0.36
+  const fromY = sprite.y - sprite.displayHeight * 0.74
   const toX = destination.x
   const toY = destination.y - 77
   const paint = (ink: Phaser.GameObjects.Graphics, time: number) => {
@@ -50,6 +45,6 @@ export function animateArcherShot(
       ink.fillCircle(toX + Math.cos(angle) * 26 * fade, toY + Math.sin(angle) * 26 * fade, 2)
     }
   }
-  const poses = poseTimes[form].map((time, frame) => [time, frame] as const)
-  return playAttack(scene, sprite, shotTexture(form), { duration: endAt, impactAt, poses }, speed, paint, onImpact, onFinish)
+  const poses: readonly AttackPose[] = [[0], [105, shotTexture(form), undefined, 0.47], [releaseAt + 64]]
+  return playAttack(scene, sprite, { duration: endAt, impactAt, poses }, speed, paint, onImpact, onFinish)
 }

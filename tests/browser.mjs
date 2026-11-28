@@ -191,13 +191,13 @@ async function testCampaign(browser, setup) {
     await page.getByRole('button', { name: presentation, exact: true }).click()
     const source = await page.locator('.character-art').getAttribute('src')
     const form = presentation === 'Feminina' ? 'feminine' : 'masculine'
+    const id = { Vanguarda: 'warrior', Atirador: 'archer', Canalizador: 'mage' }[className]
     if (portable) {
-      const id = { Vanguarda: 'warrior', Atirador: 'archer', Canalizador: 'mage' }[className]
       const assets = JSON.parse(await page.locator('#aurora-assets').textContent())
-      assert.equal(source, assets[`${id}-${form}.webp`])
+      assert.equal(source, assets[`urban-${id}-${form}.webp`])
       assert.match(source, /^data:image\/webp;base64,/)
     } else {
-      assert.match(source, new RegExp(form))
+      assert(new URL(source, page.url()).pathname.endsWith(`/urban-${id}-${form}.webp`))
     }
     await page.locator('.character-art').evaluate(image => image.decode())
     await page.getByRole('button', { name: 'Começar aventura' }).click()
@@ -234,6 +234,9 @@ async function testCampaign(browser, setup) {
     await page.getByText('Equipado', { exact: true }).waitFor()
     await page.getByRole('button', { name: 'Ir ao Bloqueio' }).click()
     await page.getByRole('heading', { name: 'Bloqueio da Linha 7' }).waitFor()
+    const bossPortrait = page.locator('.boss-hud .boss-face')
+    await bossPortrait.evaluate(image => image.decode())
+    if (!portable) assert(new URL(await bossPortrait.getAttribute('src'), page.url()).pathname.endsWith('/urban-portrait-warden.webp'))
     await page.getByRole('button', { name: 'Pular efeitos' }).click()
     await finish(page, heavy, isMobile)
     await page.getByRole('button', { name: 'Seguir para Alvor' }).click()
