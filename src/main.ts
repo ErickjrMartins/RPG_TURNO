@@ -8,7 +8,7 @@ import '@fontsource-variable/dm-sans'
 import './style.css'
 import './ui/boss-hud.css'
 import { skillsByClass, type EncounterId } from './content/adventure'
-import { classIds, type ClassId, type Presentation } from './content/classes'
+import { classes, classIds, type ClassId, type Presentation } from './content/classes'
 import { styleSlotsIds, type StyleSlot } from './content/wardrobe'
 import type { BuildingId } from './content/city'
 import { advanceBattle, playerAction, skillBlocked, startBattle, type Battle, type BattleEvent } from './domain/battle'
@@ -176,8 +176,10 @@ function render(focusHeading = false, events: readonly BattleEvent[] = []): void
     }
     mountStage()
     paintBattle(events)
+    const arriving = arrivalActive()
     const display = battleView({ battle, profile, selected: skill, history, error, speed, skip, paused, saving: busy,
-      overcharge, arriving: arrivalActive(), opening: events.some((event) => event.kind === 'abyss-start') })
+      overcharge, arriving, heroArriving: arriving && (stageLoading || !!arena?.heroEntering),
+      opening: events.some((event) => event.kind === 'abyss-start') })
     view.querySelector<HTMLElement>('[data-battle-heading]')!.innerHTML = display.heading
     const frame = view.querySelector<HTMLElement>('[data-battle-arena]')!
     frame.className = display.arenaClass
@@ -328,7 +330,7 @@ function enterBattle(): void {
   battle = startBattle(profile)
   selected = battle.skills[0]!.id
   overcharge = false
-  history = ['Rodada 1. Escolha sua habilidade.']
+  history = [`${profile.hero.name}: “${classes[profile.hero.classId].entranceLine}”`, 'Rodada 1. Escolha sua habilidade.']
   paused = false
   screen = 'battle'
 }

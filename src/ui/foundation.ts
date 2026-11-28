@@ -77,6 +77,7 @@ export function createView(draft: Draft, error: string, busy: boolean): string {
           <span class="eyebrow">${heroClass.role}</span>
           <h2>${className(draft.classId, draft.presentation)}</h2>
           <p>${heroClass.description}</p>
+          <p class="character-personality">${heroClass.personality}</p>
           <div class="attribute-list"><span><b>${heroClass.attributes.hp}</b> Vida</span><span><b>${heroClass.attributes.power}</b> Poder</span><span>${heroClass.resource}</span></div>
         </div>
       </div>

@@ -262,6 +262,7 @@ img { max-width: 100%; }
 .character-description { grid-row: 2; min-width: min(100%, 310px); background: #151d22ed; border: 1px solid var(--line); padding: 12px 18px 16px; border-radius: 3px; }
 .character-description h2 { font-size: clamp(31px, 4vw, 46px); color: var(--choice); }
 .character-description p { font-size: 14px; line-height: 1.5; color: #f0e4d1; max-width: 33ch; margin-inline: auto; }
+.character-description .character-personality { margin-top: 7px; color: var(--choice); }
 .attribute-list { display: flex; justify-content: center; flex-wrap: wrap; gap: 10px; font-size: 12px; color: #e5d5bd; margin-top: 14px; }
 .attribute-list span { border: 1px solid var(--line); border-radius: 3px; padding: 5px 9px; background: #172025; }
 .attribute-list b { color: #f5d596; }
@@ -334,6 +335,7 @@ img { max-width: 100%; }
 }
 .small-button:not(:disabled):hover, .small-button[aria-pressed="true"] { background: #3d382e; border-color: var(--gold); }
 .battle-brief { margin: 11px 0 17px; color: var(--muted); font-size: 14px; line-height: 1.55; }
+.battle-brief q { color: var(--choice); font-style: italic; }
 .arena-frame {
   position: relative;
   isolation: isolate;
