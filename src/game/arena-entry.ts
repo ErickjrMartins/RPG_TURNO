@@ -22,13 +22,13 @@ const frames = 12
 const columns = 4
 const height = 160
 const heroStride = {
-  warrior: { duration: 2250, cycles: 3, lift: 2.2, tilt: 0.026, finalLean: 0.058, finalDrop: 4 },
-  archer: { duration: 2110, cycles: 3, lift: 4.1, tilt: 0.041, finalLean: -0.063, finalDrop: -2 },
-  mage: { duration: 2470, cycles: 2, lift: 1.1, tilt: 0.014, finalLean: 0.018, finalDrop: -4 },
+  warrior: { duration: 2300, cycles: 3, lift: 2.2, tilt: 0.009, finalLean: 0.022, finalDrop: 5 },
+  archer: { duration: 2120, cycles: 3, lift: 4.1, tilt: 0.015, finalLean: -0.027, finalDrop: -2 },
+  mage: { duration: 2480, cycles: 2, lift: 1.2, tilt: 0.006, finalLean: 0.010, finalDrop: -4 },
 } as const
 
 export interface ArenaEntry {
-  fromX: number
+  origin: ReturnType<typeof pointFor>
   home: ReturnType<typeof pointFor>
   direction: number
   delay: number
@@ -39,25 +39,29 @@ export interface ArenaEntry {
   elapsed: number
   step: number
   heroClass?: ClassId
+  boss: boolean
 }
 
-export function arenaEntry(unit: Unit, width: number, initial: boolean, heroClass?: ClassId): ArenaEntry {
+export function arenaEntry(unit: Unit, initial: boolean, heroClass?: ClassId): ArenaEntry {
   const home = pointFor(unit)
   const direction = unit.team === 'allies' ? 1 : -1
-  const edge = direction === 1 ? -width / 2 : arenaWidth + width / 2
-  // Reinforcements join from the near wings so they do not hold up the next turn.
-  const fromX = initial ? edge : home.x - direction * Math.min(Math.abs(edge - home.x), unit.boss ? 246 : 170)
+  // Each fighter comes forward along its own lane, with a small perspective convergence.
+  const origin = {
+    x: home.x + (arenaWidth / 2 - home.x) * 0.05,
+    y: Math.max(104, home.y - (initial ? 119 : 86)),
+  }
   const floating = unit.art === 'wisp' || unit.art === 'moth'
   const stride = heroClass && heroStride[heroClass]
   return {
-    fromX, home, direction, floating,
-    delay: initial ? (unit.slot >= 3 ? 112 : 0) + (unit.slot % 3) * 52 + (direction === 1 ? 0 : 88) : 0,
+    origin, home, direction, floating,
+    delay: initial ? (unit.slot >= 3 ? 75 : 0) + (unit.slot % 3) * 63 + (direction === 1 ? 0 : 110) : 0,
     duration: stride ? stride.duration : initial ? (unit.boss ? 2470 : 2210) : unit.boss ? 1680 : 1290,
     cycles: stride ? stride.cycles : initial && unit.slot < 3 ? 3 : 2,
     audible: !floating && (unit.id === 'hero' || (!initial && !!unit.boss)),
     elapsed: 0,
     step: 0,
     heroClass,
+    boss: Boolean(unit.boss),
   }
 }
 
@@ -72,25 +76,35 @@ export function entryPose(entry: ArenaEntry) {
   const landing = Math.sin(settle * Math.PI)
   const travel = walking + (walking - walking ** 3) * 0.42 - Math.sin(swing * 2) * 0.007 * strength
   const lift = entry.floating ? (1 - Math.cos(swing)) * 3.8 * strength : Math.sin(swing) ** 2 * (style ? style.lift : 3.1) * strength
+  const groundY = entry.origin.y + (entry.home.y - entry.origin.y) * travel
   return {
-    x: entry.fromX + (entry.home.x - entry.fromX) * travel,
-    y: entry.home.y - lift + landing * (style ? style.finalDrop : 0),
-    tilt: entry.direction * (Math.sin(swing) * (style ? style.tilt : 0.026) * strength + landing * (style ? style.finalLean : -0.018)),
+    x: entry.origin.x + (entry.home.x - entry.origin.x) * travel,
+    y: groundY - lift + landing * (style ? style.finalDrop : 0),
+    groundY,
+    scale: 0.64 + travel * 0.36,
+    tilt: entry.direction * (Math.sin(swing) * (style ? style.tilt : 0.010) * strength + landing * (style ? style.finalLean : 0.012)),
     frame: Math.floor((stride % 1) * frames),
     step: Math.floor(stride * 2 + 0.00001),
     opacity: Math.min(1, progress * 12),
-    signature: Math.max(0, (progress - 0.79) / 0.21),
+    signature: Math.max(0, (progress - 0.78) / 0.22),
     complete: progress === 1,
   }
 }
 
 export function drawEntrySignature(
-  ink: Phaser.GameObjects.Graphics, classId: ClassId, x: number, y: number, height: number, progress: number,
+  ink: Phaser.GameObjects.Graphics, signature: ClassId | 'boss', x: number, y: number, height: number, progress: number,
 ): void {
-  const tint = Number.parseInt(classes[classId].color.slice(1), 16)
-  const alpha = Math.min(1, progress * 6) * (1 - progress)
+  const tint = signature === 'boss' ? 0xbc92ee : Number.parseInt(classes[signature].color.slice(1), 16)
+  const alpha = Math.min(1, progress * 6) * (1 - progress) ** 0.66
+  const ring = (signature === 'boss' ? 76 : 48) + progress * 45
   ink.clear()
-  switch (classId) {
+  ink.lineStyle(2, tint, alpha * 0.68)
+  ink.strokeEllipse(x, y - 3, ring, ring * 0.26)
+  ink.fillStyle(tint, alpha * 0.84)
+  for (const offset of [-3, -2, -1, 1, 2, 3]) {
+    ink.fillCircle(x + offset * (9 + progress * 12), y - 8 - progress * (18 + (4 - Math.abs(offset)) * 9), 1.3 + (4 - Math.abs(offset)) * 0.2)
+  }
+  switch (signature) {
     case 'warrior': {
       const reach = 17 + 35 * progress
       ink.lineStyle(2, tint, alpha)
@@ -119,6 +133,14 @@ export function drawEntrySignature(
         const rune = x + direction * (18 + progress * 22)
         ink.lineBetween(rune - 3, y - 13, rune + 3, y - 19)
         ink.lineBetween(rune + 3, y - 19, rune - 3, y - 22)
+      }
+      break
+    case 'boss':
+      ink.lineStyle(2, tint, alpha)
+      ink.strokeEllipse(x, y - 5, ring * 0.76, ring * 0.20)
+      for (const side of [-1, 1]) {
+        const edge = x + side * ring * 0.45
+        ink.lineBetween(edge, y - 8, edge + side * 12, y - 16 - progress * 11)
       }
       break
   }
@@ -165,8 +187,8 @@ export function prepareEntryTexture(scene: Phaser.Scene, art: string): string | 
     frame.data.set(original)
     const swing = Math.sin(index * Math.PI * 2 / frames)
     for (const { x, y, offset, left, right } of pixels) {
-      const sourceX = boundPixel(x - (left - right) * swing * width * 0.062, width - 1)
-      const sourceY = boundPixel(y + (swing >= 0 ? left : right) * Math.abs(swing) * 7, height - 1)
+      const sourceX = boundPixel(x - (left - right) * swing * width * 0.042, width - 1)
+      const sourceY = boundPixel(y + (swing >= 0 ? left : right) * Math.abs(swing) * 9, height - 1)
       const x0 = Math.floor(sourceX)
       const y0 = Math.floor(sourceY)
       const x1 = Math.min(x0 + 1, width - 1)
